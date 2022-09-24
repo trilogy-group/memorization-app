@@ -368,8 +368,6 @@ document.querySelector(".choose-lang").addEventListener("click",function(){
 
 
 
-
-
 document.querySelector(".submit-answer").addEventListener("click",function(){
 //     alert(window[lang][countQues].choices[window[lang][countQues].answer-1]);
 //     alert(document.querySelector('input[name="options"]:checked').value);

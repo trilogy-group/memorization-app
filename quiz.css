@@ -147,13 +147,22 @@ nav li{
 
 .options{
     background-color: #fff;
-    display:block;
+    display:flex;
     margin-left: 13%;
     font-size: 25px;
     font-weight: 100;
     margin-top: 30px;
     text-align: left;
 }
+
+.options_left {
+    display: block;
+}
+
+.options_right {
+    margin-left: 13%;
+}
+
 
  input[type=radio] {
      border: 5px solid white;
