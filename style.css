@@ -84,7 +84,7 @@ header{background-color: #fff;}
 
 .flashcard{
   width: 370px;
-  height: 200px;
+  height: 320px;
   word-wrap: break-word;
   margin: 10px; 
   background:#fff;
@@ -142,4 +142,17 @@ MY CODE =================================
   border: 1px solid black;
   background-position: center;
   background-size: cover;
+}
+
+#flipcards{
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.flipcard_image
+{
+  margin-left: auto;
+  margin-right: auto; 
+  width: 80%; 
+  text-align: center
 }
