@@ -98,6 +98,7 @@ li a:hover {
           <div>
             <button id="show_card_box">Add Card</button>
             <button id="delete_cards">Delete Cards</button>
+            <button id="goToQuiz" onclick="window.location.href='quiz.html'">Go to quiz</button>
           </div>
         </div>
       </div>
@@ -140,6 +141,17 @@ li a:hover {
       <div class="container" >
         <div id="flashcards"></div>
       </div>
+
+      <div class="carousel" data-carousel>
+        <button class="carousel-button prev" data-carousel-button="prev">&#8656;</button>
+        <button class="carousel-button next" data-carousel-button="next">&#8658;</button>
+        <ul data-slides>
+          <li class="slide" data-active>
+            <img src="https://source.unsplash.com/78A265wPiO4" alt="Nature Image #1">
+          </li>
+        </ul>
+      </div>
+
       <div id="flipcards">
 
       </div>
@@ -151,11 +163,6 @@ li a:hover {
     
   </main>
 
-  <h1>Let</h1>
-  <h1>put</h1>
-  <h1>link</h1>
-  <h1>here</h1>
-    <a href="login.html">Back to login page</a>
 
   <script src="script.js"></script>
 </body>
