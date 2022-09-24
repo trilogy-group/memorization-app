@@ -1,0 +1,508 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+  <title>Login or Register</title>
+
+
+  <style>
+@import url('https://fonts.googleapis.com/css?family=Montserrat:400,800');
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    font-family: 'Montserrat', sans-serif;
+    height: 100vh;
+    margin: -20px 0 50px;
+}
+
+
+h1 {
+    font-weight: bold;
+    margin: 0;
+}
+
+h2 {
+    text-align: center;
+    color: aliceblue;
+}
+
+p {
+    font-size: 14px;
+    font-weight: 100;
+    line-height: 20px;
+    letter-spacing: 0.5px;
+    margin: 20px 0 30px;
+}
+
+span {
+    font-size: 12px;
+}
+
+a {
+    color: #333;
+    font-size: 14px;
+    text-decoration: none;
+    margin: 15px 0;
+}
+
+button {
+    border-radius: 20px;
+    border: 1px solid #FF4B2B;
+    background-color: #FF4B2B;
+    color: #FFFFFF;
+    font-size: 12px;
+    font-weight: bold;
+    padding: 12px 45px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    transition: transform 80ms ease-in;
+}
+
+button:active {
+    transform: scale(0.95);
+}
+
+button:focus {
+    outline: none;
+}
+
+button.ghost {
+    background-color: transparent;
+    border-color: #FFFFFF;
+}
+
+form {
+    background-color: #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: 0 50px;
+    height: 100%;
+    text-align: center;
+}
+
+input {
+    background-color: #eee;
+    border: none;
+    padding: 12px 15px;
+    margin: 8px 0;
+    width: 100%;
+}
+
+.container {
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25),
+        0 10px 10px rgba(0, 0, 0, 0.22);
+    position: relative;
+    overflow: hidden;
+    width: 868px;
+    max-width: 100%;
+    min-height: 820px;
+    /*520*/
+}
+
+/* how fast login fields move */
+.form-container {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    transition: all 0.3s ease-in-out;
+}
+
+.sign-in-container {
+    left: 0;
+    width: 50%;
+    z-index: 2;
+}
+
+.container.right-panel-active .sign-in-container {
+    transform: translateX(100%);
+}
+
+.sign-up-container {
+    left: 0;
+    width: 50%;
+    opacity: 0;
+    z-index: 1;
+}
+
+.container.right-panel-active .sign-up-container {
+    transform: translateX(100%);
+    opacity: 1;
+    z-index: 5;
+    animation: show 0.3s;
+}
+
+@keyframes show {
+
+    0%,
+    49.99% {
+        opacity: 0;
+        z-index: 1;
+    }
+
+    50%,
+    100% {
+        opacity: 1;
+        z-index: 5;
+    }
+}
+
+.overlay-container {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 50%;
+    height: 100%;
+    overflow: hidden;
+    transition: transform 0.3s ease-in-out;
+    z-index: 100;
+}
+
+.container.right-panel-active .overlay-container {
+    transform: translateX(-100%);
+}
+
+.overlay {
+    background: #FF416C;
+    background: -webkit-linear-gradient(to right, #FF4B2B, #FF416C);
+    background: linear-gradient(to right, #ff2600, #0026ff);
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: 0 0;
+    color: #FFFFFF;
+    position: relative;
+    left: -100%;
+    height: 100%;
+    width: 200%;
+    transform: translateX(0);
+    transition: transform 0.3s ease-in-out;
+}
+
+.container.right-panel-active .overlay {
+    transform: translateX(50%);
+}
+
+.overlay-panel {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: 0 40px;
+    text-align: center;
+    top: 0;
+    height: 100%;
+    width: 50%;
+    transform: translateX(0);
+    transition: transform 0.3s ease-in-out;
+}
+
+.overlay-left {
+    transform: translateX(-20%);
+}
+
+.container.right-panel-active .overlay-left {
+    transform: translateX(0);
+}
+
+.overlay-right {
+    right: 0;
+    transform: translateX(0);
+}
+
+.container.right-panel-active .overlay-right {
+    transform: translateX(20%);
+}
+
+
+label {
+    color: black;
+    text-align: left;
+    display: block;
+    margin-top: 30px;
+    font-family: "Epilogue", sans-serif;
+    font-weight: 600;
+    font-size: 15px;
+}
+
+/**********************************************/
+
+/* Center the loader */
+#loader {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    z-index: 1;
+    width: 120px;
+    height: 120px;
+    margin: -76px 0 0 -76px;
+    border: 16px solid #f3f3f3;
+    border-radius: 50%;
+    border-top: 16px solid #3498db;
+    -webkit-animation: spin 2s linear infinite;
+    animation: spin 2s linear infinite;
+    display: none;
+    text-align: center;
+}
+
+@-webkit-keyframes spin {
+    0% {
+        -webkit-transform: rotate(0deg);
+    }
+
+    100% {
+        -webkit-transform: rotate(360deg);
+    }
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+  </style>    
+
+</head>
+
+<body>
+  <div class="container" id="container">
+
+    <div class="form-container sign-up-container">
+      <form action="#">
+        <h1>Create Account</h1>
+        <span>use your email for registration</span>
+        <label>name</label>
+        <input type="text" placeholder="Ivan" id="register-name" required minLength="4" maxLength="20" />
+        <label>email</label>
+        <input type="email" placeholder="Ivan@gmail.com" id="register-email" required maxLength="30" />
+        <label>password</label>
+        <input type="password" placeholder="qwerst" id="register-password" required minLength="3" maxLength="20" />
+        <label>confirm password</label>
+        <input type="password" placeholder="qwerst" id="register-confirm-password" required minLength="4"
+          maxLength="20" />
+        <button id="register-button">Register</button>
+      </form>
+    </div>
+
+    <div class="form-container sign-in-container">
+      <form action="#" id="login-form">
+        <h1>Log in</h1>
+        <span>if you have account</span>
+        <label>email</label>
+        <input type="email" placeholder="Ivan@gmail.com" id="login-email" required maxLength="30" />
+        <label>password</label>
+        <input type="password" placeholder="qwerst" id="login-password" required minLength="3" maxLength="20" />
+        <button id="login-button">Log In</button>
+        <label>You can use GitHub to log In </label>
+        <button id="login-button-github">Use GitHub to Log In</button>
+        <a href="select.html">CLICK HERE</a>
+      </form>
+    </div>
+
+    <div class="overlay-container">
+      <div class="overlay">
+        <div class="overlay-panel overlay-left">
+          <img src="https://www.freelogovectors.net/svg10/crossover-logo-freelogovectors.net_.svg"
+            style="width: 90px;;height: 90px;;" />
+          <h1>Do you already have an account?</h1>
+          <p>
+            if so, you can log in after pressing the button below
+          </p>
+          <button class="ghost" id="signIn">Log In</button>
+        </div>
+        <div class="overlay-panel overlay-right">
+          <img src="https://www.freelogovectors.net/svg10/crossover-logo-freelogovectors.net_.svg"
+            style="width:90px;height:90px;" />
+          <h1>Are you new here?</h1>
+          <p>if so, you can register after pressing the button below</p>
+          <button class="ghost" id="signUp">Register</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div id="loader"></div>
+</body>
+
+<script>
+    const signUpButton = document.getElementById("signUp");
+const signInButton = document.getElementById("signIn");
+const container = document.getElementById("container");
+const registerButton = document.getElementById("register-button");
+const loginButton = document.getElementById("login-button");
+const loginButtonGithub = document.getElementById("login-button-github");
+
+signUpButton.addEventListener("click", () => {
+    container.classList.add("right-panel-active");
+});
+
+signInButton.addEventListener("click", () => {
+    container.classList.remove("right-panel-active");
+});
+
+
+function validateEmail(mail) {
+    if (String(mail)
+        .toLowerCase()
+        .match(
+            /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+        )) {
+        return (true)
+    } else {
+        alert("Invalid email address")
+        return (false)
+    }
+
+}
+
+function register() {
+
+
+    const username = document.getElementById("register-name").value;
+    const email = document.getElementById("register-email").value;
+    const password = document.getElementById("register-password").value.trim();
+    const confirmPassword = document.getElementById("register-confirm-password").value.trim();
+
+    console.log(password, confirmPassword);
+    if (!validateEmail(email)) {
+        return;
+    }
+
+    if (password !== confirmPassword) {
+        alert("passwords are not the same");
+        return;
+    }
+
+    var raw = JSON.stringify({
+        "name": username,
+        "email": email,
+        "password": password
+    });
+    console.log(raw);
+    document.getElementById("loader").style.display = "block";
+    document.getElementById("container").style.display = "none";
+
+    var xhr = new XMLHttpRequest();
+    var url =
+        "https://8000-apricot-canidae-ewx07ljw.ws.trilogy.devspaces.com/api/v1/auth/signup/";
+    xhr.open("POST", url, true);
+    xhr.setRequestHeader("Content-Type", "application/json; charset=UTF-8");
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4) {
+            if (xhr.status === 200) {
+                var finaltext = JSON.parse(xhr.responseText);
+                console.log(finaltext);
+            } else if (xhr.status === 400 || xhr.status === 401) {
+                alert("There was an error during registration " + xhr.status);
+            }
+        }
+    };
+    xhr.send(raw);
+    alert('Successful registration!')
+
+};
+
+
+function login() {
+
+    const email = document.getElementById("login-email").value;
+    const password = document.getElementById("login-password").value;
+
+    if (!validateEmail(email)) {
+        return;
+    }
+
+    var raw = JSON.stringify({
+        "email": email,
+        "password": password
+    });
+    console.log(raw);
+
+    document.getElementById("loader").style.display = "block";
+    document.getElementById("container").style.display = "none";
+
+    var xhr = new XMLHttpRequest();
+    var url =
+        "https://8000-apricot-canidae-ewx07ljw.ws.trilogy.devspaces.com/api/v1/auth/login/";
+
+
+    xhr.open("POST", url, true);
+    xhr.setRequestHeader("Content-Type", "application/json; charset=UTF-8");
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4) {
+            if (xhr.status === 200) {
+                var finaltext = JSON.parse(xhr.responseText);
+                console.log(finaltext);
+                alert('Successful login! Your token was: ' + finaltext.token);
+            } else if (xhr.status === 400 || xhr.status === 401) {
+                alert("Oops! There was an error logging in: " + xhr.status);
+            }
+        }
+    };
+    xhr.send(raw);
+
+};
+
+
+registerButton.addEventListener("click", () => {
+
+    register()
+    setTimeout(function () {
+        document.getElementById("loader").style.display = "none";
+        document.getElementById("container").style.display = "block";
+    }, 2000);
+
+});
+
+loginButton.addEventListener("click", () => {
+
+    login()
+    setTimeout(function () {
+        document.getElementById("loader").style.display = "none";
+        document.getElementById("container").style.display = "block";
+    }, 2000);
+
+
+});
+
+loginButtonGithub.addEventListener("click", () => {
+
+    gitHubLogin()
+    setTimeout(function () {
+        document.getElementById("loader").style.display = "none";
+        document.getElementById("container").style.display = "block";
+    }, 2000);
+
+
+});
+
+function gitHubLogin(){
+    window.location.href = 'https://github.com/login/oauth/authorize?client_id=8c84271745ccc7f9db1a'
+}
+</script>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet"
+  integrity="sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx" crossorigin="anonymous" />
+<!-- JavaScript Bundle with Popper -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js"
+  integrity="sha384-A3rJD856KowSb7dwlZdYEkO39Gagi7vIsF0jrRAoQmDKKtQBHUuLZ9AsSv4jD4Xa" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="style.css" />
+
+</html>
