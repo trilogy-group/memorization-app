@@ -1,57 +1,441 @@
 <!DOCTYPE html>
 <html>
-<head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<style>
-.dropbtn {
-  background-color: #04AA6D;
-  color: white;
-  padding: 16px;
-  font-size: 16px;
-  border: none;
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" type="image/png" href="flashcard.png" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <title>Flashcards</title>
+  
+  
+  <!--============= -->
+  
+  <style>
+  
+  body{
+  background:rgb(0, 45, 60);
 }
-
-.dropdown {
-  position: relative;
-  display: inline-block;
+#rock1{
+  position:absolute;
+  left:-30px;
+  top:0px;
+  width:40px;
+  height:40px;
+  transform:rotate(45deg);
+  animation:b 6s infinite;
 }
-
-.dropdown-content {
-  display: none;
-  position: absolute;
-  background-color: #f1f1f1;
-  min-width: 160px;
-  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-  z-index: 1;
+#rock2{
+  position:absolute;
+  left:200px;
+  top:-25px;
+  width:40px;
+  height:40px;
+  transform:rotate(45deg);
+  animation:a 6s infinite;
 }
-
-.dropdown-content a {
-  color: black;
-  padding: 12px 16px;
-  text-decoration: none;
-  display: block;
+#rock3{
+  position:absolute;
+  left:585px;
+  top:5px;
+  width:40px;
+  height:40px;
+  transform:rotate(45deg);
+  animation:a 6s infinite;
 }
-
-.dropdown-content a:hover {background-color: #ddd;}
-
-.dropdown:hover .dropdown-content {display: block;}
-
-.dropdown:hover .dropbtn {background-color: #3e8e41;}
-</style>
-</head>
-<body>
-
-<h2>Select Subject</h2>
-
-
-<div class="dropdown">
-  <button class="dropbtn">Dropdown</button>
-  <div class="dropdown-content">
-    <a href="index.html">History</a>
-    <a href="#">Biology</a>
-    <a href="#">Something</a>
-  </div>
-</div>
-
-</body>
-</html>
+#rock4{
+  position:absolute;
+  left:385px;
+  top:90px;
+  width:40px;
+  height:40px;
+  transform:rotate(45deg);
+  animation:b 6s infinite;
+}
+#rock5{
+  position:absolute;
+  left:60px;
+  top:140px;
+  width:25px;
+  height:25px;
+  transform:rotate(45deg);
+  animation:a 6s infinite;
+}
+#rock6{
+  position:absolute;
+  left:500px;
+  top:-25px;
+  width:25px;
+  height:25px;
+  transform:rotate(45deg);
+  animation:a 6s infinite;
+}
+#rock7{
+  position:absolute;
+  left:60px;
+  top:-55px;
+  width:25px;
+  height:25px;
+  transform:rotate(45deg);
+  animation:b 6s infinite;
+}
+#rock8{
+  position:absolute;
+  left:530px;
+  top:130px;
+  width:25px;
+  height:25px;
+  transform:rotate(45deg);
+  animation:b 6s infinite;
+}
+@keyframes a{
+  0%{
+    background:transparent;
+  }
+  50%{
+    background:darkorange;
+  }
+  100%{
+    background:transparent;
+  }
+}
+@keyframes b{
+  0%{
+    background:darkorange;
+  }
+  50%{
+    background:transparent;
+  }
+  100%{
+    background:darkorange;
+  }
+}
+#div1{
+  position:absolute;
+  left:calc(50% - 300px);
+  top:calc(50% - 150px);
+  width: 445px;;
+  height:100px;
+  border:20px solid rgb(60, 60, 60);
+  border-radius:100px;
+}
+#diva1{
+  position:absolute;
+  width:414px;
+  height:90px;
+  border:5px solid orange;
+  border-radius:100px;
+  background:orange;
+  transition:.6s;
+}
+#img1{
+  position:absolute;
+  left:15px;
+  top:15px;
+  width:60px;
+}
+#img2{
+  position:absolute;
+  left:10px;
+  top:10px;
+  width:60px;
+}
+#img3{
+  position:absolute;
+  left:10px;
+  top:10px;
+  width:60px;
+}
+#divaa1{
+  position:absolute;
+  left:150px;
+  width:80px;
+  height:80px;
+  border:5px solid orange;
+  border-radius:100px;
+  background:orange;
+  transition:.6s;
+}
+#divaa1:hover{
+  height:250px;
+}
+#divaa1:hover > #divaaa1{
+  height:180px;
+  border:5px solid orange;
+}
+#divaaa1{
+  position:absolute;
+  top:-5px;
+  left:75px;
+  width:40px;
+  height:80px;
+  border:5px solid orange;
+  border-radius:100px;
+  background:orange;
+  transition:.6s;
+}
+#divaa2{
+  position:absolute;
+  left:300px;
+  width:80px;
+  height:80px;
+  border:5px solid orange;
+  border-radius:100px;
+  background:orange;
+  transition:.6s;
+}
+#divaa2:hover{
+  height:200px;
+}
+#divaa2:hover > #divaaa2{
+  height:230px;
+}
+#divaaa2{
+  position:absolute;
+  top:-5px;
+  left:-25px;
+  width:25px;
+  height:80px;
+  border:5px solid orange;
+  border-radius:100px;
+  background:orange;
+  transition:.6s;
+}
+#divaa3{
+  position:absolute;
+  left:450px;
+  width:80px;
+  height:80px;
+  border:5px solid orange;
+  border-radius:100px;
+  background:orange;
+  transition:.6s;
+}
+#divaa3:hover{
+  height:260px;
+}
+#divaa3:hover > #divaaa3{
+  height:200px;
+}
+#divaa3:hover > #divaaa4{
+  height:140px;
+}
+#divaaa3{
+  position:absolute;
+  top:-5px;
+  left:-50px;
+  width:40px;
+  height:80px;
+  border:5px solid orange;
+  border-radius:100px;
+  background:orange;
+  transition:.6s;
+}
+#divaaa4{
+  position:absolute;
+  top:-5px;
+  left:75px;
+  width:25px;
+  height:80px;
+  border:5px solid orange;
+  border-radius:100px;
+  background:orange;
+  transition:.6s;
+}
+#btna1{
+  position:absolute;
+  top:0px;
+  background:transparent;
+  width:75px;
+  color:transparent;
+  padding-top:5px;
+  padding-bottom:5px;
+  font-family:Georgia, serif;
+  font-size:15px;
+  border:2.5px solid transparent;
+  border-radius:100px;
+  cursor:pointer;
+  transition:.6s;
+}
+#divaa1:hover > #btna1{
+  top:90px;
+  color:black;
+  background:dimgrey;
+  padding-bottom:5px;
+}
+#btna2{
+  position:absolute;
+  top:0px;
+  background:transparent;
+  width:75px;
+  color:transparent;
+  padding-top:5px;
+  padding-bottom:5px;
+  font-family:Georgia, serif;
+  font-size:15px;
+  border:2.5px solid transparent;
+  border-radius:100px;
+  cursor:pointer;
+  transition:.6s;
+}
+#divaa1:hover > #btna2{
+  top:140px;
+  color:black;
+  background:dimgrey;
+  padding-bottom:5px;
+}
+#btna3{
+  position:absolute;
+  top:0px;
+  background:transparent;
+  width:75px;
+  color:transparent;
+  padding-top:5px;
+  padding-bottom:5px;
+  font-family:Georgia, serif;
+  font-size:15px;
+  border:2.5px solid transparent;
+  border-radius:100px;
+  cursor:pointer;
+  transition:.6s;
+}
+#divaa1:hover > #btna3{
+  top:190px;
+  color:black;
+  background:dimgrey;
+  padding-bottom:5px;
+}
+#btnb1{
+  position:absolute;
+  top:0px;
+  background:transparent;
+  width:75px;
+  color:transparent;
+  padding-top:5px;
+  padding-bottom:5px;
+  font-family:Georgia, serif;
+  font-size:15px;
+  border:2.5px solid transparent;
+  border-radius:100px;
+  cursor:pointer;
+  transition:.6s;
+}
+#divaa2:hover > #btnb1{
+  top:90px;
+  color:black;
+  background:dimgrey;
+  padding-bottom:5px;
+}
+#btnb2{
+  position:absolute;
+  top:0px;
+  background:transparent;
+  width:75px;
+  color:transparent;
+  padding-top:5px;
+  padding-bottom:5px;
+  font-family:Georgia, serif;
+  font-size:15px;
+  border:2.5px solid transparent;
+  border-radius:100px;
+  cursor:pointer;
+  transition:.6s;
+}
+#divaa2:hover > #btnb2{
+  top:140px;
+  color:black;
+  background:dimgrey;
+  padding-bottom:5px;
+}
+#btnc1{
+  position:absolute;
+  top:0px;
+  background:transparent;
+  width:75px;
+  color:transparent;
+  padding-top:5px;
+  padding-bottom:5px;
+  font-family:Georgia, serif;
+  font-size:15px;
+  border:2.5px solid transparent;
+  border-radius:100px;
+  cursor:pointer;
+  transition:.6s;
+}
+#divaa3:hover > #btnc1{
+  top:90px;
+  color:black;
+  background:dimgrey;
+  padding-bottom:5px;
+}
+#btnc2{
+  position:absolute;
+  top:0px;
+  background:transparent;
+  width:75px;
+  color:transparent;
+  padding-top:5px;
+  padding-bottom:5px;
+  font-family:Georgia, serif;
+  font-size:15px;
+  border:2.5px solid transparent;
+  border-radius:100px;
+  cursor:pointer;
+  transition:.6s;
+}
+#divaa3:hover > #btnc2{
+  top:140px;
+  color:black;
+  background:dimgrey;
+  padding-bottom:5px;
+}
+#btnc3{
+  position:absolute;
+  top:0px;
+  background:transparent;
+  width:75px;
+  color:transparent;
+  padding-top:5px;
+  padding-bottom:5px;
+  font-family:Georgia, serif;
+  font-size:15px;
+  border:2.5px solid transparent;
+  border-radius:100px;
+  cursor:pointer;
+  transition:.6s;
+}
+#divaa3:hover > #btnc3{
+  top:190px;
+  color:black;
+  background:dimgrey;
+  padding-bottom:5px;
+}
+  
+    </style>
+  <!--============= -->
+  
+  </head>
+  <body>
+    <div id="div1">
+      <div id="rock1"></div>
+      <div id="rock2"></div>
+      <div id="rock3"></div>
+      <div id="rock4"></div>
+      <div id="rock5"></div>
+      <div id="rock6"></div>
+      <div id="rock7"></div>
+      <div id="rock8"></div>
+      <div id="diva1">
+        
+        <div id="divaa1">
+          <input id="btna1" type="button" value="History" onclick="window.location.href='index.html'">
+          <input id="btna2" type="button" value="Biology">
+          <input id="btna3" type="button" value="Chemistry">
+          <img id="img2" src="https://static.thenounproject.com/png/1355074-200.png">
+          <div id="divaaa1"></div>
+        </div>
+        
+      </div>
+    </div>
+    </body>
+  </html>
