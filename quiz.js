@@ -8,24 +8,27 @@ var score=0;
 
 var HTMLquestions=[
 
+
     {
-        question: "HTML is what type of language ?",
-        choices: ["Scripting Language","Markup Language","Programming Language","Network Protocol"],
-        answer: 2
-    
+        question: "How early was corn planted in what is now Arizona?",
+        choices: ["30.000BC","12.000BC","8000BC","3000BC"],
+        answer: 4
+
     },
-    
+
+
     {
-        question: "HTML uses :",
-        choices: ["User defined tags","Pre-specified tags","Fixed tags defined by the language","Tags only for linking"],
+        question: "When did the first villages appear in North America?",
+        choices: ["30.000BC","12.000BC","300BC","3000BC"],
         answer: 3
-    
+
     },
     {
-        question: "The year in which HTML was first proposed _______.",
-        choices: ["1990","1980","2000","1995"],
-        answer: 1
-    
+        question: "Where did agriculture appear first?",
+        choices: ["New Mexico","Arizona","Mexico","Australia"],
+        answer: 3
+
+
     },
     {
         question: "Apart from <b> tag, what other tag makes text bold ?",
@@ -338,12 +341,6 @@ document.getElementById("score").textContent="Score : "+0;
 document.querySelector(".view-results").style.display="none";
 document.querySelector(".quiz").style.display="none";
 document.querySelector(".final-result").style.display="none";
-
-
-
-
-
-
 
 
 document.querySelector(".choose-lang").addEventListener("click",function(){

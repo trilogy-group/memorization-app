@@ -6,7 +6,7 @@
   <link rel="shortcut icon" type="image/png" href="flashcard.png" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
   <link rel="stylesheet" href="style.css">
-  <title>Flashcards</title>
+  <title>EdTok</title>
 
 
 <!--============= -->
@@ -98,6 +98,7 @@ li a:hover {
           <div>
             <button id="show_card_box">Add Card</button>
             <button id="delete_cards">Delete Cards</button>
+	    <button id="goToQuiz" onclick="window.location.href='quiz.html'">Have a quiz</button>
           </div>
         </div>
       </div>
@@ -112,7 +113,7 @@ li a:hover {
     <section>
       <div class="container">
         <div id="create_card">
-          <h2>Create Flashcard</h2>
+          <h2>Create Mnemonics</h2>
           <label for="question">Question</label>
           <textarea id="question" maxlength="280"></textarea>
           <label for="answer" maxlength="280">Answer</label>
@@ -149,10 +150,6 @@ li a:hover {
     
   </main>
 
-  <h1>Let</h1>
-  <h1>put</h1>
-  <h1>link</h1>
-  <h1>here</h1>
     <a href="login.html">Back to login page</a>
 
   <script src="script.js"></script>
