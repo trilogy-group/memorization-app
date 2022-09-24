@@ -9,23 +9,25 @@ var score=0;
 var HTMLquestions=[
 
     {
-        question: "HTML is what type of language ?",
-        choices: ["Scripting Language","Markup Language","Programming Language","Network Protocol"],
-        answer: 2
+        question: "How early was corn planted in what is now Arizona?",
+        choices: ["30.000BC","12.000BC","8000BC","3000BC"],
+        answer: 4
     
     },
-    
+
+
     {
-        question: "HTML uses :",
-        choices: ["User defined tags","Pre-specified tags","Fixed tags defined by the language","Tags only for linking"],
+        question: "When did the first villages appear in North America?",
+        choices: ["30.000BC","12.000BC","300BC","3000BC"],
         answer: 3
     
     },
     {
-        question: "The year in which HTML was first proposed _______.",
-        choices: ["1990","1980","2000","1995"],
-        answer: 1
-    
+        question: "Where did agriculture appear first?",
+        choices: ["New Mexico","Arizona","Mexico","Australia"],
+        answer: 3
+      
+
     },
     {
         question: "Apart from <b> tag, what other tag makes text bold ?",
@@ -75,22 +77,25 @@ var HTMLquestions=[
 var CSSquestions=[
 
     {
-        question: "If we want define style for an unique element, then which css selector will we use ?",
-        choices: ["Id","text","class","name"],
-        answer: 1
+        question: "How early was corn planted in what is now Arizona?",
+        choices: ["30.000BC","12.000BC","8000BC","3000BC"],
+        answer: 4
     
-    }, 
+    },
+
+
     {
-        question: "If we don't want to allow a floating div to the left side of an element, which css property will we use ?",
-        choices: ["margin","clear","float","padding"],
-        answer: 2
+        question: "When did the first villages appear in North America?",
+        choices: ["30.000BC","12.000BC","300BC","3000BC"],
+        answer: 3
     
     },
     {
-        question: "Suppose we want to arragnge five nos. of DIVs so that DIV4 is placed above DIV1. Now, which css property will we use to control the order of stack ?",
-        choices: ["d-inex","s-index","x-index","z-index"],
-        answer: 4
-    
+        question: "Where did agriculture appear first?",
+        choices: ["New Mexico","Arizona","Mexico","Australia"],
+        answer: 3
+      
+
     }, 
     {/*4*/
         question: "Can we align a Block element by setting the left and right margins ?",
