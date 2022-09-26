@@ -13,6 +13,7 @@ import { trpc } from "../utils/trpc";
 import { authOptions } from "./api/auth/[...nextauth]";
 
 const Upload: NextPage = () => {
+  console.log(`upload component`)
   const router = useRouter();
 
   const uploadMutation = trpc.useMutation("video.create");
@@ -90,6 +91,7 @@ const Upload: NextPage = () => {
   };
 
   const handleUpload = async () => {
+    console.log(`Print pls`)
     if (
       !coverImageURL ||
       !videoFile ||
@@ -126,14 +128,16 @@ const Upload: NextPage = () => {
       formData.append("file", coverBlob, "cover.png");
       formData.append("content", "From webhook");
 
-      const uploadedCover = (
-        await (
-          await fetch(process.env.NEXT_PUBLIC_IMAGE_UPLOAD_URL!, {
-            method: "POST",
-            body: formData,
-          })
-        ).json()
-      ).attachments[0].proxy_url;
+          console.log(formData)
+
+      let demo_response = await fetch(process.env.NEXT_PUBLIC_IMAGE_UPLOAD_URL!, {
+        method: "POST",
+        body: formData,
+      })
+      console.log(`DemoResponse: `, demo_response)
+      demo_response = await demo_response.json()
+
+      const uploadedCover = (demo_response).attachments[0].proxy_url;
 
       toast.loading("Uploading metadata...", { id: toastID });
 
@@ -214,9 +218,8 @@ const Upload: NextPage = () => {
                   onDragEnter={dragFocus}
                   onDragOver={dragFocus}
                   onClick={() => inputRef.current?.click()}
-                  className={`w-[250px] flex-shrink-0 border-2 border-gray-300 rounded-md border-dashed flex flex-col items-center p-8 cursor-pointer hover:border-red-1 transition ${
-                    isFileDragging ? "border-red-1" : ""
-                  }`}
+                  className={`w-[250px] flex-shrink-0 border-2 border-gray-300 rounded-md border-dashed flex flex-col items-center p-8 cursor-pointer hover:border-red-1 transition ${isFileDragging ? "border-red-1" : ""
+                    }`}
                 >
                   <BsFillCloudUploadFill className="fill-[#B0B0B4] w-10 h-10" />
                   <h1 className="font-semibold mt-4 mb-2">
@@ -294,7 +297,7 @@ const Upload: NextPage = () => {
                     Discard
                   </button>
                   <button
-                    onClick={() => handleUpload()}
+                    onClick={async () => await handleUpload()}
                     disabled={
                       !inputValue.trim() ||
                       !videoURL ||
