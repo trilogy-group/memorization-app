@@ -149,6 +149,7 @@ const Upload: NextPage = () => {
         videoWidth,
       });
 
+      console.log(`Created: `, created);
       toast.dismiss(toastID);
 
       setIsLoading(false);

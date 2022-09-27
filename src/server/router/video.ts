@@ -1,5 +1,6 @@
 import { Follow, Like } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
+import { IoConstructOutline } from "react-icons/io5";
 import { z } from "zod";
 
 import { createRouter } from "./context";
@@ -134,10 +135,25 @@ export const videoRouter = createRouter()
       videoHeight: z.number().gt(0),
     }),
     async resolve({ ctx: { prisma, session }, input }) {
+      let alltags = input.caption.match(/(#[a-z\d-]+)/gi);
+      let alltagid = [];
+      console.log(`all tags:`, alltags);
+      for(const t_ of alltags) {
+        console.log(t_);
+        const tagcreated = await prisma.hashtag.create({
+          data: {
+            tag: t_,
+          },
+        });
+        alltagid.push({id:tagcreated.id});
+      }
       const created = await prisma.video.create({
         data: {
           ...input,
           userId: session?.user?.id!,
+          hashtags: {
+            connect: alltagid,
+          }, // connect to all hashtags
         },
       });
       return created;
