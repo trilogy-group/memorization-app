@@ -5,12 +5,20 @@ import { DragEventHandler, useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { BsFillCloudUploadFill } from "react-icons/bs";
 
+import Autocomplete from '@mui/material/Autocomplete';
+import TextField from '@mui/material/TextField';
 import Navbar from "@/components/Layout/Navbar";
 import Meta from "@/components/Shared/Meta";
 import { fetchWithProgress } from "@/utils/fetch";
 
 import { trpc } from "../utils/trpc";
 import { authOptions } from "./api/auth/[...nextauth]";
+
+const subjects = [
+  '#Biology ',
+  '#History ',
+  '#Spanish ',
+];
 
 const Upload: NextPage = () => {
   console.log(`upload component`)
@@ -26,6 +34,7 @@ const Upload: NextPage = () => {
   const [videoWidth, setVideoWidth] = useState(0);
   const [videoHeight, setVideoHeight] = useState(0);
   const [inputValue, setInputValue] = useState("");
+  const [tagValue, setTagValue] = useState<string[]>([]);
 
   const [isLoading, setIsLoading] = useState(false);
   const [isFileDragging, setIsFileDragging] = useState(false);
@@ -128,7 +137,7 @@ const Upload: NextPage = () => {
       formData.append("file", coverBlob, "cover.png");
       formData.append("content", "From webhook");
 
-          console.log(formData)
+      console.log(formData)
 
       let demo_response = await fetch(process.env.NEXT_PUBLIC_IMAGE_UPLOAD_URL!, {
         method: "POST",
@@ -141,12 +150,16 @@ const Upload: NextPage = () => {
 
       toast.loading("Uploading metadata...", { id: toastID });
 
+      const tagStr = tagValue.join();
+      console.log(`tag`, tagStr);
+
       const created = await uploadMutation.mutateAsync({
         caption: inputValue.trim(),
         coverURL: uploadedCover,
         videoURL: uploadedVideo,
         videoHeight,
         videoWidth,
+        tagStr,
       });
 
       console.log(`Created: `, created);
@@ -257,6 +270,22 @@ const Upload: NextPage = () => {
               />
 
               <div className="flex-grow">
+               <Autocomplete
+                  value = {tagValue}
+                  onChange={(event, newValue) => {
+                    setTagValue(newValue);
+                  }}
+                  options={subjects}
+                  multiple
+                  limitTags={3}
+                  id="caption"
+                  className="p-2 w-full border border-gray-2 mt-1 mb-3 outline-none focus:border-gray-400 transition"
+                  renderInput={(params) => (
+                    <TextField {...params} label="Subject" placeholder="Biology, History, Spanish ..." />
+                  )}
+                  freeSolo
+                  sx={{ width: '500px' }}
+                />
                 <label className="block font-medium" htmlFor="caption">
                   Caption
                 </label>

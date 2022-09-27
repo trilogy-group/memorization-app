@@ -133,9 +133,11 @@ export const videoRouter = createRouter()
       coverURL: z.string().url(),
       videoWidth: z.number().gt(0),
       videoHeight: z.number().gt(0),
+      tagStr: z.string(),
     }),
     async resolve({ ctx: { prisma, session }, input }) {
-      let alltags = input.caption.match(/(#[a-z\d-]+)/gi);
+      console.log(input);
+      let alltags = input.tagStr.match(/(#[a-z\d-]+)/gi); //input.caption.match(/(#[a-z\d-]+)/gi);
       let alltagid = [];
       console.log(`all tags:`, alltags);
       for(const t_ of alltags) {
@@ -149,7 +151,11 @@ export const videoRouter = createRouter()
       }
       const created = await prisma.video.create({
         data: {
-          ...input,
+          caption: input.caption,
+          videoURL: input.videoURL,
+          coverURL: input.coverURL,
+          videoWidth: input.videoWidth,
+          videoHeight: input.videoHeight,
           userId: session?.user?.id!,
           hashtags: {
             connect: alltagid,
