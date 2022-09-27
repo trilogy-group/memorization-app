@@ -140,14 +140,29 @@ export const videoRouter = createRouter()
       let alltags = input.tagStr.match(/(#[a-z\d-]+)/gi); //input.caption.match(/(#[a-z\d-]+)/gi);
       let alltagid = [];
       console.log(`all tags:`, alltags);
-      for(const t_ of alltags) {
-        console.log(t_);
-        const tagcreated = await prisma.hashtag.create({
-          data: {
+      for (const t_ of alltags) {
+        const tagcreated = await prisma.hashtag.findUnique({
+          where: {
             tag: t_,
-          },
+          }
         });
-        alltagid.push({id:tagcreated.id});
+        console.log(`tagcreated`, tagcreated);
+
+        if (!tagcreated) {
+          const tagcreated = await prisma.hashtag.create({
+            data: {
+              tag: t_,
+            },
+          });
+          alltagid.push({ id: tagcreated.id });
+        } else {
+          const tagcreated = await prisma.hashtag.findUnique({
+            where: {
+              tag: t_,
+            }
+          });
+          alltagid.push({ id: tagcreated.id });
+        }
       }
       const created = await prisma.video.create({
         data: {
