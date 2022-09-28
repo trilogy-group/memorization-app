@@ -285,7 +285,7 @@ const Upload: NextPage = () => {
                     }}
                     options={subjects}
                     multiple
-                    limitTags={3}
+                    limitTags={2}
                     id="caption"
                     className="p-2 w-full mt-1 mb-3 outline-none focus:border-gray-400 transition"
                     renderInput={(params) => (
@@ -301,7 +301,7 @@ const Upload: NextPage = () => {
                     }}
                     options={chapters}
                     multiple
-                    limitTags={3}
+                    limitTags={2}
                     id="caption"
                     className="p-2 w-full mt-1 mb-3 outline-none focus:border-gray-400 transition"
                     renderInput={(params) => (
