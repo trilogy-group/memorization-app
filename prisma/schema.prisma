@@ -52,6 +52,7 @@ model User {
     comments      Comment[]
     followers     Follow[]  @relation("followings")
     followings    Follow[]  @relation("followers")
+    points        Int       @default(0)
 
     @@fulltext([name, email])
 }

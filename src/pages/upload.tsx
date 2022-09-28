@@ -148,6 +148,8 @@ const Upload: NextPage = () => {
         videoHeight,
         videoWidth,
       });
+      toast.loading("Mnemonics Created! Points +1", {id:toastID});
+      await new Promise(r => setTimeout(r, 800));
 
       toast.dismiss(toastID);
 

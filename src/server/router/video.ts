@@ -140,6 +140,13 @@ export const videoRouter = createRouter()
           userId: session?.user?.id!,
         },
       });
+      console.log('uid',session?.user?.id);
+      await prisma.user.update({
+        where: { id: session?.user?.id },
+        data: {
+          points: {increment: 1},
+        },
+      });
       return created;
     },
   });

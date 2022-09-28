@@ -79,11 +79,18 @@ export const getServerSideProps = async ({
   const [suggestedAccounts, followingAccounts] = await Promise.all([
     prisma.user.findMany({
       take: 20,
-      where: {
-        email: {
-          not: session?.user?.email,
-        },
+      /*
+    where: {
+      email: {
+        not: session?.user?.email,
       },
+
+    },*/
+      orderBy: [
+        {
+          points: 'desc',
+        },
+      ],
       select: {
         id: true,
         image: true,
@@ -92,20 +99,20 @@ export const getServerSideProps = async ({
     }),
     session?.user
       ? prisma.follow.findMany({
-          where: {
-            // @ts-ignore
-            followerId: session?.user?.id,
-          },
-          select: {
-            following: {
-              select: {
-                id: true,
-                image: true,
-                name: true,
-              },
+        where: {
+          // @ts-ignore
+          followerId: session?.user?.id,
+        },
+        select: {
+          following: {
+            select: {
+              id: true,
+              image: true,
+              name: true,
             },
           },
-        })
+        },
+      })
       : Promise.resolve([]),
     isFetchingFollowing
       ? ssg.fetchInfiniteQuery("video.following", {})
@@ -118,9 +125,8 @@ export const getServerSideProps = async ({
       session,
       suggestedAccounts,
       followingAccounts: followingAccounts.map((item) => item.following),
-      origin: `${
-        req.headers.host?.includes("localhost") ? "http" : "https"
-      }://${req.headers.host}`,
+      origin: `${req.headers.host?.includes("localhost") ? "http" : "https"
+        }://${req.headers.host}`,
     },
   };
 };

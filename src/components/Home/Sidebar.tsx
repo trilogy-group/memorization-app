@@ -61,7 +61,7 @@ const Sidebar: FC<SidebarProps> = ({
 
       {suggestedAccounts.length > 0 && (
         <div className="flex flex-col items-stretch gap-3 py-4 border-b">
-          <p className="text-sm hidden lg:block">Suggested Accounts</p>
+          <p className="text-sm hidden lg:block">Weekly leaderboard</p>
           {suggestedAccounts.map((account) => (
             <Link href={`/user/${account.id}`} key={account.id}>
               <a className="flex items-center gap-3">
