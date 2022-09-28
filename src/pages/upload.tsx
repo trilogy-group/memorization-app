@@ -20,6 +20,12 @@ const subjects = [
   '#Spanish ',
 ];
 
+const chapters = [
+  '#Chapter1 ',
+  '#Chapter2 ',
+  '#Chapter3 ',
+];
+
 const Upload: NextPage = () => {
   console.log(`upload component`)
   const router = useRouter();
@@ -34,7 +40,8 @@ const Upload: NextPage = () => {
   const [videoWidth, setVideoWidth] = useState(0);
   const [videoHeight, setVideoHeight] = useState(0);
   const [inputValue, setInputValue] = useState("");
-  const [tagValue, setTagValue] = useState<string[]>([]);
+  const [subjectValue, setSubjectValue] = useState<string[]>([]);
+  const [chapterValue, setChapterValue] = useState<string[]>([]);
 
   const [isLoading, setIsLoading] = useState(false);
   const [isFileDragging, setIsFileDragging] = useState(false);
@@ -150,7 +157,7 @@ const Upload: NextPage = () => {
 
       toast.loading("Uploading metadata...", { id: toastID });
 
-      const tagStr = tagValue.join();
+      const tagStr = subjectValue.join() + chapterValue.join();
       console.log(`tag`, tagStr);
 
       const created = await uploadMutation.mutateAsync({
@@ -270,22 +277,40 @@ const Upload: NextPage = () => {
               />
 
               <div className="flex-grow">
-               <Autocomplete
-                  value = {tagValue}
-                  onChange={(event, newValue) => {
-                    setTagValue(newValue);
-                  }}
-                  options={subjects}
-                  multiple
-                  limitTags={3}
-                  id="caption"
-                  className="p-2 w-full border border-gray-2 mt-1 mb-3 outline-none focus:border-gray-400 transition"
-                  renderInput={(params) => (
-                    <TextField {...params} label="Subject" placeholder="Biology, History, Spanish ..." />
-                  )}
-                  freeSolo
-                  sx={{ width: '500px' }}
-                />
+                <div className='flex space-x-4 max-w-[50%]'>
+                  <Autocomplete
+                    value={subjectValue}
+                    onChange={(event, newValue) => {
+                      setSubjectValue(newValue);
+                    }}
+                    options={subjects}
+                    multiple
+                    limitTags={3}
+                    id="caption"
+                    className="p-2 w-full mt-1 mb-3 outline-none focus:border-gray-400 transition"
+                    renderInput={(params) => (
+                      <TextField {...params} label="Subject" placeholder="Biology, History, Spanish ..." />
+                    )}
+                    freeSolo
+                    sx={{ width: '1/2' }}
+                  />
+                  <Autocomplete
+                    value={chapterValue}
+                    onChange={(event, newValue) => {
+                      setChapterValue(newValue);
+                    }}
+                    options={chapters}
+                    multiple
+                    limitTags={3}
+                    id="caption"
+                    className="p-2 w-full mt-1 mb-3 outline-none focus:border-gray-400 transition"
+                    renderInput={(params) => (
+                      <TextField {...params} label="Chapters" placeholder="Chapter 1, 2 ..." />
+                    )}
+                    freeSolo
+                    sx={{ width: '1/2' }}
+                  />
+                </div>
                 <label className="block font-medium" htmlFor="caption">
                   Caption
                 </label>
