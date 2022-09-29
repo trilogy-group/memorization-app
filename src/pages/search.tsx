@@ -158,7 +158,7 @@ export const getServerSideProps = async ({
     }
   }
 
-  if (!q || typeof q !== "string") {
+  if (typeof q !== "string" || (!q && !tags)) {
     return {
       redirect: {
         destination: "/",
