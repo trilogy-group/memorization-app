@@ -1,5 +1,6 @@
 import { Follow, Like } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
+import { IoConstructOutline } from "react-icons/io5";
 import { z } from "zod";
 
 import { createRouter } from "./context";
@@ -132,12 +133,49 @@ export const videoRouter = createRouter()
       coverURL: z.string().url(),
       videoWidth: z.number().gt(0),
       videoHeight: z.number().gt(0),
+      tagStr: z.string(),
     }),
     async resolve({ ctx: { prisma, session }, input }) {
+      let alltags = input.tagStr.match(/(#[a-z\d-]+)/gi);
+      let alltagid = [];
+      /*
+       * Tags hardcoded in the frontend src/upload.tsx are created in the DB, therefore "tagcreated"
+       * TODO: provided subject/chapter tags in the DB
+       */
+      for (const t_ of alltags) {
+        const tagcreated = await prisma.hashtag.findUnique({
+          where: {
+            tag: t_,
+          }
+        });
+
+        if (!tagcreated) {
+          const tagcreated = await prisma.hashtag.create({
+            data: {
+              tag: t_,
+            },
+          });
+          alltagid.push({ id: tagcreated.id });
+        } else {
+          const tagcreated = await prisma.hashtag.findUnique({
+            where: {
+              tag: t_,
+            }
+          });
+          alltagid.push({ id: tagcreated.id });
+        }
+      }
       const created = await prisma.video.create({
         data: {
-          ...input,
+          caption: input.caption,
+          videoURL: input.videoURL,
+          coverURL: input.coverURL,
+          videoWidth: input.videoWidth,
+          videoHeight: input.videoHeight,
           userId: session?.user?.id!,
+          hashtags: {
+            connect: alltagid,
+          }, // connect to all hashtags
         },
       });
       await prisma.user.update({

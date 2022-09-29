@@ -79,8 +79,15 @@ model Video {
     user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
     likes       Like[]
     comments    Comment[]
+    hashtags     Hashtag[]
 
     @@fulltext([caption])
+}
+
+model Hashtag {
+    id      Int     @id @default(autoincrement())
+    tag     String  @unique
+    videos  Video[]
 }
 
 model Like {
