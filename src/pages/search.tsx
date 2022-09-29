@@ -158,7 +158,7 @@ export const getServerSideProps = async ({
     }
   }
 
-  if (!q || typeof q !== "string") {
+  if (typeof q !== "string" || (!q && !tags)) {
     return {
       redirect: {
         destination: "/",
@@ -201,7 +201,7 @@ export const getServerSideProps = async ({
         where: {
           hashtags: {
             some: {
-              tag: tags[0],
+              tag: {in: tags},
             }
           }
         },

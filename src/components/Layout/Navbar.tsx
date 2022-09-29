@@ -47,7 +47,7 @@ const Navbar: FC = () => {
             <input
               className="w-full h-full outline-none bg-gray-1 rounded-full pl-4 pr-14 border border-transparent focus:border-gray-400 transition"
               type="text"
-              placeholder="Search accounts and videos..."
+              placeholder="Search by tags, e.g., #Spanish ..."
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
             />
