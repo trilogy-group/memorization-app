@@ -27,7 +27,6 @@ const chapters = [
 ];
 
 const Upload: NextPage = () => {
-  console.log(`upload component`)
   const router = useRouter();
 
   const uploadMutation = trpc.useMutation("video.create");
@@ -168,6 +167,8 @@ const Upload: NextPage = () => {
         videoWidth,
         tagStr,
       });
+      toast.loading("Mnemonics Created! Points +1", {id:toastID});
+      await new Promise(r => setTimeout(r, 800));
 
       console.log(`Created: `, created);
       toast.dismiss(toastID);

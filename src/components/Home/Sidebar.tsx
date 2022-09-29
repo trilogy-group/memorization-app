@@ -16,11 +16,11 @@ interface User {
 }
 
 interface SidebarProps {
-  suggestedAccounts: User[];
+  leaderboardAccounts: User[];
   followingAccounts: User[];
 }
 const Sidebar: FC<SidebarProps> = ({
-  suggestedAccounts = [],
+  leaderboardAccounts = [],
   followingAccounts = [],
 }) => {
   const router = useRouter();
@@ -59,10 +59,10 @@ const Sidebar: FC<SidebarProps> = ({
         </Link>
       </div>
 
-      {suggestedAccounts.length > 0 && (
+      {leaderboardAccounts.length > 0 && (
         <div className="flex flex-col items-stretch gap-3 py-4 border-b">
-          <p className="text-sm hidden lg:block">Suggested Accounts</p>
-          {suggestedAccounts.map((account) => (
+          <p className="text-sm hidden lg:block">Leaderboard</p>
+          {leaderboardAccounts.map((account) => (
             <Link href={`/user/${account.id}`} key={account.id}>
               <a className="flex items-center gap-3">
                 <Image

@@ -178,6 +178,12 @@ export const videoRouter = createRouter()
           }, // connect to all hashtags
         },
       });
+      await prisma.user.update({
+        where: { id: session?.user?.id },
+        data: {
+          points: {increment: 1},
+        },
+      });
       return created;
     },
   });
