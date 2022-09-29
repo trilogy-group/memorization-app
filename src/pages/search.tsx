@@ -201,7 +201,7 @@ export const getServerSideProps = async ({
         where: {
           hashtags: {
             some: {
-              tag: tags[0],
+              tag: {in: tags},
             }
           }
         },

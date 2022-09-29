@@ -142,6 +142,9 @@ export const videoRouter = createRouter()
        * Tags hardcoded in the frontend src/upload.tsx are created in the DB, therefore "tagcreated"
        * TODO: provided subject/chapter tags in the DB
        */
+      if (alltags == null) {
+        throw new TRPCError({ code: "BAD_REQUEST" });
+      }
       for (const t_ of alltags) {
         const tagcreated = await prisma.hashtag.findUnique({
           where: {
@@ -181,7 +184,7 @@ export const videoRouter = createRouter()
       await prisma.user.update({
         where: { id: session?.user?.id },
         data: {
-          points: {increment: 1},
+          points: { increment: 1 },
         },
       });
       return created;
