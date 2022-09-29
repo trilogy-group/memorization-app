@@ -150,16 +150,13 @@ export const getServerSideProps = async ({
   query,
 }: GetServerSidePropsContext) => {
   var q = query.q as string;
-  console.log(`query`, q);
   const tags = q.match(/(#[a-z\d-]+)/gi);
   // remove hashtags from caption searching
   if (tags != null) {
     for (const t_ of tags) {
       q = q.replace(t_, "");
     }
-    console.log(`tags`, tags[0]);
   }
-  console.log(`processed query`, q);
 
   if (!q || typeof q !== "string") {
     return {

@@ -291,7 +291,6 @@ const Upload: NextPage = () => {
                     renderInput={(params) => (
                       <TextField {...params} label="Subject" placeholder="Biology, History, Spanish ..." />
                     )}
-                    freeSolo
                     sx={{ width: '1/2' }}
                   />
                   <Autocomplete
@@ -307,7 +306,6 @@ const Upload: NextPage = () => {
                     renderInput={(params) => (
                       <TextField {...params} label="Chapters" placeholder="Chapter 1, 2 ..." />
                     )}
-                    freeSolo
                     sx={{ width: '1/2' }}
                   />
                 </div>
