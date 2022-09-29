@@ -11,6 +11,12 @@ import { fetchWithProgress } from "@/utils/fetch";
 
 import { trpc } from "../utils/trpc";
 import { authOptions } from "./api/auth/[...nextauth]";
+import React from "react";
+import ReactDOM from "react-dom";
+import { sleep } from "react-query/types/core/utils";
+
+var fileDataType = 0;
+// 1 = image, 2=video, 3=audio
 
 const Upload: NextPage = () => {
   console.log(`upload component`)
@@ -20,12 +26,16 @@ const Upload: NextPage = () => {
 
   const inputRef = useRef<HTMLInputElement | null>(null);
 
+  // added next line
+  const inputRefImage = useRef<HTMLInputElement | null>(null);
+
   const [coverImageURL, setCoverImageURL] = useState<string | null>(null);
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [videoURL, setVideoURL] = useState<string | null>(null);
   const [videoWidth, setVideoWidth] = useState(0);
   const [videoHeight, setVideoHeight] = useState(0);
   const [inputValue, setInputValue] = useState("");
+
 
   const [isLoading, setIsLoading] = useState(false);
   const [isFileDragging, setIsFileDragging] = useState(false);
@@ -39,10 +49,58 @@ const Upload: NextPage = () => {
   }, [uploadMutation.error]);
 
   const handleFileChange = (file: File) => {
+    console.log("selected file from PC")
+    console.log(file.type)
+
+    if (file.type.startsWith("image")) {
+      const urlImage = URL.createObjectURL(file);
+      const chosenImage = document.createElement("img");
+      chosenImage.style.opacity = "0";
+      // chosenImage.style.width = "0px";
+      //chosenImage.style.height = "0px";
+      document.body.appendChild(chosenImage);
+      chosenImage.setAttribute("src", urlImage);
+
+      chosenImage.addEventListener("load", () => {
+        setTimeout(() => {
+          const canvas = document.createElement("canvas");
+          const ctx = canvas.getContext("2d")!;
+
+          canvas.width = chosenImage.width;
+          canvas.height = chosenImage.height;
+
+          console.log(canvas.width)
+          console.log(canvas.height)
+
+          ctx.drawImage(chosenImage, 0, 0);
+
+          console.log("set cover image url mnemonic image 1");
+          setCoverImageURL(canvas.toDataURL("image/png"));
+          //  "https://avatars.mds.yandex.net/i?id=f51ce319fbbe5a197dce74134d6b57e8-5350081-images-thumbs&n=13"
+          console.log(coverImageURL)
+          console.log("set cover image url mnemonic image 2")
+
+          //document.body.removeChild(chosenImage);
+        }, 300);
+      });
+
+      fileDataType = 1;
+      console.log(`selected image`)
+
+    }
+
+    if (file.type.startsWith("video")) {
+      console.log(`selected video`)
+      fileDataType = 2;
+    }
+
+    // VIDEOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+
     if (!file.type.startsWith("video")) {
       toast("Only video file is allowed");
       return;
     }
+
 
     // Max 200MB file size
     if (file.size > 209715200) {
@@ -51,6 +109,7 @@ const Upload: NextPage = () => {
     }
 
     const url = URL.createObjectURL(file);
+
 
     setVideoFile(file);
     setVideoURL(url);
@@ -78,6 +137,9 @@ const Upload: NextPage = () => {
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
 
+        console.log(canvas.width)
+        console.log(canvas.height)
+
         setVideoWidth(video.videoWidth);
         setVideoHeight(video.videoHeight);
 
@@ -92,6 +154,29 @@ const Upload: NextPage = () => {
 
   const handleUpload = async () => {
     console.log(`Print pls`)
+
+    if (fileDataType == 1) {
+      console.log(`selected to upload image`)
+      // BEGIN
+      const coverBlob = await (await fetch(coverImageURL)).blob();
+
+      const formData = new FormData();
+      formData.append("file", coverBlob, "cover.png");
+      formData.append("content", "From webhook");
+
+      console.log(formData)
+
+      let demo_response = await fetch(process.env.NEXT_PUBLIC_IMAGE_UPLOAD_URL!, {
+        method: "POST",
+        body: formData,
+      })
+      console.log(`DemoResponse: `, demo_response)
+      return;
+      // END
+    }
+
+
+    console.log(`selected to upload video`)
     if (
       !coverImageURL ||
       !videoFile ||
@@ -128,7 +213,7 @@ const Upload: NextPage = () => {
       formData.append("file", coverBlob, "cover.png");
       formData.append("content", "From webhook");
 
-          console.log(formData)
+      console.log(formData)
 
       let demo_response = await fetch(process.env.NEXT_PUBLIC_IMAGE_UPLOAD_URL!, {
         method: "POST",
@@ -164,6 +249,35 @@ const Upload: NextPage = () => {
     }
   };
 
+
+  const giveSuggestions = async () => {
+    console.log("giving suggestions");
+    try {
+      var suggestions = document.createElement("textarea");
+      suggestions.innerHTML = "Random text";
+
+      var textAboveSuggestions = document.createElement("h1");
+      /*
+            var h = React.createElement(
+              "h1",
+              { className: "text-2xl font-bold" },
+              "I'm suggesting you this mnemonic text"
+            )
+      */
+      textAboveSuggestions.classList.add("text-2xl", "font-bold");
+      textAboveSuggestions.innerHTML = "For " + document.getElementById("dataTypeSelection").value;
+      //ReactDOM.render(h, document.getElementById("deleteThis"))
+      document.getElementById("deleteThis").appendChild(textAboveSuggestions);
+      document.getElementById("deleteThis").appendChild(suggestions);
+    }
+    catch (error) {
+      console.log("problem with loading suggestions and the text for suggestion")
+    }
+
+  };
+
+
+
   const dragBlur: DragEventHandler<HTMLButtonElement> = (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -177,6 +291,7 @@ const Upload: NextPage = () => {
   };
 
   const dropFile = (e: any) => {
+    console.log("dropping video")
     e.preventDefault();
     e.stopPropagation();
 
@@ -191,15 +306,23 @@ const Upload: NextPage = () => {
     setIsFileDragging(false);
   };
 
+
   return (
     <>
       <Meta title="Upload | TopTop" description="Upload" image="/favicon.png" />
       <div className="min-h-screen flex flex-col items-stretch">
         <Navbar />
         <div className="flex justify-center mx-2 flex-grow bg-gray-1">
-          <div className="w-full max-w-[1000px] p-8 bg-white my-4">
-            <h1 className="text-2xl font-bold">Upload video</h1>
-            <p className="text-gray-400 mt-2">Post a video to your account</p>
+          <div className="w-full max-w-[1000px] p-8 bg-white my-4" id="deleteThis">
+            <h1 className="text-2xl font-bold" >You are trying to memorize:</h1>
+            <select name="data-type" id="type-select" id="dataTypeSelection">
+              <option value="">--Please choose the type of data--</option>
+              <option value="list">List of words</option>
+              <option value="sequence">Sequence</option>
+              <option value="linguistics">Linguistics</option>
+            </select>
+            <h1 className="text-2xl font-bold">Upload mnemonic video/image/audio</h1>
+            <p className="text-gray-400 mt-2">Post a mnemonic file to your account</p>
 
             <div className="flex items-start mt-10 gap-4">
               {videoURL ? (
@@ -223,14 +346,14 @@ const Upload: NextPage = () => {
                 >
                   <BsFillCloudUploadFill className="fill-[#B0B0B4] w-10 h-10" />
                   <h1 className="font-semibold mt-4 mb-2">
-                    Select video to upload
+                    Select a file to upload
                   </h1>
                   <p className="text-gray-500 text-sm">
                     Or drag and drop a file
                   </p>
 
                   <div className="flex flex-col items-center text-gray-400 my-4 gap-1 text-sm">
-                    <p>MP4 or WebM</p>
+                    <p>MP4 or WebM or image or audio</p>
                     <p>Any resolution</p>
                     <p>Any duration</p>
                     <p>Less than 200MB</p>
@@ -247,7 +370,7 @@ const Upload: NextPage = () => {
                 type="file"
                 hidden
                 className="hidden"
-                accept="video/mp4,video/webm"
+                accept="video/mp4,video/webm, image/*, audio/*"
                 onChange={(e) => {
                   if (e.target.files?.[0]) {
                     handleFileChange(e.target.files[0]);
@@ -298,6 +421,7 @@ const Upload: NextPage = () => {
                   </button>
                   <button
                     onClick={async () => await handleUpload()}
+
                     disabled={
                       !inputValue.trim() ||
                       !videoURL ||
@@ -305,6 +429,7 @@ const Upload: NextPage = () => {
                       !coverImageURL ||
                       isLoading
                     }
+
                     className={`flex justify-center items-center gap-2 py-3 min-w-[170px] hover:brightness-90 transition text-white bg-red-1 disabled:text-gray-400 disabled:bg-gray-200`}
                   >
                     {isLoading && (
@@ -312,6 +437,27 @@ const Upload: NextPage = () => {
                     )}
                     Post
                   </button>
+
+                  <button
+                    onClick={async () => await giveSuggestions()}
+
+                    className={`flex justify-center items-center gap-2 py-3 min-w-[170px] hover:brightness-90 transition text-white bg-red-1 disabled:text-gray-400 disabled:bg-gray-200`}
+                  >
+
+                    Get Suggestions in Text from GPT-3
+                  </button>
+
+                  <a href="http://127.0.0.1:5500/src/pages/quiz.html">
+                    <button
+                      className={`flex justify-center items-center gap-2 py-3 min-w-[170px] hover:brightness-90 transition text-white bg-red-1 disabled:text-gray-400 disabled:bg-gray-200`}
+                    >
+                      Quiz
+                    </button>
+                  </a>
+
+
+
+
                 </div>
               </div>
             </div>
