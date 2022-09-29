@@ -78,6 +78,21 @@ const Main: FC<MainProps> = ({ origin }) => {
       <div className="flex-grow text-center my-4">There is no video yet</div>
     );
 
+  console.log('scroll?');
+
+  useEffect(() => {
+    const handleScroll = event => {
+      //console.log('window.scrollY', window.scrollY);
+      //console.log('scrolled');
+    };
+
+    window.addEventListener('scroll', handleScroll);
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+
   return (
     <div className="flex-grow">
       {data?.pages.map((page) =>
