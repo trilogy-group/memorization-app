@@ -136,17 +136,18 @@ export const videoRouter = createRouter()
       tagStr: z.string(),
     }),
     async resolve({ ctx: { prisma, session }, input }) {
-      console.log(input);
-      let alltags = input.tagStr.match(/(#[a-z\d-]+)/gi); //input.caption.match(/(#[a-z\d-]+)/gi);
+      let alltags = input.tagStr.match(/(#[a-z\d-]+)/gi);
       let alltagid = [];
-      console.log(`all tags:`, alltags);
+      /*
+       * Tags hardcoded in the frontend src/upload.tsx are created in the DB, therefore "tagcreated"
+       * TODO: provided subject/chapter tags in the DB
+       */
       for (const t_ of alltags) {
         const tagcreated = await prisma.hashtag.findUnique({
           where: {
             tag: t_,
           }
         });
-        console.log(`tagcreated`, tagcreated);
 
         if (!tagcreated) {
           const tagcreated = await prisma.hashtag.create({
