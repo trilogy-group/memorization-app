@@ -17,7 +17,7 @@ import { appRouter } from "@/server/router";
 import { authOptions } from "./api/auth/[...nextauth]";
 
 const Home: NextPage<HomeProps> = ({
-  suggestedAccounts,
+  leaderboardAccounts,
   followingAccounts,
   origin,
 }) => {
@@ -32,7 +32,7 @@ const Home: NextPage<HomeProps> = ({
       <div className="flex justify-center mx-4">
         <div className="w-full max-w-[1150px] flex">
           <Sidebar
-            suggestedAccounts={suggestedAccounts!}
+            leaderboardAccounts={leaderboardAccounts!}
             followingAccounts={followingAccounts!}
           />
           <Main origin={origin!} />
@@ -76,7 +76,7 @@ export const getServerSideProps = async ({
     transformer: superjson,
   });
 
-  const [suggestedAccounts, followingAccounts] = await Promise.all([
+  const [leaderboardAccounts, followingAccounts] = await Promise.all([
     prisma.user.findMany({
       take: 20,
       /*
@@ -123,7 +123,7 @@ export const getServerSideProps = async ({
     props: {
       trpcState: ssg.dehydrate(),
       session,
-      suggestedAccounts,
+      leaderboardAccounts,
       followingAccounts: followingAccounts.map((item) => item.following),
       origin: `${req.headers.host?.includes("localhost") ? "http" : "https"
         }://${req.headers.host}`,

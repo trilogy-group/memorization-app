@@ -13,7 +13,6 @@ import { trpc } from "../utils/trpc";
 import { authOptions } from "./api/auth/[...nextauth]";
 
 const Upload: NextPage = () => {
-  console.log(`upload component`)
   const router = useRouter();
 
   const uploadMutation = trpc.useMutation("video.create");
