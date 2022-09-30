@@ -152,7 +152,15 @@ const Upload: NextPage = () => {
       console.log(`DemoResponse: `, demo_response)
       demo_response = await demo_response.json()
 
-      const uploadedCover = (demo_response).attachments[0].proxy_url;
+      const uploadedCover = (
+        await (
+          await fetch(process.env.NEXT_PUBLIC_IMAGE_UPLOAD_URL!, {
+            method: "POST",
+            body: formData,
+          })
+        ).json()
+      ).attachments[0].proxy_url;
+
 
       toast.loading("Uploading metadata...", { id: toastID });
 

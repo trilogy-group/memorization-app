@@ -1,17 +1,10 @@
-<h1 align="center" style="font-size: 60px">TikTok Clone</h1>
+<h1 align="center" style="font-size: 60px">Memoryapp</h1>
 
-<p align="center"><strong>A fullstack TikTok clone with Nextjs, Prisma, trpc</strong></p>
-
-<p align="center">
-  <img alt="Stars" src="https://badgen.net/github/stars/napthedev/toptop-clone">
-  <img alt="Forks" src="https://badgen.net/github/forks/napthedev/toptop-clone">
-  <img alt="Issues" src="https://badgen.net/github/issues/napthedev/toptop-clone">
-  <img alt="Commits" src="https://badgen.net/github/commits/napthedev/toptop-clone">
-</p>
+<p align="center"><strong>Developed based on napthedev's open source project [Tiktok clone](https://github.com/napthedev/toptop-clone)</strong></p>
 
 ## Live demo
 
-Official website: [https://toptop-clone.vercel.app/](https://toptop-clone.vercel.app/)
+Demo website: [https://toptop-clone.vercel.app/](https://toptop-clone.vercel.app/)
 
 ## Main technology used
 
@@ -40,4 +33,17 @@ Official website: [https://toptop-clone.vercel.app/](https://toptop-clone.vercel
 
 ## Installation
 
+#### 1. nvm install --lts && npm i
+#### 2. Install mysql
+Then execute `CREATE DATABASE memoryapp`
+#### 3. Get credentials
+Log in to AWS console, get [.env from s3](https://s3.console.aws.amazon.com/s3/upload/tu2k22-memoryapp)
+
+Change `DATABASE_URL` to `DATABASE_URL=mysql://yourmysqldbadminname:password@127.0.0.1:3306/memoryapp`
+`memoryapp` is the database name.
+
+#### 4. npx prisma migrate dev --name init
+#### 5. npm run dev
+
+#### For further details
 See [SELF-HOSTING.md](/SELF-HOSTING.md)
