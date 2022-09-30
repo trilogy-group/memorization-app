@@ -5,12 +5,11 @@ import { useRouter } from "next/router";
 import Link from "next/link";
 import { AiOutlinePlus } from "react-icons/ai";
 import { unstable_getServerSession as getServerSession } from "next-auth";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 import Navbar from "@/components/Layout/Navbar";
 import Meta from "@/components/Shared/Meta";
-import { fetchWithProgress } from "@/utils/fetch";
 
 import { trpc } from "../utils/trpc";
 import { authOptions } from "./api/auth/[...nextauth]";
@@ -21,10 +20,7 @@ const CreateListOfWords: NextPage = () => {
   const uploadMutation = trpc.useMutation("video.create");
 
   const [coverImageURL, setCoverImageURL] = useState<string | null>(null);
-  const [videoFile, setVideoFile] = useState<File | null>(null);
-  const [videoURL, setVideoURL] = useState<string | null>(null);
-  const [videoWidth, setVideoWidth] = useState(0);
-  const [videoHeight, setVideoHeight] = useState(0);
+  const [selectedMnemonics, setSelectedMnemonics] = useState(false);
   const [inputValue, setInputValue] = useState("");
 
   const [isLoading, setIsLoading] = useState(false);
@@ -41,6 +37,31 @@ const CreateListOfWords: NextPage = () => {
     // TODO: connect to backend generate mnemonics API
   }
 
+  const handleUpload = async () => {
+    if (
+      !inputValue.trim() ||
+      isLoading
+    )
+      return;
+    setIsLoading(true);
+    const toastID = toast.loading("Posting...");
+    try {
+
+      toast.loading("Mnemonics Created! Points +1", { id: toastID });
+      await new Promise(r => setTimeout(r, 800));
+      toast.dismiss(toastID);
+      setIsLoading(false);
+      //router.push(`/video/${created.id}`);
+    } catch (error) {
+      console.log(error);
+      setIsLoading(false);
+      toast.error("Failed to upload video", {
+        position: "bottom-right",
+        id: toastID,
+      });
+    }
+  };
+
   return (
     <>
       <Meta title="Post Mnemonics | EdTok" description="Post Mnemonics" image="/favicon.png" />
@@ -53,8 +74,12 @@ const CreateListOfWords: NextPage = () => {
             <div className="flex items-start mt-10 gap-4">
               <div className="flex-grow">
                 <Textarea
-                  label="Write your thoughts"
-                  placeholder="Enter your amazing ideas."
+                  label="Enter your question"
+                  placeholder="e.g., world leaders during WW2"
+                  value={inputValue}
+                  onChange={(e) => {
+                    setInputValue(e.target.value);
+                  }}
                 />
 
                 <div className="flex flex-wrap gap-3">
@@ -94,20 +119,21 @@ const CreateListOfWords: NextPage = () => {
                         <span>Videos</span>
                       </a>
                     </Link>
-                    <Link href={"/upload"}>
-                      <a className="border rounded flex items-center gap-2 h-9 px-3 border-gray-200 bg-white hover:bg-gray-100 transition">
-                        <AiOutlinePlus className="w-5 h-5" />
-                        <span>Images</span>
-                      </a>
-                    </Link>
-                    <Link href={"/upload"}>
-                      <a className="border rounded flex items-center gap-2 h-9 px-3 border-gray-200 bg-white hover:bg-gray-100 transition">
-                        <AiOutlinePlus className="w-5 h-5" />
-                        <span>Texts</span>
-                      </a>
-                    </Link>
                   </div>
                 </div>
+                <button
+                  onClick={async () => await handleUpload()}
+                  disabled={
+                    !inputValue.trim() ||
+                    isLoading
+                  }
+                  className={`flex justify-center items-center gap-2 py-3 min-w-[170px] hover:brightness-90 transition text-white bg-red-1 disabled:text-gray-400 disabled:bg-gray-200`}
+                >
+                  {isLoading && (
+                    <span className="w-4 h-4 border-2 border-gray-500 border-t-transparent rounded-full animate-spin"></span>
+                  )}
+                  Post
+                </button>
               </div>
             </div>
           </div>
