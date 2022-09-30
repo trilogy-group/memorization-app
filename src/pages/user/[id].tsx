@@ -103,6 +103,12 @@ const UserProfile: NextPage<UserProfileProps> = ({ user }) => {
                 </span>
                 <span>Followers</span>
               </div>
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-lg">
+                  {formatNumber(user?.points||0)}
+                </span>
+                <span>Points</span>
+              </div>
             </div>
           </div>
 
@@ -161,6 +167,7 @@ export const getServerSideProps = async ({
             select: { id: true, coverURL: true, caption: true },
             orderBy: { createdAt: "desc" },
           },
+          points: true,
         },
       }),
       session?.user?.id
