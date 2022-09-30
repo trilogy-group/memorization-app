@@ -1,6 +1,5 @@
 import { Follow, Like } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
-import { IoConstructOutline } from "react-icons/io5";
 import { z } from "zod";
 
 import { createRouter } from "./context";
@@ -142,6 +141,9 @@ export const videoRouter = createRouter()
        * Tags hardcoded in the frontend src/upload.tsx are created in the DB, therefore "tagcreated"
        * TODO: provided subject/chapter tags in the DB
        */
+      if (alltags == null) {
+        throw new TRPCError({ code: "BAD_REQUEST" });
+      }
       for (const t_ of alltags) {
         const tagcreated = await prisma.hashtag.findUnique({
           where: {
@@ -149,7 +151,7 @@ export const videoRouter = createRouter()
           }
         });
 
-        if (!tagcreated) {
+        if (tagcreated == null) {
           const tagcreated = await prisma.hashtag.create({
             data: {
               tag: t_,
@@ -157,11 +159,6 @@ export const videoRouter = createRouter()
           });
           alltagid.push({ id: tagcreated.id });
         } else {
-          const tagcreated = await prisma.hashtag.findUnique({
-            where: {
-              tag: t_,
-            }
-          });
           alltagid.push({ id: tagcreated.id });
         }
       }
@@ -179,9 +176,9 @@ export const videoRouter = createRouter()
         },
       });
       await prisma.user.update({
-        where: { id: session?.user?.id },
+        where: { id: session?.user?.id as string },
         data: {
-          points: {increment: 1},
+          points: { increment: 1 },
         },
       });
       return created;
