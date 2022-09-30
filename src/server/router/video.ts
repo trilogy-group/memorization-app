@@ -132,12 +132,53 @@ export const videoRouter = createRouter()
       coverURL: z.string().url(),
       videoWidth: z.number().gt(0),
       videoHeight: z.number().gt(0),
+      tagStr: z.string(),
     }),
     async resolve({ ctx: { prisma, session }, input }) {
+      let alltags = input.tagStr.match(/(#[a-z\d-]+)/gi);
+      let alltagid = [];
+      /*
+       * Tags hardcoded in the frontend src/upload.tsx are created in the DB, therefore "tagcreated"
+       * TODO: provided subject/chapter tags in the DB
+       */
+      if (alltags == null) {
+        throw new TRPCError({ code: "BAD_REQUEST" });
+      }
+      for (const t_ of alltags) {
+        const tagcreated = await prisma.hashtag.findUnique({
+          where: {
+            tag: t_,
+          }
+        });
+
+        if (tagcreated == null) {
+          const tagcreated = await prisma.hashtag.create({
+            data: {
+              tag: t_,
+            },
+          });
+          alltagid.push({ id: tagcreated.id });
+        } else {
+          alltagid.push({ id: tagcreated.id });
+        }
+      }
       const created = await prisma.video.create({
         data: {
-          ...input,
+          caption: input.caption,
+          videoURL: input.videoURL,
+          coverURL: input.coverURL,
+          videoWidth: input.videoWidth,
+          videoHeight: input.videoHeight,
           userId: session?.user?.id!,
+          hashtags: {
+            connect: alltagid,
+          }, // connect to all hashtags
+        },
+      });
+      await prisma.user.update({
+        where: { id: session?.user?.id as string },
+        data: {
+          points: { increment: 1 },
         },
       });
       return created;

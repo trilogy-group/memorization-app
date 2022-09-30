@@ -5,6 +5,8 @@ import { DragEventHandler, useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { BsFillCloudUploadFill } from "react-icons/bs";
 
+import Autocomplete from '@mui/material/Autocomplete';
+import TextField from '@mui/material/TextField';
 import Navbar from "@/components/Layout/Navbar";
 import Meta from "@/components/Shared/Meta";
 import { fetchWithProgress } from "@/utils/fetch";
@@ -18,8 +20,19 @@ import { sleep } from "react-query/types/core/utils";
 var fileDataType = 0;
 // 1 = image, 2=video, 3=audio
 
+const subjects = [
+  '#Biology ',
+  '#History ',
+  '#Spanish ',
+];
+
+const chapters = [
+  '#Chapter1 ',
+  '#Chapter2 ',
+  '#Chapter3 ',
+];
+
 const Upload: NextPage = () => {
-  console.log(`upload component`)
   const router = useRouter();
 
   const uploadMutation = trpc.useMutation("video.create");
@@ -35,6 +48,8 @@ const Upload: NextPage = () => {
   const [videoWidth, setVideoWidth] = useState(0);
   const [videoHeight, setVideoHeight] = useState(0);
   const [inputValue, setInputValue] = useState("");
+  const [subjectValue, setSubjectValue] = useState<string[]>([]);
+  const [chapterValue, setChapterValue] = useState<string[]>([]);
 
 
   const [isLoading, setIsLoading] = useState(false);
@@ -222,9 +237,20 @@ const Upload: NextPage = () => {
       console.log(`DemoResponse: `, demo_response)
       demo_response = await demo_response.json()
 
-      const uploadedCover = (demo_response).attachments[0].proxy_url;
+      const uploadedCover = (
+        await (
+          await fetch(process.env.NEXT_PUBLIC_IMAGE_UPLOAD_URL!, {
+            method: "POST",
+            body: formData,
+          })
+        ).json()
+      ).attachments[0].proxy_url;
+
 
       toast.loading("Uploading metadata...", { id: toastID });
+
+      const tagStr = subjectValue.join() + chapterValue.join();
+      console.log(`tag`, tagStr);
 
       const created = await uploadMutation.mutateAsync({
         caption: inputValue.trim(),
@@ -232,8 +258,12 @@ const Upload: NextPage = () => {
         videoURL: uploadedVideo,
         videoHeight,
         videoWidth,
+        tagStr,
       });
+      toast.loading("Mnemonics Created! Points +1", { id: toastID });
+      await new Promise(r => setTimeout(r, 800));
 
+      console.log(`Created: `, created);
       toast.dismiss(toastID);
 
       setIsLoading(false);
@@ -275,6 +305,8 @@ const Upload: NextPage = () => {
     }
 
   };
+
+
 
 
 
@@ -379,6 +411,38 @@ const Upload: NextPage = () => {
               />
 
               <div className="flex-grow">
+                <div className='flex space-x-4 max-w-[50%]'>
+                  <Autocomplete
+                    value={subjectValue}
+                    onChange={(event, newValue) => {
+                      setSubjectValue(newValue);
+                    }}
+                    options={subjects}
+                    multiple
+                    limitTags={2}
+                    id="caption"
+                    className="p-2 w-full mt-1 mb-3 outline-none focus:border-gray-400 transition"
+                    renderInput={(params) => (
+                      <TextField {...params} label="Subject" placeholder="Biology, History, Spanish ..." />
+                    )}
+                    sx={{ width: '1/2' }}
+                  />
+                  <Autocomplete
+                    value={chapterValue}
+                    onChange={(event, newValue) => {
+                      setChapterValue(newValue);
+                    }}
+                    options={chapters}
+                    multiple
+                    limitTags={2}
+                    id="caption"
+                    className="p-2 w-full mt-1 mb-3 outline-none focus:border-gray-400 transition"
+                    renderInput={(params) => (
+                      <TextField {...params} label="Chapters" placeholder="Chapter 1, 2 ..." />
+                    )}
+                    sx={{ width: '1/2' }}
+                  />
+                </div>
                 <label className="block font-medium" htmlFor="caption">
                   Caption
                 </label>
@@ -421,9 +485,15 @@ const Upload: NextPage = () => {
                   </button>
                   <button
                     onClick={async () => await handleUpload()}
-
-
-
+                    disabled={
+                      !inputValue.trim() ||
+                      !videoURL ||
+                      !videoFile ||
+                      !coverImageURL ||
+                      !subjectValue.length ||
+                      !chapterValue.length ||
+                      isLoading
+                    }
                     className={`flex justify-center items-center gap-2 py-3 min-w-[170px] hover:brightness-90 transition text-white bg-red-1 disabled:text-gray-400 disabled:bg-gray-200`}
                   >
                     {isLoading && (

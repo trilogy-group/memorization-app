@@ -25,8 +25,8 @@ const Search: FC<SearchProps> = ({ videos, accounts }) => {
   return (
     <>
       <Meta
-        title={`Find '${router.query.q}' on Toptop`}
-        description="TopTop Search"
+        title={`Find '${router.query.q}' on EdTok`}
+        description="EdTok Search"
         image="/favicon.png"
       />
       <Navbar />
@@ -35,21 +35,19 @@ const Search: FC<SearchProps> = ({ videos, accounts }) => {
           <div className="flex gap-10 px-10 my-4 border-b">
             <button
               onClick={() => setCurrentTab(Tabs.accounts)}
-              className={`py-1 font-medium transition border-b-2 ${
-                currentTab === Tabs.accounts
-                  ? "border-black"
-                  : "text-gray-500 border-transparent"
-              } `}
+              className={`py-1 font-medium transition border-b-2 ${currentTab === Tabs.accounts
+                ? "border-black"
+                : "text-gray-500 border-transparent"
+                } `}
             >
               Accounts
             </button>
             <button
               onClick={() => setCurrentTab(Tabs.videos)}
-              className={`py-1 font-medium transition border-b-2 ${
-                currentTab === Tabs.videos
-                  ? "border-black"
-                  : "text-gray-500 border-transparent"
-              } `}
+              className={`py-1 font-medium transition border-b-2 ${currentTab === Tabs.videos
+                ? "border-black"
+                : "text-gray-500 border-transparent"
+                } `}
             >
               Videos
             </button>
@@ -151,9 +149,16 @@ export const getServerSideProps = async ({
   res,
   query,
 }: GetServerSidePropsContext) => {
-  const q = query.q as string;
+  var q = query.q as string;
+  const tags = q.match(/(#[a-z\d-]+)/gi);
+  // remove hashtags from caption searching
+  if (tags != null) {
+    for (const t_ of tags) {
+      q = q.replace(t_, "");
+    }
+  }
 
-  if (!q || typeof q !== "string") {
+  if (typeof q !== "string" || (!q && !tags)) {
     return {
       redirect: {
         destination: "/",
@@ -165,52 +170,106 @@ export const getServerSideProps = async ({
 
   const session = await getServerSession(req, res, authOptions);
 
-  const [accounts, videos] = await Promise.all([
-    prisma.user.findMany({
-      where: {
-        OR: {
-          email: {
-            search: q,
-          },
-          name: {
-            search: q,
-          },
-        },
-      },
-      take: 20,
-      select: {
-        _count: {
-          select: {
-            followers: true,
+  let accounts, videos;
+  if (tags != null) {
+    [accounts, videos] = await Promise.all([
+      prisma.user.findMany({
+        where: {
+          OR: {
+            email: {
+              search: q,
+            },
+            name: {
+              search: q,
+            },
           },
         },
-        id: true,
-        image: true,
+        take: 20,
+        select: {
+          _count: {
+            select: {
+              followers: true,
+            },
+          },
+          id: true,
+          image: true,
 
-        name: true,
-      },
-    }),
-    prisma.video.findMany({
-      where: {
-        caption: {
-          search: q,
+          name: true,
         },
-      },
-      take: 20,
-      select: {
-        id: true,
-        coverURL: true,
-        caption: true,
-        user: {
-          select: {
-            id: true,
-            image: true,
-            name: true,
+      }),
+      prisma.video.findMany({
+        where: {
+          hashtags: {
+            some: {
+              tag: {in: tags},
+            }
+          }
+        },
+        take: 20,
+        select: {
+          id: true,
+          coverURL: true,
+          caption: true,
+          user: {
+            select: {
+              id: true,
+              image: true,
+              name: true,
+            },
           },
         },
-      },
-    }),
-  ]);
+      }),
+    ]);
+
+  }
+  else {
+    [accounts, videos] = await Promise.all([
+      prisma.user.findMany({
+        where: {
+          OR: {
+            email: {
+              search: q,
+            },
+            name: {
+              search: q,
+            },
+          },
+        },
+        take: 20,
+        select: {
+          _count: {
+            select: {
+              followers: true,
+            },
+          },
+          id: true,
+          image: true,
+
+          name: true,
+        },
+      }),
+      prisma.video.findMany({
+        where: {
+          caption: {
+            search: q,
+          },
+        },
+        take: 20,
+        select: {
+          id: true,
+          coverURL: true,
+          caption: true,
+          user: {
+            select: {
+              id: true,
+              image: true,
+              name: true,
+            },
+          },
+        },
+      }),
+    ]);
+  }
 
   return {
     props: {
