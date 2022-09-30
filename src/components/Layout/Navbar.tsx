@@ -60,10 +60,10 @@ const Navbar: FC = () => {
             </button>
           </form>
           <div className="flex items-center gap-3">
-            <Link href={status === "authenticated" ? "/upload" : "/sign-in"}>
+            <Link href={status === "authenticated" ? "/create-mnemonics" : "/sign-in"}>
               <a className="border rounded flex items-center gap-2 h-9 px-3 border-gray-200 bg-white hover:bg-gray-100 transition">
                 <AiOutlinePlus className="w-5 h-5" />
-                <span>Upload</span>
+                <span>Create</span>
               </a>
             </Link>
             {status === "unauthenticated" ? (
