@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <title>Select Data Type</title>
+
+
+    <!--============= -->
+
+    <style>
+        body {
+            font-family: sans-serif;
+        }
+
+        #quiz {
+            margin: 0 0 15px 0;
+            padding: 0;
+        }
+
+        /*END addding beautiful list*/
+    </style>
+    <!--============= -->
+
+</head>
+
+<body>
+    <nav className="border-b sticky top-0 z-20 bg-white">
+        <div className="flex justify-center mx-4">
+            <div className="w-full max-w-[1150px] flex justify-between items-center h-[60px]">
+                <Link href="/">
+                <a className="flex items-end gap-1">
+                    <Image src="..\..\public\logo.png" alt="Logo" width=30px height=30 />
+                    <span className="text-2xl leading-[1] font-bold"
+                        style="font-weight: 700; font-size: 1.5rem;">TopTop</span>
+                </a>
+                </Link>
+            </div>
+        </div>
+    </nav>
+
+    <!-- SELECT DATA TYPE-->
+    <div style="">
+        <h1>Select type of mnemonic you want to upload</h1>
+
+        <a href="http://localhost:3000/upload">
+            <button
+                style="font-weight: 700; font-size: 1.0rem; border: 1px solid rgb(0, 0, 0); padding: 10px; cursor: pointer; ">
+                Video
+            </button>
+        </a>
+        <p> </p>
+        <a href="http://localhost:3000/upload">
+            <button
+                style="font-weight: 700; font-size: 1.0rem; border: 1px solid rgb(0, 0, 0); padding: 10px; cursor: pointer;">
+                Image
+            </button>
+        </a>
+        <p> </p>
+        <a href="http://localhost:3000/upload">
+            <button
+                style="font-weight: 700; font-size: 1.0rem; border: 1px solid rgb(0, 0, 0); padding: 10px; cursor: pointer;">
+                Text
+            </button>
+        </a>
+
+    </div>
+
+    <h1> OR</h1>
+
+    <div style="">
+        <h1>Select data type you're trying to memorize</h1>
+
+
+
+
+        <a href="http://127.0.0.1:5501/src/pages/selectDataTypeParagraph.html">
+            <button
+                style="font-weight: 700; font-size: 1.0rem; border: 1px solid rgb(0, 0, 0); padding: 10px; cursor: pointer; ">
+                List
+            </button>
+        </a>
+        <p> </p>
+        <a href="http://127.0.0.1:5501/src/pages/selectDataTypeParagraph.html">
+            <button
+                style="font-weight: 700; font-size: 1.0rem; border: 1px solid rgb(0, 0, 0); padding: 10px; cursor: pointer;">
+                Sequence
+            </button>
+        </a>
+        <p> </p>
+        <a href="http://127.0.0.1:5501/src/pages/selectDataTypeParagraph.html">
+            <button
+                style="font-weight: 700; font-size: 1.0rem; border: 1px solid rgb(0, 0, 0); padding: 10px; cursor: pointer;">
+                Linguistics
+            </button>
+        </a>
+
+    </div>
+
+
+
+
+    <button onclick="checkAnswer()" style="font-weight: 700; font-size: 1.0rem; border: 1px solid rgb(0, 0, 0); padding: 10px; cursor: pointer; position: absolute; bottom: 8px;
+        left: 16px; ">Next</button>
+
+
+
+    <script></script>
+</body>
+
+</html>

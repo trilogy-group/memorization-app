@@ -32,8 +32,8 @@ const Sidebar: FC<SidebarProps> = ({
         <Link href="/">
           <a
             className={`flex items-center gap-2 ${!router.query.following
-                ? "fill-pink text-pink"
-                : "fill-black text-black"
+              ? "fill-pink text-pink"
+              : "fill-black text-black"
               }`}
           >
             {!router.query.following ? <AiFillHome /> : <AiOutlineHome />}
@@ -43,8 +43,8 @@ const Sidebar: FC<SidebarProps> = ({
         <Link href={session.data?.user ? "/?following=1" : "/sign-in"}>
           <a
             className={`flex items-center gap-2 ${router.query.following
-                ? "fill-pink text-pink"
-                : "fill-black text-black"
+              ? "fill-pink text-pink"
+              : "fill-black text-black"
               }`}
           >
             {router.query.following ? (
@@ -56,11 +56,11 @@ const Sidebar: FC<SidebarProps> = ({
           </a>
         </Link>
 
-        <Link href={"http://127.0.0.1:5500/src/pages/quiz.html"}>
+        <Link href={"http://127.0.0.1:5501/src/pages/quiz.html"}>
           <a
             className={`flex items-center gap-2 ${router.query.following
-                ? "fill-pink text-pink"
-                : "fill-black text-black"
+              ? "fill-pink text-pink"
+              : "fill-black text-black"
               }`}
           >
 

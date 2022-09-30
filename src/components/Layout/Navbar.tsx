@@ -66,6 +66,12 @@ const Navbar: FC = () => {
                 <span>Upload</span>
               </a>
             </Link>
+            <Link href={"http://127.0.0.1:5501/src/pages/selectDataType.html"}>
+              <a className="border rounded flex items-center gap-2 h-9 px-3 border-gray-200 bg-white hover:bg-gray-100 transition">
+                <AiOutlinePlus className="w-5 h-5" />
+                <span>Select data type for mnemonic</span>
+              </a>
+            </Link>
             {status === "unauthenticated" ? (
               <Link href="/sign-in">
                 <a className="rounded h-9 px-6 bg-pink text-white flex items-center hover:brightness-105 transition">
@@ -88,11 +94,10 @@ const Navbar: FC = () => {
                       />
                     </button>
                     <div
-                      className={`absolute shadow-[rgb(0_0_0_/_12%)_0px_4px_16px] bg-white top-[120%] right-0 py-2 flex flex-col items-stretch [&>*]:whitespace-nowrap rounded-md transition-all z-50 ${
-                        isDropdownOpened
-                          ? "opacity-100 visible"
-                          : "opacity-0 invisible"
-                      }`}
+                      className={`absolute shadow-[rgb(0_0_0_/_12%)_0px_4px_16px] bg-white top-[120%] right-0 py-2 flex flex-col items-stretch [&>*]:whitespace-nowrap rounded-md transition-all z-50 ${isDropdownOpened
+                        ? "opacity-100 visible"
+                        : "opacity-0 invisible"
+                        }`}
                     >
                       {/* @ts-ignore */}
                       <Link href={`/user/${session?.user?.id}`}>

@@ -422,13 +422,7 @@ const Upload: NextPage = () => {
                   <button
                     onClick={async () => await handleUpload()}
 
-                    disabled={
-                      !inputValue.trim() ||
-                      !videoURL ||
-                      !videoFile ||
-                      !coverImageURL ||
-                      isLoading
-                    }
+
 
                     className={`flex justify-center items-center gap-2 py-3 min-w-[170px] hover:brightness-90 transition text-white bg-red-1 disabled:text-gray-400 disabled:bg-gray-200`}
                   >

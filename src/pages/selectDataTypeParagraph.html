@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <title>Select Data Type</title>
+
+
+    <!--============= -->
+
+    <style>
+        body {
+            font-family: sans-serif;
+        }
+
+        #quiz {
+            margin: 0 0 15px 0;
+            padding: 0;
+        }
+
+        /*BEGIN dynamic table*/
+
+        .container {
+            overflow: auto;
+            height: 500px;
+            width: 500px;
+            margin: 0 auto;
+        }
+
+        table {
+            width: 100%;
+        }
+
+        table td,
+        th {
+            padding: 5px;
+            border: 1px solid black;
+        }
+
+        table tr:first-child td {
+            border: none !important;
+            outline: 0;
+        }
+
+        /* Align Center */
+        h1,
+        p,
+        table td,
+        table td input {
+            text-align: center;
+        }
+
+        p {
+            color: red;
+        }
+
+        table td input,
+        table td button {
+            height: 25px;
+            width: 98%;
+        }
+    </style>
+    <!--============= -->
+
+</head>
+
+<body>
+    <nav className="border-b sticky top-0 z-20 bg-white">
+        <div className="flex justify-center mx-4">
+            <div className="w-full max-w-[1150px] flex justify-between items-center h-[60px]">
+                <Link href="/">
+                <a className="flex items-end gap-1">
+                    <Image src="..\..\public\logo.png" alt="Logo" width=30px height=30 />
+                    <span className="text-2xl leading-[1] font-bold"
+                        style="font-weight: 700; font-size: 1.5rem;">TopTop</span>
+                </a>
+                </Link>
+            </div>
+        </div>
+    </nav>
+
+    <!-- SELECT DATA TYPE-->
+    <div style="">
+        <h1>Give your input</h1>
+        <textarea rows="4" cols="50" id="inputText">Sample text</textarea>
+        <button id="generateSuggestions"
+            style="font-weight: 700; font-size: 1.0rem; border: 1px solid rgb(0, 0, 0); padding: 10px; cursor: pointer;"
+            onclick="showSuggestions()">
+            Generate
+        </button>
+    </div>
+
+    <h1>Dynamically Add/Remove Table Row with JS</h1>
+    <p id="invalidMsg"></p>
+    <div class="container">
+        <table id="mylist">
+            <colgroup>
+                <col style="width:40%;">
+                <col style="width:40%;">
+                <col style="width:20%;">
+            </colgroup>
+            <tr style="border:none !important;">
+                <td><input type="text" placeholder="Input Caption ..." id="firstname" autocomplete="off"></td>
+                <td><input type="text" placeholder="Input Data ..." id="lastname" autocomplete="off"></td>
+                <td><button onclick="return addRow();">Add</button></td>
+            </tr>
+            <tr>
+                <th>Caption</th>
+                <th>Information</th>
+                <th style="border:none;"></th>
+            </tr>
+        </table>
+    </div>
+
+    <div id="generatedSuggestions" style="display: none;">
+        <h1>Suggestions</h1>
+        <p>First </p>
+        <textarea rows="4" cols="50" id="suggestion1">1</textarea>
+        <p>Second </p>
+        <textarea rows="4" cols="50" id="suggestion2">2</textarea>
+        <p>Third </p>
+        <textarea rows="4" cols="50" id="suggestion3">3</textarea>
+    </div>
+
+    <a href="http://localhost:3000/upload" id="uploadMyself" style="display: none;">
+        <button
+            style="font-weight: 700; font-size: 1.0rem; border: 1px solid rgb(0, 0, 0); padding: 10px; cursor: pointer;  ">
+            I want to upload mnemonic myself
+        </button>
+    </a>
+
+    <script>
+        function showSuggestions() {
+            document.getElementById("generatedSuggestions").style = "display:block";
+            document.getElementById("generateSuggestions").innerHTML = "Retry";
+            let i = document.getElementById("inputText").value;
+            document.getElementById("suggestion1").innerHTML = i;
+            document.getElementById("suggestion2").innerHTML = i;
+            document.getElementById("suggestion3").innerHTML = i;
+            console.log(document.getElementById("inputText").value)
+            document.getElementById("uploadMyself").style = "display:block";
+        }
+
+        /**/
+        function addRow() {
+            var firstname = document.getElementById('firstname').value;
+            var lastname = document.getElementById('lastname').value;
+
+            if (firstname == "") {
+                document.getElementById('invalidMsg').innerHTML = 'Please Fill in Caption';
+                document.getElementById('firstname').focus();
+                return;
+            }
+            else if (lastname == "") {
+                document.getElementById('invalidMsg').innerHTML = 'Please Fill in Information';
+                document.getElementById('lastname').focus();
+                return;
+            }
+
+            else {
+                document.getElementById('invalidMsg').innerHTML = "";
+                let table = document.getElementById('mylist');
+                // Insert a row at the end of the table
+                let newRow = table.insertRow(-1);
+                var l = table.rows.length - 1;
+                //Col 1 = Firstname
+                table.rows[l].insertCell(0);
+                table.rows[l].cells[0].innerHTML = firstname;
+                //Col 2 = Firstname
+                table.rows[l].insertCell(1);
+                table.rows[l].cells[1].innerHTML = lastname;
+                //Col 3 = Delete Button
+                table.rows[l].insertCell(2);
+                table.rows[l].cells[2].innerHTML = "<button type='button' class='btnDelete' onclick='delRow(this);' id='btnDelete' size='1' height='1'>Delete</button>";
+
+                //Clear input
+                document.getElementById('firstname').value = "";
+                document.getElementById('lastname').value = "";
+                document.getElementById('firstname').focus();
+            }
+
+        }
+
+        function delRow(btn) {
+            var row = btn.parentNode.parentNode;
+            row.parentNode.removeChild(row);
+        }
+    </script>
+</body>
+
+</html>
