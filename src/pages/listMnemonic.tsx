@@ -19,7 +19,7 @@ import Link from "next/link";
 
 
 
-const SequenceMnemonic: NextPage = () => {
+const ListMnemonic: NextPage = () => {
   const router = useRouter();
 
   const uploadMutation = trpc.useMutation("video.create");
@@ -40,27 +40,8 @@ const SequenceMnemonic: NextPage = () => {
         position: "bottom-right",
       });
     }
-
-    const script = document.createElement('script');
-
-    script.src = "https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js";
-    script.async = true;
-
-    document.body.appendChild(script);
-    console.log("added da script");
-
-    setTimeout(() => {
-      let quizScript = document.createElement('script');
-
-      quizScript.innerHTML = "new Sortable(quiz);"
-
-      document.body.appendChild(quizScript);
-    }, 300);
-
-
-
     return () => {
-      document.body.removeChild(script);
+
       console.log("sdfdsfsdf");
     }
 
@@ -74,6 +55,7 @@ const SequenceMnemonic: NextPage = () => {
   const addToSequence = async () => {
     console.log("adding entry");
     var entry = document.createElement("li");
+    entry.className = "border rounded flex items-center gap-2 h-9 px-3 border-gray-200 bg-white hover:bg-gray-100 transition";
     /*
           var h = React.createElement(
             "h1",
@@ -82,7 +64,6 @@ const SequenceMnemonic: NextPage = () => {
           )
     */
     entry.innerHTML = inputValue.trim();
-    entry.className = "border rounded flex items-center gap-2 h-9 px-3 border-gray-200 bg-white hover:bg-gray-100 transition";
     document.getElementById("quiz").appendChild(entry);
   };
 
@@ -93,7 +74,7 @@ const SequenceMnemonic: NextPage = () => {
         <Navbar />
         <div className="flex justify-center mx-2 flex-grow bg-gray-1">
           <div className="w-full max-w-[1000px] p-8 bg-white my-4">
-            <h1 className="text-2xl font-bold">Memorize a sequence</h1>
+            <h1 className="text-2xl font-bold">Memorize a list</h1>
             <ul id="quiz">
               <li className="border rounded flex items-center gap-2 h-9 px-3 border-gray-200 bg-white hover:bg-gray-100 transition">1</li>
               <li className="border rounded flex items-center gap-2 h-9 px-3 border-gray-200 bg-white hover:bg-gray-100 transition">2</li>
@@ -172,7 +153,7 @@ const SequenceMnemonic: NextPage = () => {
   );
 };
 
-export default SequenceMnemonic;
+export default ListMnemonic;
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
   const session = await getServerSession(req, res, authOptions);
