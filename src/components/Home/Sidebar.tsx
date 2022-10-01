@@ -122,11 +122,9 @@ const Sidebar: FC<SidebarProps> = ({
           <p>Newsroom</p>
           <p>Store</p>
           <p>Contact</p>
-          <p>Carrers</p>
-          <p>ByteDance</p>
+          <p>Careers</p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <p>TikTik for Good</p>
           <p>Advertise</p>
           <p>Developers</p>
           <p>Transparency</p>
@@ -140,7 +138,7 @@ const Sidebar: FC<SidebarProps> = ({
           <p>Creator Portal</p>
           <p>Community Guidelines</p>
         </div>
-        <span>© 2022 TopTop</span>
+        <span>© 2022 EdTok</span>
       </div>
     </div>
   );

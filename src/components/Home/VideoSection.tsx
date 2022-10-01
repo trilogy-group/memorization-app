@@ -183,7 +183,7 @@ const VideoSection: FC<VideoSectionProps> = ({ video, refetch, origin }) => {
                   className="flex items-center gap-2 px-3 py-2 bg-white hover:bg-gray-100 transition"
                   href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
                     videoURL
-                  )}&t=${encodeURIComponent(`${video.user.name} on TopTop`)}`}
+                  )}&t=${encodeURIComponent(`${video.user.name} on EdTok`)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -193,7 +193,7 @@ const VideoSection: FC<VideoSectionProps> = ({ video, refetch, origin }) => {
                 <a
                   className="flex items-center gap-2 px-3 py-2 bg-white hover:bg-gray-100 transition"
                   href={`http://twitter.com/share?text=${encodeURIComponent(
-                    `${video.user.name} on TopTop`
+                    `${video.user.name} on EdTok`
                   )}&url=${encodeURIComponent(videoURL)}`}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -206,7 +206,7 @@ const VideoSection: FC<VideoSectionProps> = ({ video, refetch, origin }) => {
                   href={`http://www.reddit.com/submit?url=${encodeURIComponent(
                     videoURL
                   )}&title=${encodeURIComponent(
-                    `${video.user.name} on TopTop`
+                    `${video.user.name} on EdTok`
                   )}`}
                   target="_blank"
                   rel="noopener noreferrer"

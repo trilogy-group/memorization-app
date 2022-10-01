@@ -44,8 +44,8 @@ const UserProfile: NextPage<UserProfileProps> = ({ user }) => {
   return (
     <>
       <Meta
-        title={`${user?.name} (@${formatAccountName(user?.name!)}) | TopTop`}
-        description={`${user?.name} on TopTop`}
+        title={`${user?.name} (@${formatAccountName(user?.name!)}) | EdTok`}
+        description={`${user?.name} on EdTok`}
         image={user?.image!}
       />
 
