@@ -67,7 +67,7 @@ const CreateListOfWords: NextPage = () => {
       <Meta title="Post Mnemonics | EdTok" description="Post Mnemonics" image="/favicon.png" />
       <div className="min-h-screen flex flex-col items-stretch">
         <Navbar />
-        <div className="flex justify-center mx-2 flex-grow bg-gray-1">
+        <div className="flex justify-center mx-2 flex-grow bg-gray-1 place-items-center">
           <div className="w-full max-w-[1000px] p-8 bg-white my-4">
             <h1 className="text-2xl font-bold">Memorize a list of words</h1>
 
@@ -82,7 +82,18 @@ const CreateListOfWords: NextPage = () => {
                   }}
                 />
 
-                <div className="flex flex-wrap gap-3">
+                <div className="p-2 border border-gray-2 h-[170px] mb-2">
+                  {coverImageURL ? (
+                    <img
+                      className="h-full w-auto object-contain"
+                      src={coverImageURL}
+                      alt=""
+                    />
+                  ) : (
+                    <div className="bg-gray-1 h-full w-[100px]"></div>
+                  )}
+                </div>
+                <div className="flex flex-wrap gap-3 place-content-center">
                   <div className="flex items-start mt-10 gap-4">
                     <button
                       disabled={isLoading}
@@ -98,17 +109,6 @@ const CreateListOfWords: NextPage = () => {
                   </div>
                 </div>
 
-                <div className="p-2 border border-gray-2 h-[170px] mb-2">
-                  {coverImageURL ? (
-                    <img
-                      className="h-full w-auto object-contain"
-                      src={coverImageURL}
-                      alt=""
-                    />
-                  ) : (
-                    <div className="bg-gray-1 h-full w-[100px]"></div>
-                  )}
-                </div>
 
                 <div className="flex flex-wrap gap-3">
                   <p className="text-2xl font-bold">I want to upload my own</p>
