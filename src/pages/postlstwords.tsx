@@ -82,7 +82,7 @@ const CreateListOfWords: NextPage = () => {
                   }}
                 />
 
-                <div className="p-2 border border-gray-2 h-[170px] mb-2">
+                <div className="grid grid-cols-3 gap-2 p-2 border border-gray-2 h-[170px] mb-2">
                   {coverImageURL ? (
                     <img
                       className="h-full w-auto object-contain"
@@ -90,7 +90,12 @@ const CreateListOfWords: NextPage = () => {
                       alt=""
                     />
                   ) : (
-                    <div className="bg-gray-1 h-full w-[100px]"></div>
+                    <>
+                    <div className="col-span-1 bg-gray-1 h-full w-full"></div>
+                    <div className="col-span-1 bg-gray-1 h-full w-full"></div>
+                    <div className="col-span-1 bg-gray-1 h-full w-full"></div>
+                    </>
+
                   )}
                 </div>
                 <div className="flex flex-wrap gap-3 place-content-center">
