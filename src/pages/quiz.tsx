@@ -13,7 +13,6 @@ import React from "react";
 const Quiz: NextPage = () => {
 
   const uploadMutation = trpc.useMutation("video.create");
-  const [selectedOptions, setSelectedOptions] = useState([]);
 
   useEffect(() => {
 
@@ -45,11 +44,18 @@ const Quiz: NextPage = () => {
 
 
   function shuffle(arr: string[]): string[] {
-    var myClonedArray = Object.assign([], arr);
+    var myClonedArray = new Array<string>;
+    myClonedArray = Object.assign([], arr);
     let m = myClonedArray.length;
     while (m) {
       const i = Math.floor(Math.random() * m--);
-      [myClonedArray[m], myClonedArray[i]] = [myClonedArray[i], myClonedArray[m]];
+      const arr_i = myClonedArray[i];
+      const arr_m = myClonedArray[m];
+      if (arr_i == null || arr_m == null) {
+        throw new Error("Quiz answer entry null");
+      } else {
+        [myClonedArray[m], myClonedArray[i]] = [arr_i, arr_m];
+      }
     }
     return myClonedArray;
   };
@@ -97,17 +103,23 @@ const Quiz: NextPage = () => {
         score++;
       }
       // clearing the elments in the unordered list
-      while (elem.lastElementChild) {
-        elem.removeChild(elem.lastElementChild);
+      while (elem!.lastElementChild) {
+        elem!.removeChild(elem!.lastElementChild);
       }
 
       // options for second question
-      let shuffleOptions = shuffle(arrayOArrayCorrectAnswers[questionNumber])
-      for (var i = 0; i < arrayOArrayCorrectAnswers[questionNumber]?.length; i++) {
+      if (arrayOArrayCorrectAnswers[questionNumber] == null) {
+        throw new Error("array of correct answers is null at that index");
+      } else {
+
+      }
+
+      let shuffleOptions = shuffle(arrayOArrayCorrectAnswers[questionNumber] as Array<string>);
+      for (var i = 0; i < arrayOArrayCorrectAnswers[questionNumber]!?.length; i++) {
         let option = document.createElement('li');
         option.className = "border rounded flex items-center gap-2 h-9 px-3 border-gray-200 bg-white hover:bg-gray-100 transition"
-        option.innerHTML = shuffleOptions[i];
-        elem.appendChild(option);
+        option.innerHTML = shuffleOptions[i] as string;
+        elem!.appendChild(option);
         console.log("pushed ", option.innerHTML);
       }
 
@@ -115,17 +127,17 @@ const Quiz: NextPage = () => {
       answers.length = 0
 
       // upload next hint
-      document.getElementById("hint").setAttribute("src", "/hint2.png");
+      document.getElementById("hint")!.setAttribute("src", "/hint2.png");
 
       // after answering the first question the dropdown for diffculty dissappears
-      document.getElementById("difficulty-select").style.display = 'none';
+      document.getElementById("difficulty-select")!.style.display = 'none';
 
     } else if (questionNumber == 2) {
       console.log("answered second question");
       // adding the answers of the second question to the stack
-      for (var i = 0; i < elem.children.length; i++) {
-        var option = elem.children[i];
-        answers.push(option.innerHTML);
+      for (var i = 0; i < elem!.children.length; i++) {
+        var option = elem!.children[i];
+        answers.push(option!.innerHTML);
 
       }
 
@@ -134,16 +146,16 @@ const Quiz: NextPage = () => {
       }
 
       // clearing the elments in the unordered list
-      while (elem.lastElementChild) {
-        elem.removeChild(elem.lastElementChild);
+      while (elem!.lastElementChild) {
+        elem!.removeChild(elem!.lastElementChild);
       }
 
       //emptying the array of answers
       answers.length = 0
 
       // upload next hint
-      document.getElementById("hint").setAttribute("src", "/hint3.png");
-      document.getElementById("quiz").style.display = 'none';
+      document.getElementById("hint")!.setAttribute("src", "/hint3.png");
+      document.getElementById("quiz")!.style.display = 'none';
       console.log("second is answered")
 
     } else {
@@ -151,18 +163,18 @@ const Quiz: NextPage = () => {
     }
 
     questionNumber++;
-    document.getElementById("score").innerHTML = String(score);
+    document.getElementById("score")!.innerHTML = String(score);
 
   }
 
   function removeHints(index: number): void {
     if (index != 1) {
       console.log("gonna remove images");
-      document.getElementById("hint").style.display = 'none';
+      document.getElementById("hint")!.style.display = 'none';
     }
     else {
       console.log("images stay");
-      document.getElementById("hint").style.display = 'block';
+      document.getElementById("hint")!.style.display = 'block';
     }
     return;
   };
