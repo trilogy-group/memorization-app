@@ -1,12 +1,9 @@
 import type { GetServerSideProps, NextPage } from "next";
-import { useRouter } from "next/router";
 import { unstable_getServerSession as getServerSession } from "next-auth";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
-
 import Navbar from "@/components/Layout/Navbar";
 import Meta from "@/components/Shared/Meta";
-
 import { trpc } from "../utils/trpc";
 import { authOptions } from "./api/auth/[...nextauth]";
 import React from "react";
@@ -14,19 +11,9 @@ import React from "react";
 
 
 const Quiz: NextPage = () => {
-  const router = useRouter();
 
   const uploadMutation = trpc.useMutation("video.create");
-
-  const [coverImageURL, setCoverImageURL] = useState<string | null>(null);
-  const [videoFile, setVideoFile] = useState<File | null>(null);
-  const [videoURL, setVideoURL] = useState<string | null>(null);
-  const [videoWidth, setVideoWidth] = useState(0);
-  const [videoHeight, setVideoHeight] = useState(0);
-  const [inputValue, setInputValue] = useState("");
-
-  const [isLoading, setIsLoading] = useState(false);
-
+  const [selectedOptions, setSelectedOptions] = useState([]);
 
   useEffect(() => {
 
@@ -38,36 +25,24 @@ const Quiz: NextPage = () => {
 
     // adding script that makes elements of the list able to be dragged PART 1
     const script = document.createElement('script');
-
     script.src = "https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js";
     script.async = true;
-
     document.body.appendChild(script);
-    console.log("added da script");
 
     // adding script that makes elements of the list able to be dragged PART 2
     setTimeout(() => {
       let quizScript = document.createElement('script');
-
       quizScript.innerHTML = "new Sortable(quiz);"
-
       document.body.appendChild(quizScript);
+      console.log("added the sequence quiz script");
     }, 300);
-
-
 
     return () => {
       document.body.removeChild(script);
-      console.log("sdfdsfsdf");
     }
 
   }, [uploadMutation.error]);
 
-
-  // I need this as a template for a function. It can be deleted
-  const handleGenerate = async () => {
-    console.log("something something");
-  };
 
   function shuffle(arr: string[]): string[] {
     var myClonedArray = Object.assign([], arr);
@@ -83,37 +58,94 @@ const Quiz: NextPage = () => {
   let score = 0;
   let questionNumber = 1;
 
+  //TODO: connect to DB for questions and answers
   const arrayOArrayCorrectAnswers = [
     // First question
     [
-      "1",
-      "2",
-      "3",
-      "4",
-      "5",
-      "6",]
+      "Mussolini becomes leader of Italy",
+      "Emperor Hirohito leads Japan",
+      "The great depression",
+      "Hirohito invades Manchuria",
+      "Hitler becomes leader of Germany",
+      "Mussolini invades Abyssinia",
+      "Hitler invades Sudetenland",
+      "Germany unifies Austria",
+      "Germany invades Poland"
+    ]
+
     ,
     // Second question
     [
-      "7",
-      "8",
-      "9",
-      "10",
+      "Stone Age",
+      "Medieval times",
+      "Modern Age",
+      "Contemporary",
     ],
     // Third question
     [
-      "a",
-      "b",
-      "c",
-      "d",
-      "e"
+      "Denmark",
+      "Norway",
+      "Belgium",
+      "Netherlands ",
+      "France ",
     ]
   ]
 
+  //BEGIN CODE FOR MULTIPLE CORRECT QUIZ
 
-  console.log(shuffle(arrayOArrayCorrectAnswers[1]));
+  const [userinfo, setUserInfo] = useState({
+    languages: [],
+    response: [],
+  });
 
-  console.log(arrayOArrayCorrectAnswers[1]);
+  var chosenOptions: Array<string> = [];
+
+  const handleChange = (e) => {
+    // Destructuring
+    let { value, checked } = e.target;
+    const { languages } = userinfo;
+
+    console.log(`${value} is ${checked}`);
+
+    // Case 1 : The user checks the box
+    if (checked) {
+      setUserInfo({
+        languages: [...languages, value],
+        response: [...languages, value],
+      });
+      //chosenOptions.push(value);
+      chosenOptions.push(e.target.value);
+      console.log("added ", e.target.value)
+
+
+      selectedOptions.push(e.target.value);
+      setSelectedOptions(selectedOptions);
+
+    }
+
+    // Case 2  : The user unchecks the box
+    else {
+      setUserInfo({
+        languages: languages.filter((e) => e !== value),
+        response: languages.filter((e) => e !== value),
+      });
+      let indexToDelete = chosenOptions.indexOf(e.target.value, 0);
+      if (indexToDelete > -1) {
+        chosenOptions.splice(indexToDelete, 1);
+      }
+      //directions.add(e.target.value);
+      console.log("removed ", e.target.value)
+
+      let index = selectedOptions.indexOf(e.target.value, 0);
+      if (index > -1) {
+        selectedOptions.splice(index, 1);
+      }
+      setSelectedOptions(selectedOptions);
+    }
+
+
+  };
+  //END CODE FOR MULTIPLE CORRECT QUIZ
 
   function checkAnswer() {
     var elem = document.getElementById("quiz");
@@ -151,7 +183,7 @@ const Quiz: NextPage = () => {
       // after answering the first question the dropdown for diffculty dissappears
       document.getElementById("difficulty-select").style.display = 'none';
 
-    } else {
+    } else if (questionNumber == 2) {
       console.log("answered second question");
       // adding the answers of the second question to the stack
       for (var i = 0; i < elem.children.length; i++) {
@@ -169,21 +201,20 @@ const Quiz: NextPage = () => {
         elem.removeChild(elem.lastElementChild);
       }
 
-      // options for third question
-      let shuffleOptions = shuffle(arrayOArrayCorrectAnswers[questionNumber])
-      for (var i = 0; i < arrayOArrayCorrectAnswers[questionNumber]?.length; i++) {
-        let option = document.createElement('li');
-        option.className = "border rounded flex items-center gap-2 h-9 px-3 border-gray-200 bg-white hover:bg-gray-100 transition"
-        option.innerHTML = shuffleOptions[i];
-        elem.appendChild(option);
-        console.log("pushed ", option.innerHTML);
-      }
-
       //emptying the array of answers
       answers.length = 0
 
       // upload next hint
       document.getElementById("hint").setAttribute("src", "/hint3.png");
+      document.getElementById("questionForMultipleCorrect").style.display = 'block';
+      document.getElementById("multipleCorrect").style.display = 'block';
+      document.getElementById("quiz").style.display = 'none';
+      console.log("second is answered")
+
+      score++;
+    } else {
+
+
 
     }
 
@@ -219,20 +250,127 @@ const Quiz: NextPage = () => {
               <option value="standard">Standard</option>
               <option value="difficult">Difficult</option>
             </select>
-            <h1 className="text-2xl font-bold">Sort this</h1>
+            <h1 className="text-2xl font-bold">Put the following events in chronological order:</h1>
+            <div id="questionForMultipleCorrect" style={{ display: "none" }}>
+              <h1 className="text-2xl font-bold" id="question" >Germany in Blitzkrieg conquered ...</h1>
+              <h2 className="text-2xl">check all that apply</h2>
+            </div>
             <img src="/hint1.png" id="hint" style={{ width: "200", height: "200" }} />
-            <ul id="quiz" >
-              <li className="border rounded flex items-center gap-2 h-9 px-3 border-gray-200 bg-white hover:bg-gray-100 transition">1</li>
-              <li className="border rounded flex items-center gap-2 h-9 px-3 border-gray-200 bg-white hover:bg-gray-100 transition">2</li>
-              <li className="border rounded flex items-center gap-2 h-9 px-3 border-gray-200 bg-white hover:bg-gray-100 transition">5</li>
-              <li className="border rounded flex items-center gap-2 h-9 px-3 border-gray-200 bg-white hover:bg-gray-100 transition">3</li>
-              <li className="border rounded flex items-center gap-2 h-9 px-3 border-gray-200 bg-white hover:bg-gray-100 transition">4</li>
-              <li className="border rounded flex items-center gap-2 h-9 px-3 border-gray-200 bg-white hover:bg-gray-100 transition">6</li>
+            <ul id="quiz"  >
+              <li className="border rounded flex items-center gap-2 h-9 px-3 border-gray-200 bg-white hover:bg-gray-100 transition">Germany invades Poland</li>
+              <li className="border rounded flex items-center gap-2 h-9 px-3 border-gray-200 bg-white hover:bg-gray-100 transition">Mussolini becomes leader of Italy</li>
+              <li className="border rounded flex items-center gap-2 h-9 px-3 border-gray-200 bg-white hover:bg-gray-100 transition">Emperor Hirohito leads Japan</li>
+              <li className="border rounded flex items-center gap-2 h-9 px-3 border-gray-200 bg-white hover:bg-gray-100 transition">The great depression</li>
+              <li className="border rounded flex items-center gap-2 h-9 px-3 border-gray-200 bg-white hover:bg-gray-100 transition">Hirohito invades Manchuria</li>
+              <li className="border rounded flex items-center gap-2 h-9 px-3 border-gray-200 bg-white hover:bg-gray-100 transition">Hitler becomes leader of Germany</li>
+              <li className="border rounded flex items-center gap-2 h-9 px-3 border-gray-200 bg-white hover:bg-gray-100 transition">Mussolini invades Abyssinia</li>
+              <li className="border rounded flex items-center gap-2 h-9 px-3 border-gray-200 bg-white hover:bg-gray-100 transition">Hitler invades Sudetenland</li>
+              <li className="border rounded flex items-center gap-2 h-9 px-3 border-gray-200 bg-white hover:bg-gray-100 transition">Germany unifies Austria</li>
             </ul>
+            <div id="multipleCorrect" style={{ display: "none" }}>
+              <input
+                className="form-check-input"
+                type="checkbox"
+                name="languages"
+                value="Denmark"
+                id="flexCheckDefault1"
+                onChange={handleChange}
+              />
+              <label
+                className="form-check-label"
+                htmlFor="flexCheckDefault1"
+                id="option1"
+              >
+                Denmark
+              </label>
+
+              <p>___</p>
+              <input
+                className="form-check-input"
+                type="checkbox"
+                name="languages"
+                value="Norway"
+                id="flexCheckDefault2"
+                onChange={handleChange}
+              />
+              <label
+                className="form-check-label"
+                htmlFor="flexCheckDefault2"
+                id="option2"
+              >
+                Norway
+              </label>
+              <p>___</p>
+              <input
+                className="form-check-input"
+                type="checkbox"
+                name="languages"
+                value="Belgium"
+                id="flexCheckDefault3"
+                onChange={handleChange}
+              />
+              <label
+                className="form-check-label"
+                htmlFor="flexCheckDefault3"
+                id="option3"
+              >
+                Belgium
+              </label>
+
+              <p>___</p>
+              <input
+                className="form-check-input"
+                type="checkbox"
+                name="languages"
+                value="Netherlands "
+                id="flexCheckDefault4"
+                onChange={handleChange}
+              />
+              <label
+                className="form-check-label"
+                htmlFor="flexCheckDefault4"
+                id="option4"
+              >
+                Netherlands
+              </label>
+              <p>___</p>
+              <input
+                className="form-check-input"
+                type="checkbox"
+                name="languages"
+                value="France"
+                id="flexCheckDefault5"
+                onChange={handleChange}
+              />
+              <label
+                className="form-check-label"
+                htmlFor="flexCheckDefault5"
+                id="option5"
+              >
+                France
+              </label>
+
+              <p>___</p>
+              <input
+                className="form-check-input"
+                type="checkbox"
+                name="languages"
+                value="Australia "
+                id="flexCheckDefault6"
+                onChange={handleChange}
+              />
+              <label
+                className="form-check-label"
+                htmlFor="flexCheckDefault6"
+                id="option6"
+              >
+                Australia
+              </label>
+            </div>
             <button
               onClick={async () => await checkAnswer()}
-
-              className="border rounded flex py-3 min-w-[170px] border border-gray-2 bg-white hover:bg-gray-100 transition"
+              id="nextButton"
+              className="border rounded flex py-3 min-w-[170px] border border-gray-2 bg-red-1 hover:bg-gray-100 transition"
             >
 
               Next

@@ -27,7 +27,9 @@ const QuizList: NextPage = () => {
   const [inputValue, setInputValue] = useState("");
 
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedOptions, setSelectedOptions] = useState([]);
 
+  const [input, setInput] = useState("Denmark")
 
   useEffect(() => {
 
@@ -66,19 +68,16 @@ const QuizList: NextPage = () => {
   const arrayOArrayCorrectAnswers = [
     // First question
     [
-      "1",
-      "2",
-      "3",
-      "4",
-      "5",
-      "6",]
+      "Denmark",
+      "Norway",
+      "Belgium",
+      "Netherlands ",
+      "France ",
+    ]
     ,
     // Second question
     [
-      "7",
-      "8",
-      "9",
-      "10",
+      "Denmark",
     ],
     // Third question
     [
@@ -91,37 +90,142 @@ const QuizList: NextPage = () => {
   ]
 
 
-  //console.log(shuffle(arrayOArrayCorrectAnswers[1]));
-
-  //console.log(arrayOArrayCorrectAnswers[1]);
 
   function checkAnswer() {
-    var myl = document.getElementById("myCheck");
-    var myl1 = document.getElementById("myCheck1");
-    var myl2 = document.getElementById("myCheck2");
-    var myl3 = document.getElementById("myCheck3");
 
-    var array1 = [myl, myl1, myl2, myl3];
+    if (questionNumber == 1) {
+      let sortedArraySelected: string[] = selectedOptions.sort((n1, n2) => {
+        if (n1 > n2) {
+          return 1;
+        }
 
-    for (let i = 0; i <= array1.length; i++) {
-      if (array1[i].checked == true) {
+        if (n1 < n2) {
+          return -1;
+        }
+
+        return 0;
+      });
+
+      let sortedArrayCorrect: string[] = arrayOArrayCorrectAnswers[0].sort((n1, n2) => {
+        if (n1 > n2) {
+          return 1;
+        }
+
+        if (n1 < n2) {
+          return -1;
+        }
+
+        return 0;
+      });
+
+      console.log(sortedArraySelected);
+      console.log(sortedArrayCorrect);
+
+      let correct = false;
+      if (sortedArraySelected.length != sortedArrayCorrect.length) {
+        //
+      } else {
+        for (var i = 0, l = sortedArraySelected.length; i < l; i++) {
+          // recurse into the nested arrays
+          if (!sortedArraySelected[i] == (sortedArrayCorrect[i])) {
+            correct = false;
+          } else if (sortedArraySelected[i] != sortedArrayCorrect[i]) {
+            correct = false;
+          }
+        }
+        correct = true;
+      }
+
+      if (correct) {
         score++;
       }
+
+      //change question
+      document.getElementById("question").innerHTML = "When did homo sapiens appear?";
+
+      // change values of checkboxes
+      document.getElementById("flexCheckDefault1").value = "200,000 years ago";
+      document.getElementById("option1").innerHTML = "200,000 years ago";
+      console.log("I hope", document.getElementById("flexCheckDefault1").value);
+
+      document.getElementById("option2").innerHTML = "400,000 years ago";
+      document.getElementById("option3").innerHTML = "4000 years ago";
+      document.getElementById("option4").innerHTML = "5 years ago";
+      document.getElementById("option5").innerHTML = "100,000 years ago";
+      document.getElementById("option6").innerHTML = "1 milllion years ago";
+
+      setSelectedOptions([]);
+
+    } else if (questionNumber == 2) {
+      console.log("answered second q");
+
+      // SECOND QUESTION
+      let sortedArraySelected: string[] = selectedOptions.sort((n1, n2) => {
+        if (n1 > n2) {
+          return 1;
+        }
+
+        if (n1 < n2) {
+          return -1;
+        }
+
+        return 0;
+      });
+
+      let sortedArrayCorrect: string[] = arrayOArrayCorrectAnswers[1].sort((n1, n2) => {
+        if (n1 > n2) {
+          return 1;
+        }
+
+        if (n1 < n2) {
+          return -1;
+        }
+
+        return 0;
+      });
+
+      console.log(sortedArraySelected);
+      console.log(sortedArrayCorrect);
+
+      let correct = false;
+      if (sortedArraySelected.length != sortedArrayCorrect.length) {
+        //
+      } else {
+        for (var i = 0, l = sortedArraySelected.length; i < l; i++) {
+          // recurse into the nested arrays
+          if (!sortedArraySelected[i] == (sortedArrayCorrect[i])) {
+            correct = false;
+          } else if (sortedArraySelected[i] != sortedArrayCorrect[i]) {
+            correct = false;
+          }
+        }
+        correct = true;
+      }
+
+      console.log(score);
+      if (correct) {
+        score++;
+      }
+      console.log(score);
+
+      // delete everything
+      document.getElementById("deleteAfterQuiz").style.display = 'none';
+
     }
 
-    //Gets percentage of answered questions
-    var obtained = score;
-    var total = 4;
-    var percent = obtained * 100 / total;
-    var finalscore = percent + "%";
 
-    document.getElementById("deleteThis").innerHTML = "You scored " + myscore + " Out Of 4." + " <b>Grade:</b> " + finalscore;
 
-    ////////////////////////////////////
+    questionNumber++;
+
+
+    document.getElementById("score").innerHTML = String(score);
+
+    /*
+
     var elem = document.getElementById("quiz");
     let answers = new Array();
     if (questionNumber == 1) {
-      /*
+      
       const li = document.querySelectorAll("#quiz li");
  
       li.forEach(function (text) {
@@ -146,18 +250,19 @@ const QuizList: NextPage = () => {
       }
  
       //emptying the array of answers
-      answers.length = 0
+      setSelectedOptions([]);
  
       // upload next hint
       document.getElementById("hint").setAttribute("src", "/hint2.png");
  
       // after answering the first question the dropdown for diffculty dissappears
       document.getElementById("difficulty-select").style.display = 'none';
-*/
+
     }
 
     questionNumber++;
     document.getElementById("score").innerHTML = String(score);
+    */
   }
 
   const [userinfo, setUserInfo] = useState({
@@ -166,13 +271,15 @@ const QuizList: NextPage = () => {
   });
 
   var chosenOptions: Array<string> = [];
-  var suka = "1"
+  var deleteThis = "";
   //let directions = new Set<string>();
 
   const handleChange = (e) => {
     // Destructuring
-    const { value, checked } = e.target;
+    let { value, checked } = e.target;
     const { languages } = userinfo;
+
+
 
     console.log(`${value} is ${checked}`);
 
@@ -185,10 +292,11 @@ const QuizList: NextPage = () => {
       //chosenOptions.push(value);
       chosenOptions.push(e.target.value);
       console.log("added ", e.target.value)
-      console.log("what we have is ", chosenOptions.length);
-      chosenOptions.forEach(function (value) {
-        console.log(value);
-      });
+
+
+      selectedOptions.push(e.target.value);
+      setSelectedOptions(selectedOptions);
+
     }
 
     // Case 2  : The user unchecks the box
@@ -203,10 +311,12 @@ const QuizList: NextPage = () => {
       }
       //directions.add(e.target.value);
       console.log("removed ", e.target.value)
-      console.log("what we have is ", chosenOptions.length);
-      chosenOptions.forEach(function (value) {
-        console.log(value);
-      });
+
+      let index = selectedOptions.indexOf(e.target.value, 0);
+      if (index > -1) {
+        selectedOptions.splice(index, 1);
+      }
+      setSelectedOptions(selectedOptions);
     }
 
 
@@ -233,46 +343,114 @@ const QuizList: NextPage = () => {
       <div className="min-h-screen flex flex-col items-stretch">
         <Navbar />
         <div className="flex justify-center mx-2 flex-grow bg-gray-1">
-          <div className="w-full max-w-[1000px] p-8 bg-white my-4">
+          <div className="w-full max-w-[1000px] p-8 bg-white my-4" id="deleteAfterQuiz">
             <select id="difficulty-select" onChange={e => { removeHints(e.target.selectedIndex); }} style={{ color: "red" }}>
               <option value="">--Please choose difficulty--</option>
               <option value="easy">Easy</option>
               <option value="standard">Standard</option>
               <option value="difficult">Difficult</option>
             </select>
-            <h1 className="text-2xl font-bold" id="deleteThis">Check all the correct options</h1>
-            <h2 className="text-2xl">Select even numbers</h2>
+            <h1 className="text-2xl font-bold" id="question" >Germany in Blitzkrieg conquered ...</h1>
+            <h2 className="text-2xl">check all that apply</h2>
             <img src="/hint1.png" id="hint" style={{ width: "200", height: "200" }} />
+
             <input
               className="form-check-input"
               type="checkbox"
               name="languages"
-              value="Javascript"
-              id="flexCheckDefault"
+              value={input}
+              id="flexCheckDefault1"
               onChange={handleChange}
             />
             <label
               className="form-check-label"
-              htmlFor="flexCheckDefault"
+              htmlFor="flexCheckDefault1"
+              id="option1"
             >
-              Javascript
+              Denmark
             </label>
-            <br>
-            </br>
-            <p>Suka</p>
+
+            <p>___</p>
             <input
               className="form-check-input"
               type="checkbox"
               name="languages"
-              value="Python"
-              id="flexCheckDefault"
+              value="Norway"
+              id="flexCheckDefault2"
               onChange={handleChange}
             />
             <label
               className="form-check-label"
-              htmlFor="flexCheckDefault"
+              htmlFor="flexCheckDefault2"
+              id="option2"
             >
-              Python
+              Norway
+            </label>
+            <p>___</p>
+            <input
+              className="form-check-input"
+              type="checkbox"
+              name="languages"
+              value="Belgium"
+              id="flexCheckDefault3"
+              onChange={handleChange}
+            />
+            <label
+              className="form-check-label"
+              htmlFor="flexCheckDefault3"
+              id="option3"
+            >
+              Belgium
+            </label>
+
+            <p>___</p>
+            <input
+              className="form-check-input"
+              type="checkbox"
+              name="languages"
+              value="Netherlands "
+              id="flexCheckDefault4"
+              onChange={handleChange}
+            />
+            <label
+              className="form-check-label"
+              htmlFor="flexCheckDefault4"
+              id="option4"
+            >
+              Netherlands
+            </label>
+            <p>___</p>
+            <input
+              className="form-check-input"
+              type="checkbox"
+              name="languages"
+              value="France"
+              id="flexCheckDefault5"
+              onChange={handleChange}
+            />
+            <label
+              className="form-check-label"
+              htmlFor="flexCheckDefault5"
+              id="option5"
+            >
+              France
+            </label>
+
+            <p>___</p>
+            <input
+              className="form-check-input"
+              type="checkbox"
+              name="languages"
+              value="Australia "
+              id="flexCheckDefault6"
+              onChange={handleChange}
+            />
+            <label
+              className="form-check-label"
+              htmlFor="flexCheckDefault6"
+              id="option6"
+            >
+              Australia
             </label>
 
             <button

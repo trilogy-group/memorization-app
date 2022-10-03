@@ -66,12 +66,6 @@ const Navbar: FC = () => {
                 <span>Upload</span>
               </a>
             </Link>
-            <Link href={"http://127.0.0.1:5501/src/pages/selectDataType.html"}>
-              <a className="border rounded flex items-center gap-2 h-9 px-3 border-gray-200 bg-white hover:bg-gray-100 transition">
-                <AiOutlinePlus className="w-5 h-5" />
-                <span>Select data type for mnemonic</span>
-              </a>
-            </Link>
             {status === "unauthenticated" ? (
               <Link href="/sign-in">
                 <a className="rounded h-9 px-6 bg-pink text-white flex items-center hover:brightness-105 transition">
