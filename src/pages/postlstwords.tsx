@@ -14,10 +14,14 @@ import Meta from "@/components/Shared/Meta";
 import { trpc } from "../utils/trpc";
 import { authOptions } from "./api/auth/[...nextauth]";
 
+import { recommendationRouter } from "@/server/router/recommendImg";
+
 const CreateListOfWords: NextPage = () => {
   const router = useRouter();
 
   const uploadMutation = trpc.useMutation("video.create");
+
+  const recommendationMutation = trpc.useMutation("recommend.stabledif");
 
   const [coverImageURL, setCoverImageURL] = useState<string | null>(null);
   const [selectedMnemonics, setSelectedMnemonics] = useState(false);
@@ -35,6 +39,14 @@ const CreateListOfWords: NextPage = () => {
 
   const handleGenerate = async () => {
     // TODO: connect to backend generate mnemonics API
+  }
+
+  const handleRecommeddedImage = async () => {
+    console.log("handle recommend image")
+    const created = await recommendationMutation.mutateAsync({
+        description: "calamari croissant",
+      });
+    console.log(created)
   }
 
   const handleUpload = async () => {
@@ -91,7 +103,11 @@ const CreateListOfWords: NextPage = () => {
                     />
                   ) : (
                     <>
-                    <div className="col-span-1 bg-gray-1 h-full w-full"></div>
+                    <div className="col-span-1 bg-gray-1 h-full w-full">
+
+                      <img src = "/54c69afa-aac3-47f1-93c4-45480790f26c-0-1607815762.png"></img>
+
+                    </div>
                     <div className="col-span-1 bg-gray-1 h-full w-full"></div>
                     <div className="col-span-1 bg-gray-1 h-full w-full"></div>
                     </>
@@ -105,9 +121,17 @@ const CreateListOfWords: NextPage = () => {
                       onClick={() => {
                         setIsLoading(true);
                         async () => await handleGenerate();
+                        
                         setIsLoading(false);
                       }}
                       className="border rounded flex py-3 min-w-[170px] border border-gray-2 bg-white hover:bg-gray-100 transition"
+                    >
+                      Generate Mnemonics
+                    </button>
+                    <button
+                    disabled={isLoading}
+                    onClick={async () => await handleRecommeddedImage()}
+                    className={`flex justify-center items-center gap-2 py-3 min-w-[170px] hover:brightness-90 transition text-white bg-red-1 disabled:text-gray-400 disabled:bg-gray-200`}
                     >
                       Generate Mnemonics
                     </button>
