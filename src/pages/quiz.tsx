@@ -80,72 +80,9 @@ const Quiz: NextPage = () => {
       "Medieval times",
       "Modern Age",
       "Contemporary",
-    ],
-    // Third question
-    [
-      "Denmark",
-      "Norway",
-      "Belgium",
-      "Netherlands ",
-      "France ",
     ]
   ]
 
-  //BEGIN CODE FOR MULTIPLE CORRECT QUIZ
-
-  const [userinfo, setUserInfo] = useState({
-    languages: [],
-    response: [],
-  });
-
-  var chosenOptions: Array<string> = [];
-
-  const handleChange = (e) => {
-    // Destructuring
-    let { value, checked } = e.target;
-    const { languages } = userinfo;
-
-    console.log(`${value} is ${checked}`);
-
-    // Case 1 : The user checks the box
-    if (checked) {
-      setUserInfo({
-        languages: [...languages, value],
-        response: [...languages, value],
-      });
-      //chosenOptions.push(value);
-      chosenOptions.push(e.target.value);
-      console.log("added ", e.target.value)
-
-
-      selectedOptions.push(e.target.value);
-      setSelectedOptions(selectedOptions);
-
-    }
-
-    // Case 2  : The user unchecks the box
-    else {
-      setUserInfo({
-        languages: languages.filter((e) => e !== value),
-        response: languages.filter((e) => e !== value),
-      });
-      let indexToDelete = chosenOptions.indexOf(e.target.value, 0);
-      if (indexToDelete > -1) {
-        chosenOptions.splice(indexToDelete, 1);
-      }
-      //directions.add(e.target.value);
-      console.log("removed ", e.target.value)
-
-      let index = selectedOptions.indexOf(e.target.value, 0);
-      if (index > -1) {
-        selectedOptions.splice(index, 1);
-      }
-      setSelectedOptions(selectedOptions);
-    }
-
-
-  };
-  //END CODE FOR MULTIPLE CORRECT QUIZ
 
   function checkAnswer() {
     var elem = document.getElementById("quiz");
@@ -206,15 +143,10 @@ const Quiz: NextPage = () => {
 
       // upload next hint
       document.getElementById("hint").setAttribute("src", "/hint3.png");
-      document.getElementById("questionForMultipleCorrect").style.display = 'block';
-      document.getElementById("multipleCorrect").style.display = 'block';
       document.getElementById("quiz").style.display = 'none';
       console.log("second is answered")
 
-      score++;
     } else {
-
-
 
     }
 
@@ -251,10 +183,6 @@ const Quiz: NextPage = () => {
               <option value="difficult">Difficult</option>
             </select>
             <h1 className="text-2xl font-bold">Put the following events in chronological order:</h1>
-            <div id="questionForMultipleCorrect" style={{ display: "none" }}>
-              <h1 className="text-2xl font-bold" id="question" >Germany in Blitzkrieg conquered ...</h1>
-              <h2 className="text-2xl">check all that apply</h2>
-            </div>
             <img src="/hint1.png" id="hint" style={{ width: "200", height: "200" }} />
             <ul id="quiz"  >
               <li className="border rounded flex items-center gap-2 h-9 px-3 border-gray-200 bg-white hover:bg-gray-100 transition">Germany invades Poland</li>
@@ -267,112 +195,11 @@ const Quiz: NextPage = () => {
               <li className="border rounded flex items-center gap-2 h-9 px-3 border-gray-200 bg-white hover:bg-gray-100 transition">Hitler invades Sudetenland</li>
               <li className="border rounded flex items-center gap-2 h-9 px-3 border-gray-200 bg-white hover:bg-gray-100 transition">Germany unifies Austria</li>
             </ul>
-            <div id="multipleCorrect" style={{ display: "none" }}>
-              <input
-                className="form-check-input"
-                type="checkbox"
-                name="languages"
-                value="Denmark"
-                id="flexCheckDefault1"
-                onChange={handleChange}
-              />
-              <label
-                className="form-check-label"
-                htmlFor="flexCheckDefault1"
-                id="option1"
-              >
-                Denmark
-              </label>
-
-              <p>___</p>
-              <input
-                className="form-check-input"
-                type="checkbox"
-                name="languages"
-                value="Norway"
-                id="flexCheckDefault2"
-                onChange={handleChange}
-              />
-              <label
-                className="form-check-label"
-                htmlFor="flexCheckDefault2"
-                id="option2"
-              >
-                Norway
-              </label>
-              <p>___</p>
-              <input
-                className="form-check-input"
-                type="checkbox"
-                name="languages"
-                value="Belgium"
-                id="flexCheckDefault3"
-                onChange={handleChange}
-              />
-              <label
-                className="form-check-label"
-                htmlFor="flexCheckDefault3"
-                id="option3"
-              >
-                Belgium
-              </label>
-
-              <p>___</p>
-              <input
-                className="form-check-input"
-                type="checkbox"
-                name="languages"
-                value="Netherlands "
-                id="flexCheckDefault4"
-                onChange={handleChange}
-              />
-              <label
-                className="form-check-label"
-                htmlFor="flexCheckDefault4"
-                id="option4"
-              >
-                Netherlands
-              </label>
-              <p>___</p>
-              <input
-                className="form-check-input"
-                type="checkbox"
-                name="languages"
-                value="France"
-                id="flexCheckDefault5"
-                onChange={handleChange}
-              />
-              <label
-                className="form-check-label"
-                htmlFor="flexCheckDefault5"
-                id="option5"
-              >
-                France
-              </label>
-
-              <p>___</p>
-              <input
-                className="form-check-input"
-                type="checkbox"
-                name="languages"
-                value="Australia "
-                id="flexCheckDefault6"
-                onChange={handleChange}
-              />
-              <label
-                className="form-check-label"
-                htmlFor="flexCheckDefault6"
-                id="option6"
-              >
-                Australia
-              </label>
-            </div>
             <button
               onClick={async () => await checkAnswer()}
               id="nextButton"
               className="border rounded flex py-3 min-w-[170px] border border-gray-2 bg-red-1 hover:bg-gray-100 transition"
             >
-
               Next
             </button>
             <h1 className="text-2xl font-bold">Score</h1>
