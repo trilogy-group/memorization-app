@@ -22,7 +22,8 @@ const CreateListOfWords: NextPage = () => {
 
 
   // TODO: connect mnemonic image with recommendation system in the backend
-  const [mnemonicImage, setMnemonicImage] = useState<string | null>(null);
+  const [mnemonicImage, setMnemonicImage] = useState<string | undefined>(undefined);
+  
   const recommendationMutation = trpc.useMutation("recommend.stabledif");
 
   const [inputValue, setInputValue] = useState("");
@@ -45,9 +46,10 @@ const CreateListOfWords: NextPage = () => {
   const handleRecommeddedImage = async () => {
     console.log("handle recommend image")
     const created = await recommendationMutation.mutateAsync({
-        description: "calamari croissant",
+        description: inputValue,
       });
     console.log(created)
+    setMnemonicImage(created?.filename);
   }
 
   const handleUpload = async () => {

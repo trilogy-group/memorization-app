@@ -6,13 +6,6 @@ import { Dalle } from "node-dalle2";
 import { generateAsync } from 'stability-client'
 import { generate } from 'stability-client'
 
-interface Dalle2Image {
-  buffer : any[],
-  filePath: string,
-  seed: number,
-  mimeType: string,
-}
-
 export const recommendationRouter = createRouter()
   .middleware(async ({ ctx, next }) => {
     if (!ctx.session) {
@@ -30,22 +23,6 @@ export const recommendationRouter = createRouter()
         console.log(imageDescription)
         
         if (session?.user?.id) {
-          /*const api = generate({
-            prompt: imageDescription,
-            apiKey: process.env.DREAMSTUDIO_API_KEY || '',
-          })
-          
-          api.on('image', ({ buffer, filePath }) => {
-            console.log('Image', buffer, filePath)
-            var path = filePath
-            console.log(path)
-            console.log("returning", path)
-            return path
-          })
-          
-          api.on('end', (data) => {
-            console.log('Generating Complete', data)
-          })*/
           try {
             const stabilityImages = await generateAsync({
               prompt: imageDescription,
@@ -67,7 +44,7 @@ export const recommendationRouter = createRouter()
             const fs = require('fs');
             const path2 = require('path');
             const oldPath = path;
-            const newPath = path2.join('./public/images/' + filename);
+            const newPath = path2.join('./public/' + filename);
             fs.copyFile(oldPath, newPath, function (err: any) {
               if (err) throw err;
               console.log('Successfully moved!');
