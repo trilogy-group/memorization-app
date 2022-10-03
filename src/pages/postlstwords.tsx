@@ -14,12 +14,17 @@ import { trpc } from "../utils/trpc";
 import { authOptions } from "./api/auth/[...nextauth]";
 import { borderRadius } from "@mui/system";
 
+import { recommendationRouter } from "@/server/router/recommendImg";
+
 const CreateListOfWords: NextPage = () => {
 
   const uploadMutation = trpc.useMutation("video.create");
 
+
   // TODO: connect mnemonic image with recommendation system in the backend
   const [mnemonicImage, setMnemonicImage] = useState<string | null>(null);
+  const recommendationMutation = trpc.useMutation("recommend.stabledif");
+
   const [inputValue, setInputValue] = useState("");
   const [tableEntryValue, setTableEntryValue] = useState("");
 
@@ -35,6 +40,14 @@ const CreateListOfWords: NextPage = () => {
 
   const handleGenerate = async () => {
     // TODO: connect to backend generate mnemonics API
+  }
+
+  const handleRecommeddedImage = async () => {
+    console.log("handle recommend image")
+    const created = await recommendationMutation.mutateAsync({
+        description: "calamari croissant",
+      });
+    console.log(created)
   }
 
   const handleUpload = async () => {
@@ -104,18 +117,13 @@ const CreateListOfWords: NextPage = () => {
                     <div className="flex items-start mt-1 gap-4">
                       <button
                         disabled={isLoading}
-                        onClick={() => {
-                          setIsLoading(true);
-                          async () => await handleGenerate();
-                          setIsLoading(false);
-                        }}
-                        className={`flex justify-center items-center gap-2 py-3 min-w-[20px] hover:brightness-90 transition text-white bg-red-1 disabled:text-gray-400 disabled:bg-gray-200`}
-                        style={{ borderRadius: 5, padding: 5 }}
-                      >
-
-                        Generate Mnemonics
-                      </button>
+                        onClick={async () => await handleRecommeddedImage()}
+                        className={`flex justify-center items-center gap-2 py-3 min-w-[170px] hover:brightness-90 transition text-white bg-red-1 disabled:text-gray-400 disabled:bg-gray-200`}
+                        >
+                      Generate Mnemonics
+                    </button>
                     </div>
+
                   </div>
 
                 </div>

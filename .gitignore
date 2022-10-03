@@ -38,3 +38,6 @@ yarn-error.log*
 
 *.swp
 migrations
+
+# images
+.out/
