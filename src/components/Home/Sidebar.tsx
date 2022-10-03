@@ -13,6 +13,7 @@ interface User {
   id: string | null;
   image: string | null;
   name: string | null;
+  points: number | 0;
 }
 
 interface SidebarProps {
@@ -75,26 +76,41 @@ const Sidebar: FC<SidebarProps> = ({
       {leaderboardAccounts.length > 0 && (
         <div className="flex flex-col items-stretch gap-3 py-4 border-b">
           <p className="text-sm hidden lg:block">Leaderboard</p>
-          {leaderboardAccounts.map((account) => (
+          {leaderboardAccounts.map((account, index) => (
             <Link href={`/user/${account.id}`} key={account.id}>
-              <a className="flex items-center gap-3">
-                <Image
-                  className="rounded-full object-cover"
-                  height={36}
-                  width={36}
-                  src={account.image!}
-                  alt=""
-                />
+              <a className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <Image
+                    className="rounded-full object-cover"
+                    height={36}
+                    width={36}
+                    src={account.image!}
+                    alt=""
+                  />
 
-                <div className="hidden lg:block">
-                  <p className="relative leading-[1]">
-                    <span className="font-semibold text-sm">
-                      {formatAccountName(account.name!)}
-                    </span>
-                    <BsFillCheckCircleFill className="absolute w-[14px] h-[14px] right-[-20px] top-1 fill-[#20D5EC]" />
-                  </p>
-                  <p className="font-light text-xs">{account.name}</p>
+                  <div className="hidden lg:block">
+                    <p className="relative leading-[1]">
+                      <span className="font-semibold text-sm">
+                        {formatAccountName(account.name!)}
+                      </span>
+                      <BsFillCheckCircleFill className="absolute w-[14px] h-[14px] right-[-20px] top-1 fill-[#20D5EC]" />
+                    </p>
+                    <p className="font-light text-xs">{account.name}</p>
+                  </div>
                 </div>
+
+                <div className="grid gap-2 grid-cols-2 items-center justify-center">
+                  <Image
+                    className="col-span-1 rounded-full object-cover"
+                    style={{ marginLeft: 50 }}
+                    height={17}
+                    width={17}
+                    src={"/star.png"}
+                    alt=""
+                  />
+                  <div className="col-span-1">{account.points}</div>
+                </div>
+
               </a>
             </Link>
           ))}
@@ -135,15 +151,12 @@ const Sidebar: FC<SidebarProps> = ({
           <p>Newsroom</p>
           <p>Store</p>
           <p>Contact</p>
-          <p>Carrers</p>
-          <p>ByteDance</p>
+          <p>Careers</p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <p>TikTik for Good</p>
           <p>Advertise</p>
           <p>Developers</p>
           <p>Transparency</p>
-          <p>TikTik Rewards</p>
         </div>
         <div className="flex flex-wrap gap-2">
           <p>Help</p>
@@ -153,7 +166,7 @@ const Sidebar: FC<SidebarProps> = ({
           <p>Creator Portal</p>
           <p>Community Guidelines</p>
         </div>
-        <span>© 2022 TopTop</span>
+        <span>© 2022 EdTok</span>
       </div>
     </div>
   );
