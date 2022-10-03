@@ -79,13 +79,6 @@ export const getServerSideProps = async ({
   const [leaderboardAccounts, followingAccounts] = await Promise.all([
     prisma.user.findMany({
       take: 20,
-      /*
-    where: {
-      email: {
-        not: session?.user?.email,
-      },
-
-    },*/
       orderBy: [
         {
           points: 'desc',
@@ -95,6 +88,7 @@ export const getServerSideProps = async ({
         id: true,
         image: true,
         name: true,
+        points: true,
       },
     }),
     session?.user
