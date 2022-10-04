@@ -6,6 +6,7 @@ import { followRouter } from "./follow";
 import { likeRouter } from "./like";
 import { videoRouter } from "./video";
 import { recommendationRouter } from "./recommendImg";
+import { progressRouter } from "./progress";
 
 export const appRouter = createRouter()
   .transformer(superjson)
@@ -13,6 +14,7 @@ export const appRouter = createRouter()
   .merge("like.", likeRouter)
   .merge("follow.", followRouter)
   .merge("comment.", commentRouter)
-  .merge("recommend.", recommendationRouter);
+  .merge("recommend.", recommendationRouter)
+  .merge("progress.", progressRouter);
 
 export type AppRouter = typeof appRouter;
