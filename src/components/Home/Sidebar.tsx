@@ -56,6 +56,21 @@ const Sidebar: FC<SidebarProps> = ({
             <span className="hidden lg:inline">Following</span>
           </a>
         </Link>
+
+        <Link href={"/quiz"}>
+          <a
+            className={`flex items-center gap-2 ${router.query.following
+              ? "fill-pink text-pink"
+              : "fill-black text-black"
+              }`}
+          >
+
+            <span className="hidden lg:inline">Take a sequence quiz</span>
+          </a>
+        </Link>
+
+
+
       </div>
 
       {leaderboardAccounts.length > 0 && (

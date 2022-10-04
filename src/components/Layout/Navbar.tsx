@@ -88,11 +88,10 @@ const Navbar: FC = () => {
                       />
                     </button>
                     <div
-                      className={`absolute shadow-[rgb(0_0_0_/_12%)_0px_4px_16px] bg-white top-[120%] right-0 py-2 flex flex-col items-stretch [&>*]:whitespace-nowrap rounded-md transition-all z-50 ${
-                        isDropdownOpened
-                          ? "opacity-100 visible"
-                          : "opacity-0 invisible"
-                      }`}
+                      className={`absolute shadow-[rgb(0_0_0_/_12%)_0px_4px_16px] bg-white top-[120%] right-0 py-2 flex flex-col items-stretch [&>*]:whitespace-nowrap rounded-md transition-all z-50 ${isDropdownOpened
+                        ? "opacity-100 visible"
+                        : "opacity-0 invisible"
+                        }`}
                     >
                       {/* @ts-ignore */}
                       <Link href={`/user/${session?.user?.id}`}>

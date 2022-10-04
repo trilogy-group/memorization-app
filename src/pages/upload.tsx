@@ -175,7 +175,7 @@ const Upload: NextPage = () => {
         videoWidth,
         tagStr,
       });
-      toast.loading("Mnemonics Created! Points +1", {id:toastID});
+      toast.loading("Mnemonics Created! Points +1", { id: toastID });
       await new Promise(r => setTimeout(r, 800));
 
       console.log(`Created: `, created);
