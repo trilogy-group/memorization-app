@@ -14,7 +14,6 @@ import { trpc } from "../utils/trpc";
 import { authOptions } from "./api/auth/[...nextauth]";
 import { borderRadius } from "@mui/system";
 
-import { recommendationRouter } from "@/server/router/recommendImg";
 
 const CreateListOfWords: NextPage = () => {
 
@@ -31,6 +30,9 @@ const CreateListOfWords: NextPage = () => {
 
   const [isLoading, setIsLoading] = useState(false);
 
+  const [isLoadingMnemonic, setIsLoadingMnemonic] = useState(false);
+
+
   useEffect(() => {
     if (uploadMutation.error) {
       toast.error("Failed to load the video", {
@@ -38,10 +40,6 @@ const CreateListOfWords: NextPage = () => {
       });
     }
   }, [uploadMutation.error]);
-
-  const handleGenerate = async () => {
-    // TODO: connect to backend generate mnemonics API
-  }
 
   const handleRecommeddedImage = async () => {
     console.log("handle recommend image")
@@ -118,10 +116,16 @@ const CreateListOfWords: NextPage = () => {
                   <div className="flex flex-wrap gap-3 place-content-center ">
                     <div className="flex items-start mt-1 gap-4">
                       <button
-                        disabled={isLoading}
-                        onClick={async () => await handleRecommeddedImage()}
+                        disabled={isLoadingMnemonic}
+                        onClick={async () => {
+                          setIsLoadingMnemonic(true);
+                          await handleRecommeddedImage()
+                          setIsLoadingMnemonic(false);}}
                         className={`flex justify-center items-center gap-2 py-3 min-w-[170px] hover:brightness-90 transition text-white bg-red-1 disabled:text-gray-400 disabled:bg-gray-200`}
                         >
+                        {isLoadingMnemonic && (
+                          <span className="w-4 h-4 border-2 border-gray-500 border-t-transparent rounded-full animate-spin"></span>
+                        )}
                       Generate Mnemonics
                     </button>
                     </div>
