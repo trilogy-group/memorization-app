@@ -35,16 +35,17 @@ export const recommendationRouter = createRouter()
                   filePath: string, 
                   seed: number, 
                   mimeType: string}]})
-            const path = castImage.images[0].filePath
-            console.log("path is: " , path)
-            const filename2 = path.split("\\")
-            const filename = filename2[filename2.length - 1]
+            const path = require("path")
+            const path1 = castImage.images[0].filePath
+            const filename = path.parse(path1).base
             console.log("filename is: " , filename)
             //move image path to public folder
             const fs = require('fs');
-            const path2 = require('path');
-            const oldPath = path;
-            const newPath = path2.join('./public/' + filename);
+            const path3 = require('path');
+            const oldPath = path1;
+            const newPath = path3.join('./public/' + filename);
+            console.log("oldPath is: " , oldPath)
+            console.log("newPath is: " , newPath)
             fs.copyFile(oldPath, newPath, function (err: any) {
               if (err) throw err;
               console.log('Successfully moved!');
