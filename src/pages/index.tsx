@@ -103,6 +103,7 @@ export const getServerSideProps = async ({
               id: true,
               image: true,
               name: true,
+              points: true,
             },
           },
         },
