@@ -33,7 +33,6 @@ const Quiz: NextPage = () => {
       let quizScript = document.createElement('script');
       quizScript.innerHTML = "new Sortable(quiz);"
       document.body.appendChild(quizScript);
-      console.log("added the sequence quiz script");
     }, 300);
 
     return () => {
@@ -120,7 +119,6 @@ const Quiz: NextPage = () => {
         option.className = "border rounded flex items-center gap-2 h-9 px-3 border-gray-200 bg-white hover:bg-gray-100 transition"
         option.innerHTML = shuffleOptions[i] as string;
         elem!.appendChild(option);
-        console.log("pushed ", option.innerHTML);
       }
 
       //emptying the array of answers
@@ -133,7 +131,6 @@ const Quiz: NextPage = () => {
       document.getElementById("difficulty-select")!.style.display = 'none';
 
     } else if (questionNumber == 2) {
-      console.log("answered second question");
       // adding the answers of the second question to the stack
       for (var i = 0; i < elem!.children.length; i++) {
         var option = elem!.children[i];
@@ -156,7 +153,6 @@ const Quiz: NextPage = () => {
       // upload next hint
       document.getElementById("hint")!.setAttribute("src", "/hint3.png");
       document.getElementById("quiz")!.style.display = 'none';
-      console.log("second is answered")
 
     } else {
 
@@ -169,11 +165,9 @@ const Quiz: NextPage = () => {
 
   function removeHints(index: number): void {
     if (index != 1) {
-      console.log("gonna remove images");
       document.getElementById("hint")!.style.display = 'none';
     }
     else {
-      console.log("images stay");
       document.getElementById("hint")!.style.display = 'block';
     }
     return;
