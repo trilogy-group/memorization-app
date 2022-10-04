@@ -22,8 +22,11 @@ const CreateListOfWords: NextPage = () => {
 
   // TODO: connect mnemonic image with recommendation system in the backend
   const [mnemonicImage, setMnemonicImage] = useState<string | undefined>(undefined);
-  
-  const recommendationMutation = trpc.useMutation("recommend.stabledif");
+  const [inputWordList, setInputWordList] = useState<string | undefined>(undefined);
+
+  const imgRecommendationMutation = trpc.useMutation("recommendImg.stabledif");
+  const acroRecommendationMutation = trpc.useMutation("recommendAcro.acronym");
+
 
   const [inputValue, setInputValue] = useState("");
   const [inputPromptValue, setInputPromptValue] = useState("");
@@ -45,10 +48,17 @@ const CreateListOfWords: NextPage = () => {
   }, [uploadMutation.error]);
 
   const handleRecommeddedImage = async () => {
-    const created = await recommendationMutation.mutateAsync({
+    const created = await imgRecommendationMutation.mutateAsync({
         description: inputPromptValue,
       });
     setMnemonicImage(created?.filename);
+  }
+
+  const handleRecommeddedAcronym = async () => {
+    const acronym = await acroRecommendationMutation.mutateAsync({
+        description: inputPromptValue,
+      });
+    setInputWordList(acronym?.result);
   }
 
   const handleUpload = async () => {
@@ -120,7 +130,8 @@ const CreateListOfWords: NextPage = () => {
                         disabled={isLoadingMnemonic}
                         onClick={async () => {
                           setIsLoadingMnemonic(true);
-                          await handleRecommeddedImage()
+                          //await handleRecommeddedImage()
+                          await handleRecommeddedAcronym()
                           setIsLoadingMnemonic(false);}}
                         className={`flex justify-center items-center gap-2 py-3 min-w-[170px] hover:brightness-90 transition text-white bg-red-1 disabled:text-gray-400 disabled:bg-gray-200`}
                         >
@@ -155,7 +166,6 @@ const CreateListOfWords: NextPage = () => {
                     onClick={async () => await handleAddToSequence()}
                     className={`flex justify-center items-center gap-2 py-3 min-w-[20px] hover:brightness-90 transition text-white bg-red-1 disabled:text-gray-400 disabled:bg-gray-200`}
                     style={{ borderRadius: 5, padding: 5 }}
-
                   >
                     <AiOutlinePlus className="w-5 h-5" />
 
