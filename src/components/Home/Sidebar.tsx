@@ -57,15 +57,14 @@ const Sidebar: FC<SidebarProps> = ({
           </a>
         </Link>
 
-        <Link href={"/quiz"}>
+        <Link href={"/quizUltimate"}>
           <a
-            className={`flex items-center gap-2 ${router.query.following
-              ? "fill-pink text-pink"
-              : "fill-black text-black"
-              }`}
+            className={`flex items-center gap-2  "fill-black text-black" `}
+
           >
 
-            <span className="hidden lg:inline">Take a sequence quiz</span>
+
+            <span className="hidden lg:inline">Take a quiz</span>
           </a>
         </Link>
 
