@@ -26,6 +26,9 @@ const CreateListOfWords: NextPage = () => {
   const recommendationMutation = trpc.useMutation("recommend.stabledif");
 
   const [inputValue, setInputValue] = useState("");
+  const [inputPromptValue, setInputPromptValue] = useState("");
+  const [inputQuestionValue, setInputQuestionValue] = useState("");
+
   const [tableEntryValue, setTableEntryValue] = useState("");
 
   const [isLoading, setIsLoading] = useState(false);
@@ -42,9 +45,8 @@ const CreateListOfWords: NextPage = () => {
   }, [uploadMutation.error]);
 
   const handleRecommeddedImage = async () => {
-    console.log("handle recommend image")
     const created = await recommendationMutation.mutateAsync({
-        description: inputValue,
+        description: inputPromptValue,
       });
     console.log(created)
     setMnemonicImage(created?.filename);
@@ -83,17 +85,17 @@ const CreateListOfWords: NextPage = () => {
                     <Textarea
                       label="Enter your question"
                       placeholder="e.g., world leaders during WW2"
-                      value={inputValue}
+                      value={inputQuestionValue}
                       onChange={(e) => {
-                        setInputValue(e.target.value);
+                        setInputQuestionValue(e.target.value);
                       }}
                     />
                     <Textarea
                       label="Give prompts for the generation"
                       placeholder="e.g., when you win a communist revolution L'MAO'"
-                      value={inputValue}
+                      value={inputPromptValue}
                       onChange={(e) => {
-                        setInputValue(e.target.value);
+                        setInputPromptValue(e.target.value);
                       }}
                     />
                   </div>
