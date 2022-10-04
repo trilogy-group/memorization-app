@@ -48,7 +48,6 @@ const CreateListOfWords: NextPage = () => {
     const created = await recommendationMutation.mutateAsync({
         description: inputPromptValue,
       });
-    console.log(created)
     setMnemonicImage(created?.filename);
   }
 
