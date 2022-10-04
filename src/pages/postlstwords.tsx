@@ -14,16 +14,27 @@ import { trpc } from "../utils/trpc";
 import { authOptions } from "./api/auth/[...nextauth]";
 import { borderRadius } from "@mui/system";
 
+
 const CreateListOfWords: NextPage = () => {
 
   const uploadMutation = trpc.useMutation("video.create");
 
+
   // TODO: connect mnemonic image with recommendation system in the backend
-  const [mnemonicImage, setMnemonicImage] = useState<string | null>(null);
+  const [mnemonicImage, setMnemonicImage] = useState<string | undefined>(undefined);
+  
+  const recommendationMutation = trpc.useMutation("recommend.stabledif");
+
   const [inputValue, setInputValue] = useState("");
+  const [inputPromptValue, setInputPromptValue] = useState("");
+  const [inputQuestionValue, setInputQuestionValue] = useState("");
+
   const [tableEntryValue, setTableEntryValue] = useState("");
 
   const [isLoading, setIsLoading] = useState(false);
+
+  const [isLoadingMnemonic, setIsLoadingMnemonic] = useState(false);
+
 
   useEffect(() => {
     if (uploadMutation.error) {
@@ -33,8 +44,11 @@ const CreateListOfWords: NextPage = () => {
     }
   }, [uploadMutation.error]);
 
-  const handleGenerate = async () => {
-    // TODO: connect to backend generate mnemonics API
+  const handleRecommeddedImage = async () => {
+    const created = await recommendationMutation.mutateAsync({
+        description: inputPromptValue,
+      });
+    setMnemonicImage(created?.filename);
   }
 
   const handleUpload = async () => {
@@ -70,17 +84,17 @@ const CreateListOfWords: NextPage = () => {
                     <Textarea
                       label="Enter your question"
                       placeholder="e.g., world leaders during WW2"
-                      value={inputValue}
+                      value={inputQuestionValue}
                       onChange={(e) => {
-                        setInputValue(e.target.value);
+                        setInputQuestionValue(e.target.value);
                       }}
                     />
                     <Textarea
                       label="Give prompts for the generation"
                       placeholder="e.g., when you win a communist revolution L'MAO'"
-                      value={inputValue}
+                      value={inputPromptValue}
                       onChange={(e) => {
-                        setInputValue(e.target.value);
+                        setInputPromptValue(e.target.value);
                       }}
                     />
                   </div>
@@ -103,19 +117,20 @@ const CreateListOfWords: NextPage = () => {
                   <div className="flex flex-wrap gap-3 place-content-center ">
                     <div className="flex items-start mt-1 gap-4">
                       <button
-                        disabled={isLoading}
-                        onClick={() => {
-                          setIsLoading(true);
-                          async () => await handleGenerate();
-                          setIsLoading(false);
-                        }}
-                        className={`flex justify-center items-center gap-2 py-3 min-w-[20px] hover:brightness-90 transition text-white bg-red-1 disabled:text-gray-400 disabled:bg-gray-200`}
-                        style={{ borderRadius: 5, padding: 5 }}
-                      >
-
-                        Generate Mnemonics
-                      </button>
+                        disabled={isLoadingMnemonic}
+                        onClick={async () => {
+                          setIsLoadingMnemonic(true);
+                          await handleRecommeddedImage()
+                          setIsLoadingMnemonic(false);}}
+                        className={`flex justify-center items-center gap-2 py-3 min-w-[170px] hover:brightness-90 transition text-white bg-red-1 disabled:text-gray-400 disabled:bg-gray-200`}
+                        >
+                        {isLoadingMnemonic && (
+                          <span className="w-4 h-4 border-2 border-gray-500 border-t-transparent rounded-full animate-spin"></span>
+                        )}
+                      Generate Mnemonics
+                    </button>
                     </div>
+
                   </div>
 
                 </div>
