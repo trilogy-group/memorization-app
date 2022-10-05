@@ -53,8 +53,24 @@ model User {
     followers     Follow[]  @relation("followings")
     followings    Follow[]  @relation("followers")
     points        Int       @default(0)
+    progress      Progress[]
 
     @@fulltext([name, email])
+}
+
+//TODO: implement Question model and relate to the Progress
+model Progress {
+    lastEvaluated  DateTime   @updatedAt
+    interval       Float      @default(0)
+    repetition     Float      @default(0)
+    efactor        Float      @default(2.5)
+    userId         String
+    user           User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+    videoId        String
+    video          Video      @relation(fields: [videoId], references: [id], onDelete: Cascade)
+
+    @@id([userId, videoId], name: "progress_identifier")
+    @@unique([userId, videoId])
 }
 
 model VerificationToken {
@@ -79,7 +95,8 @@ model Video {
     user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
     likes       Like[]
     comments    Comment[]
-    hashtags     Hashtag[]
+    hashtags    Hashtag[]
+    progress    Progress[]
 
     @@fulltext([caption])
 }

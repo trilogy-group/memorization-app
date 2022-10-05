@@ -24,8 +24,8 @@ const Home: NextPage<HomeProps> = ({
   return (
     <>
       <Meta
-        title="EdTok - Make Your Day"
-        description="EdTok - trends start here"
+        title="EdTok - Share your Mnemonics"
+        description="EdTok - create and share your mnemonics"
         image="/favicon.png"
       />
       <Navbar />
