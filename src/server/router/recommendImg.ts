@@ -3,7 +3,7 @@ import { z } from "zod";
 import { createRouter } from "./context";
 import { generateAsync } from 'stability-client'
 
-export const recommendationRouter = createRouter()
+export const imgRecommendationRouter = createRouter()
   .middleware(async ({ ctx, next }) => {
     if (!ctx.session) {
       throw new TRPCError({ code: "UNAUTHORIZED" });
