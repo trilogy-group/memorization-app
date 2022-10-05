@@ -38,6 +38,7 @@
     "stability-sdk": "Stability-AI/api-interfaces#1363356",
     "stability-ts": "^1.3.0",
     "superjson": "^1.9.1",
+    "supermemo": "^2.0.17",
     "zod": "^3.18.0"
   },
   "devDependencies": {
