@@ -14,7 +14,7 @@ const QuizUltimate: NextPage = () => {
 
   const uploadMutation = trpc.useMutation("video.create");
   const [optionMCQ, setOptionMCQ] = useState();
-  const [optionsList, setOptionsList] = useState([]);
+  const [optionsList, setOptionsList] = useState<string[]>([]);
   const [optionA, setOptionA] = useState("");
   const [scoooreArray, setScoooreArray] = useState<number[]>([]);
 
@@ -68,30 +68,31 @@ const QuizUltimate: NextPage = () => {
     return myClonedArray;
   };
 
-  function onChange(e) {
-    // current array of options
-    const Newoptions = optionsList;
+  function onChange(e: React.FormEvent<HTMLInputElement>) {
+    // current array of options for quiz List
+    const Newoptions = optionsList as Array<string>;
     let index;
 
     // check if the check box is checked or unchecked
-    if (e.target.checked) {
+    if ((e.target as any).checked) {
       // add the numerical value of the checkbox to options array
-      Newoptions.push(e.target.value)
+      Newoptions.push((e.target as any).value)
     } else {
       // or remove the value from the unchecked checkbox from the array
-      index = Newoptions.indexOf(e.target.value)
+      index = Newoptions.indexOf((e.target as any).value)
       Newoptions.splice(index, 1)
     }
 
     // sort the array
     Newoptions.sort()
+    console.log("the checked are ", Newoptions);
 
     // update the state with the new array of options
     setOptionsList(Newoptions);
   }
 
-  function onChangeMCQ(e) {
-    setOptionMCQ(e.target.value);
+  function onChangeMCQ(e: React.FormEvent<HTMLInputElement>) {
+    setOptionMCQ((e.target as any).value);
   }
 
 
@@ -267,8 +268,8 @@ const QuizUltimate: NextPage = () => {
 
     if (arrayType[questionNumber.current - 1] == "sequence") {
       let elem = document.getElementById("sequence");
-      //let shuffleOptions = shuffle(arrayOfArrayCorrectAnswers[questionNumber - 1] as Array<string>);
-      let shuffleOptions = arrayOfArrayCorrectAnswers[questionNumber.current - 1] as Array<string>;
+      let shuffleOptions = shuffle(arrayOfArrayCorrectAnswers[questionNumber.current - 1] as Array<string>);
+      //let shuffleOptions = arrayOfArrayCorrectAnswers[questionNumber.current - 1] as Array<string>;
       for (var i = 0; i < arrayOfArrayCorrectAnswers[questionNumber.current - 1]!?.length; i++) {
         let option = document.createElement('li');
         option.className = "border rounded flex items-center gap-2 h-9 px-3 border-black bg-white hover:bg-gray-100 transition cursor-pointer"
@@ -304,7 +305,7 @@ const QuizUltimate: NextPage = () => {
       document.getElementById("optionA")!.innerHTML = arrayOfArrayCorrectAnswers[questionNumber.current - 1]![0] as string;
       setOptionA(arrayOfArrayCorrectAnswers[questionNumber.current - 1]![0] as string);
       setOptionMCQ(undefined);
-      MCQOptions!.onchange = onChangeMCQ.bind(this);
+      MCQOptions.onchange = onChangeMCQ.bind(this);
 
       MCQOptions!.className = "block";
 
