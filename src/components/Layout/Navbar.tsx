@@ -37,11 +37,8 @@ const Navbar: FC = () => {
           <Link href="/">
             <a className="flex items-end gap-1">
               <Image src="/logo.png" alt="Logo" width={30} height={30} />
-<<<<<<< HEAD
-              <span className="text-4xl leading-[1] font-bold">EdTok</span>
-=======
+
               <span className="text-2xl leading-[1] font-bold">EdTok</span>
->>>>>>> origin/master
             </a>
           </Link>
           <form
