@@ -110,8 +110,8 @@ const Video: NextPage<VideoProps> = ({ video, href, title }) => {
   return (
     <>
       <Meta
-        title={`${video.user.name} on TopTop`}
-        description="Video | TopTop"
+        title={`${video.user.name} on EdTok`}
+        description="Video | EdTok"
         image={video.coverURL}
       />
 
@@ -410,7 +410,7 @@ export const getServerSideProps = async ({
         href: `${
           req.headers.host?.includes("localhost") ? "http" : "https"
         }://${req.headers.host}/video/${id}`,
-        title: `${video.user.name} on TopTop`,
+        title: `${video.user.name} on EdTok`,
       },
     };
   } catch (error) {
