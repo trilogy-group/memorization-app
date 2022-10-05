@@ -118,8 +118,8 @@ const CreateListOfWords: NextPage = () => {
                       }}
                     />
                     <Textarea
-                      label="Give prompts for the generation"
-                      placeholder="e.g., when you win a communist revolution L'MAO'"
+                      label="Prompt for generation"
+                      placeholder="e.g., Panda eating bambu"
                       value={inputPromptValue}
                       onChange={(e) => {
                         setInputPromptValue(e.target.value);
