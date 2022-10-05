@@ -13,11 +13,10 @@ import React from "react";
 const QuizUltimate: NextPage = () => {
 
   const uploadMutation = trpc.useMutation("video.create");
-  //const [questionNumbah, setQuestionNumbah] = useState(1);
   const [optionMCQ, setOptionMCQ] = useState();
   const [optionsList, setOptionsList] = useState([]);
   const [optionA, setOptionA] = useState("");
-  const [scoooreArray, setScoooreArray] = useState([]);
+  const [scoooreArray, setScoooreArray] = useState<number[]>([]);
 
   var questionNumber = useRef(1);
   var score = useRef(0);
@@ -40,7 +39,7 @@ const QuizUltimate: NextPage = () => {
     // adding script that makes elements of the list able to be dragged PART 2
     setTimeout(() => {
       let quizScript = document.createElement('script');
-      quizScript.innerHTML = "new Sortable(sequence);" //!!!!!!!!!!!!!
+      quizScript.innerHTML = "new Sortable(sequence);"
       document.body.appendChild(quizScript);
     }, 300);
 
@@ -73,7 +72,6 @@ const QuizUltimate: NextPage = () => {
     // current array of options
     const Newoptions = optionsList;
     let index;
-    console.log("target is ", e.target.value);
 
     // check if the check box is checked or unchecked
     if (e.target.checked) {
@@ -90,11 +88,9 @@ const QuizUltimate: NextPage = () => {
 
     // update the state with the new array of options
     setOptionsList(Newoptions);
-    console.log("Look here: ", Newoptions);
   }
 
   function onChangeMCQ(e) {
-    console.log("target is ", e.target.value);
     setOptionMCQ(e.target.value);
   }
 
@@ -143,7 +139,6 @@ const QuizUltimate: NextPage = () => {
 
 
   /*
-
       A:
     array of src -> hints
     array of difficulty ->
@@ -151,16 +146,11 @@ const QuizUltimate: NextPage = () => {
     array of answers
     array of types
 
-
   function checkAnswerUltimate() {
     // check answer AND clear existing q/a and answer AND push score array
-
     // increment questionnumber 'answered ith question'
-
     // create new question and new options
     quizMakerUltimateHelper()
-
-
   }
 
     function  quizMakerUltimateHelper() {
@@ -171,12 +161,11 @@ const QuizUltimate: NextPage = () => {
 
   IMPORTANT NOTES:
   NO SHUFFLING AS MCQ AND LIST DON'T HAVE INCORRECT OPTION
-
   */
 
   let arraySrc //hints
   let arrayDifficulty
-  let arrayQuestion = ["Put WW2 events in chronological order", "Out of all these countries, which was conquered by Germany in WW2?", "First homo sapiens appeared when?", "Put eras of human story in chronological order", "When did the Ice Age began?", "Which countries were NOT part of USSR?"]
+  let arrayQuestion = ["Put WW2 events in chronological order", "Out of all these countries, which was occupied by Germany in WW2?", "First homo sapiens appeared when?", "Put eras of human story in chronological order", "When did the Ice Age began?", "Which countries were NOT part of USSR?"]
   let arrayAnswer
   let arrayIncorrectAnswer
   let arrayType = ["sequence", "list", "MCQ", "sequence", "MCQ", "list"]
@@ -211,9 +200,6 @@ const QuizUltimate: NextPage = () => {
       }
 
     } else if (arrayType[questionNumber.current - 1] == "list") {
-      //console.log("the score right now is ", score);
-      //console.log("checked and deleted list");
-      // list
       if (JSON.stringify(optionsList) == JSON.stringify(arrayOfArrayCorrectAnswers[questionNumber.current - 1]?.sort())) {
         score.current++;
         newScoooreArray.push(1);
@@ -233,8 +219,6 @@ const QuizUltimate: NextPage = () => {
     }
     else if (arrayType[questionNumber.current - 1] == "MCQ") {
       // MCQ
-      console.log(optionMCQ);
-      console.log("the score as of right now is ", score.current);
       if (optionMCQ == arrayOfArrayCorrectAnswers[questionNumber.current - 1]) {
         score.current++;
         newScoooreArray.push(1);
@@ -245,35 +229,25 @@ const QuizUltimate: NextPage = () => {
       let MCQOptions = document.getElementById("MCQOptions");
 
       // clearing the elments in the possible options
-      MCQOptions.className = "hidden";
+      MCQOptions!.className = "hidden";
     }
 
 
 
     //TODO check accuracy and push score array
-    document.getElementById("score").innerHTML = String(score.current);
-    document.getElementById("hintVideo").className = "block";
+    document.getElementById("score")!.innerHTML = String(score.current);
+    document.getElementById("hintVideo")!.className = "block";
 
-
-
-    // increment questionnumber 'answered ith question'
-    //setQuestionNumbah(questionNumber.current + 1);
-    //console.log("answered question number ", questionNumbah);
-
-    console.log("question ", questionNumber.current, " was answered");
     questionNumber.current = questionNumber.current + 1;
-
-
-    console.log(newScoooreArray);
 
     // check if by any chance we have finished all the questions
     if (questionNumber.current - 1 == arrayOfArrayCorrectAnswers.length) {
-      document.getElementById("question").style.display = 'none';
-      document.getElementById("hintVideo").className = "hidden";
-      document.getElementById("nextButton").className = "hidden";
-      document.getElementById("score").className = "text-9xl font-bold";
-      document.getElementById("hintText").className = "hidden";
-      document.getElementById("scoreArray").innerHTML = newScoooreArray;
+      document.getElementById("question")!.style.display = 'none';
+      document.getElementById("hintVideo")!.className = "hidden";
+      document.getElementById("nextButton")!.className = "hidden";
+      document.getElementById("score")!.className = "text-9xl font-bold";
+      document.getElementById("hintText")!.className = "hidden";
+      document.getElementById("scoreArray")!.innerHTML = String(newScoooreArray);
 
     }
 
@@ -289,8 +263,7 @@ const QuizUltimate: NextPage = () => {
 
     // if difficulty[questionnumber]!=easy {document.getElementById("hint")!.style.display = 'none';}
 
-    document.getElementById("question")!.innerHTML = arrayQuestion[questionNumber.current - 1];
-    //console.log("the answer options are ", arrayOfArrayCorrectAnswers[questionNumbah - 1]);
+    document.getElementById("question")!.innerHTML = arrayQuestion[questionNumber.current - 1] as string;
 
     if (arrayType[questionNumber.current - 1] == "sequence") {
       let elem = document.getElementById("sequence");
@@ -304,7 +277,6 @@ const QuizUltimate: NextPage = () => {
       }
 
     } else if (arrayType[questionNumber.current - 1] == "list") {
-      console.log("list options should be ", arrayOfArrayCorrectAnswers[questionNumber.current - 1]);
       let possibleOptions = document.getElementById("checkBoxOptions");
       for (var i = 0; i < arrayOfArrayCorrectAnswers[questionNumber.current - 1]!?.length; i++) {
 
@@ -313,12 +285,12 @@ const QuizUltimate: NextPage = () => {
 
         let divOptionInput = document.createElement('input');
         divOptionInput.type = "checkbox";
-        divOptionInput.value = arrayOfArrayCorrectAnswers[questionNumber.current - 1][i];
+        divOptionInput.value = arrayOfArrayCorrectAnswers[questionNumber.current - 1]![i] as string;
         //divOptionInput.setAttribute("onchange", function(){toggleSelect(transport_select_id);});
         divOptionInput.onchange = onChange.bind(this);
 
         let divOptionLabel = document.createElement('label');
-        divOptionLabel.innerHTML = arrayOfArrayCorrectAnswers[questionNumber.current - 1][i];
+        divOptionLabel.innerHTML = arrayOfArrayCorrectAnswers[questionNumber.current - 1]![i] as string;
 
         divOption.appendChild(divOptionInput);
         divOption.appendChild(divOptionLabel);
@@ -328,26 +300,13 @@ const QuizUltimate: NextPage = () => {
     } else if (arrayType[questionNumber.current - 1] == "MCQ") {
       // create MCQ options
       let MCQOptions = document.getElementById("MCQOptions");
-      //MCQOptions.onchange = { this => { setOptionMCQ(this.target.value); console.log("radio checked"); } }
 
-
-      document.getElementById("optionA").innerHTML = arrayOfArrayCorrectAnswers[questionNumber.current - 1][0];
-      setOptionA(arrayOfArrayCorrectAnswers[questionNumber.current - 1][0]);
+      document.getElementById("optionA")!.innerHTML = arrayOfArrayCorrectAnswers[questionNumber.current - 1]![0] as string;
+      setOptionA(arrayOfArrayCorrectAnswers[questionNumber.current - 1]![0] as string);
       setOptionMCQ(undefined);
-      //MCQOptions.children.map(this.props.children, (child: React.ReactElement<ChildPropTypes>) => child.props.bar)
-      //MCQOptions.onchange = setOptionMCQ.bind(this.target);
-      MCQOptions.onchange = onChangeMCQ.bind(this);
+      MCQOptions!.onchange = onChangeMCQ.bind(this);
 
-      MCQOptions.className = "block";
-
-      /*
-      MCQOptions.addEventListener(
-        'change',
-        function () { e => { setOptionMCQ(e.target.value); console.log("radio checked"); } },
-        false
-      );
-*/
-
+      MCQOptions!.className = "block";
 
     }
 
@@ -374,7 +333,7 @@ const QuizUltimate: NextPage = () => {
           <div className="w-full max-w-[1000px] p-8 bg-white my-4">
 
             <div className="flex flex-col items-center justify-center">
-              <a href="#_" className="relative inline-block text-lg group" id="startQuizButton" onClick={() => { document.getElementById("quizContent").className = "block"; quizMakerUltimateHelper(); document.getElementById("startQuizButton").className = "hidden"; }}>
+              <a href="#_" className="relative inline-block text-lg group" id="startQuizButton" onClick={() => { document.getElementById("quizContent")!.className = "block"; quizMakerUltimateHelper(); document.getElementById("startQuizButton")!.className = "hidden"; }}>
                 <span className="relative z-10 block px-5 py-3 overflow-hidden font-medium leading-tight text-gray-800 transition-colors duration-300 ease-out border-2 border-gray-900 rounded-lg group-hover:text-white">
                   <span className="absolute inset-0 w-full h-full px-5 py-3 rounded-lg bg-gray-50"></span>
                   <span className="absolute left-0 w-48 h-48 -ml-2 transition-all duration-300 origin-top-right -rotate-90 -translate-x-full translate-y-12 bg-gray-900 group-hover:-rotate-180 ease"></span>
