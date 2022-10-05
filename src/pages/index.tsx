@@ -6,7 +6,9 @@ import type {
 } from "next";
 import { unstable_getServerSession as getServerSession } from "next-auth";
 import superjson from "superjson";
-
+import { useEffect } from "react";
+import Link from "next/link";
+import { ToastContainer, toast } from "react-toastify";
 import Main from "@/components/Home/Main";
 import Sidebar from "@/components/Home/Sidebar";
 import Navbar from "@/components/Layout/Navbar";
@@ -16,11 +18,42 @@ import { appRouter } from "@/server/router";
 
 import { authOptions } from "./api/auth/[...nextauth]";
 
+var timestamp
+var t: string
+
+const CustomToastWithLink = () => (
+  <div>
+    You haven't taken a quiz in a long time.
+    Look at the time! -{">"} {t}
+    <br />
+    <Link href={`/quizUltimate`}>Go to Quiz Page</Link>
+  </div>
+);
+
 const Home: NextPage<HomeProps> = ({
   leaderboardAccounts,
   followingAccounts,
   origin,
 }) => {
+
+  const letsToast = () => {
+    timestamp = Date.now();
+    t = new Intl.DateTimeFormat('en-US', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' }).format(timestamp) as string;
+    toast.info(CustomToastWithLink);
+  };
+
+
+  useEffect(() => {
+
+    setTimeout(() => {
+      letsToast();
+    }, 300);
+
+
+  }
+  );
+
+
   return (
     <>
       <Meta
@@ -36,7 +69,11 @@ const Home: NextPage<HomeProps> = ({
             followingAccounts={followingAccounts!}
           />
           <Main origin={origin!} />
+          <div id="notificationArea" className="w-1/6">
+            <ToastContainer />
+          </div>
         </div>
+
       </div>
     </>
   );
