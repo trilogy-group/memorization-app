@@ -136,7 +136,7 @@ const QuizUltimate: NextPage = () => {
     ["2,4 million years ago"],
     // Sixth question
     ["Italy",
-      "Germany",
+      "Australia",
       "Canada"
     ]
   ]
@@ -392,7 +392,7 @@ const QuizUltimate: NextPage = () => {
                 <option value="difficult">Difficult</option>
               </select>
               <h1 className="text-2xl font-bold" id="question"></h1>
-              <h1 id="hintText" className="text-1xl font-bold">Here's da hint</h1>
+              <h1 id="hintText" className="text-1xl font-bold">Here's a hint</h1>
               <img id="hintImage" style={{ width: "200", height: "200" }} />
               <iframe id="hintVideo"
                 frameBorder='0'
