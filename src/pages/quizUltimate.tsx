@@ -11,7 +11,6 @@ import React from "react";
 
 
 const QuizUltimate: NextPage = () => {
-
   const uploadMutation = trpc.useMutation("video.create");
   const [optionMCQ, setOptionMCQ] = useState();
   const [optionsList, setOptionsList] = useState<string[]>([]);
@@ -21,29 +20,23 @@ const QuizUltimate: NextPage = () => {
   var questionNumber = useRef(1);
   var score = useRef(0);
 
-
   useEffect(() => {
-
     if (uploadMutation.error) {
       toast.error("Failed to load the video", {
         position: "bottom-right",
       });
     }
-
     // adding script that makes elements of the list able to be dragged PART 1
     const script = document.createElement('script');
     script.src = "https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js";
     script.async = true;
     document.body.appendChild(script);
-
     // adding script that makes elements of the list able to be dragged PART 2
     setTimeout(() => {
       let quizScript = document.createElement('script');
       quizScript.innerHTML = "new Sortable(sequence);"
       document.body.appendChild(quizScript);
     }, 300);
-
-
     return () => {
       document.body.removeChild(script);
     }
@@ -72,7 +65,6 @@ const QuizUltimate: NextPage = () => {
     // current array of options for quiz List
     const Newoptions = optionsList as Array<string>;
     let index;
-
     // check if the check box is checked or unchecked
     if ((e.target as any).checked) {
       // add the numerical value of the checkbox to options array
@@ -82,11 +74,9 @@ const QuizUltimate: NextPage = () => {
       index = Newoptions.indexOf((e.target as any).value)
       Newoptions.splice(index, 1)
     }
-
     // sort the array
     Newoptions.sort()
     console.log("the checked are ", Newoptions);
-
     // update the state with the new array of options
     setOptionsList(Newoptions);
   }
@@ -94,8 +84,6 @@ const QuizUltimate: NextPage = () => {
   function onChangeMCQ(e: React.FormEvent<HTMLInputElement>) {
     setOptionMCQ((e.target as any).value);
   }
-
-
 
   //TODO: connect to DB for questions and answers
   const arrayOfArrayCorrectAnswers = [
@@ -159,9 +147,6 @@ const QuizUltimate: NextPage = () => {
   }
 
   quizMakerUltimateHelper(questionnumber==1) is automatically used when the page is loaded
-
-  IMPORTANT NOTES:
-  NO SHUFFLING AS MCQ AND LIST DON'T HAVE INCORRECT OPTION
   */
 
   let arraySrc //hints
@@ -172,12 +157,7 @@ const QuizUltimate: NextPage = () => {
   let arrayType = ["sequence", "list", "MCQ", "sequence", "MCQ", "list"]
 
   function checkAnswerUltimate() {
-
     // check answer AND clear existing q/a and answer AND push score array
-
-    /*
-    IF TYPE==Sequence
-    */
     let newScoooreArray = scoooreArray;
     if (arrayType[questionNumber.current - 1] == "sequence") {
       let elem = document.getElementById("sequence");
@@ -193,8 +173,6 @@ const QuizUltimate: NextPage = () => {
         newScoooreArray.push(0);
       }
       setScoooreArray(newScoooreArray);
-
-
       // clearing the elments in the unordered list
       while (elem!.lastElementChild) {
         elem!.removeChild(elem!.lastElementChild);
@@ -208,11 +186,8 @@ const QuizUltimate: NextPage = () => {
         newScoooreArray.push(0);
       }
       setScoooreArray(newScoooreArray);
-
       optionsList.length = 0;
-
       let possibleOptions = document.getElementById("checkBoxOptions");
-
       // clearing the elments in the possible options
       while (possibleOptions!.lastElementChild) {
         possibleOptions!.removeChild(possibleOptions!.lastElementChild);
@@ -228,19 +203,13 @@ const QuizUltimate: NextPage = () => {
       }
       setScoooreArray(newScoooreArray);
       let MCQOptions = document.getElementById("MCQOptions");
-
       // clearing the elments in the possible options
       MCQOptions!.className = "hidden";
     }
-
-
-
     //TODO check accuracy and push score array
     document.getElementById("score")!.innerHTML = String(score.current);
     document.getElementById("hintVideo")!.className = "block";
-
     questionNumber.current = questionNumber.current + 1;
-
     // check if by any chance we have finished all the questions
     if (questionNumber.current - 1 == arrayOfArrayCorrectAnswers.length) {
       document.getElementById("question")!.style.display = 'none';
@@ -251,25 +220,17 @@ const QuizUltimate: NextPage = () => {
       document.getElementById("scoreArray")!.innerHTML = String(newScoooreArray);
 
     }
-
-
     // create new question and new answer options and mnemonic hint
     quizMakerUltimateHelper()
-
-
   }
 
+
   function quizMakerUltimateHelper() {
-    // use src[questionnumber], difficulty[questionnumber], questions[questionnumber], answers[questionnumber], types[questionnumber]
-
-    // if difficulty[questionnumber]!=easy {document.getElementById("hint")!.style.display = 'none';}
-
     document.getElementById("question")!.innerHTML = arrayQuestion[questionNumber.current - 1] as string;
 
     if (arrayType[questionNumber.current - 1] == "sequence") {
       let elem = document.getElementById("sequence");
       let shuffleOptions = shuffle(arrayOfArrayCorrectAnswers[questionNumber.current - 1] as Array<string>);
-      //let shuffleOptions = arrayOfArrayCorrectAnswers[questionNumber.current - 1] as Array<string>;
       for (var i = 0; i < arrayOfArrayCorrectAnswers[questionNumber.current - 1]!?.length; i++) {
         let option = document.createElement('li');
         option.className = "border rounded flex items-center gap-2 h-9 px-3 border-black bg-white hover:bg-gray-100 transition cursor-pointer"
@@ -287,7 +248,6 @@ const QuizUltimate: NextPage = () => {
         let divOptionInput = document.createElement('input');
         divOptionInput.type = "checkbox";
         divOptionInput.value = arrayOfArrayCorrectAnswers[questionNumber.current - 1]![i] as string;
-        //divOptionInput.setAttribute("onchange", function(){toggleSelect(transport_select_id);});
         divOptionInput.onchange = onChange.bind(this);
 
         let divOptionLabel = document.createElement('label');
@@ -306,7 +266,6 @@ const QuizUltimate: NextPage = () => {
       setOptionA(arrayOfArrayCorrectAnswers[questionNumber.current - 1]![0] as string);
       setOptionMCQ(undefined);
       MCQOptions.onchange = onChangeMCQ.bind(this);
-
       MCQOptions!.className = "block";
 
     }
@@ -324,7 +283,6 @@ const QuizUltimate: NextPage = () => {
   };
 
 
-
   return (
     <>
       <Meta title="Post Mnemonics | EdTok" description="Post Mnemonics" image="/favicon.png" />
@@ -332,7 +290,6 @@ const QuizUltimate: NextPage = () => {
         <Navbar />
         <div className="flex justify-center mx-2 flex-grow bg-white-1">
           <div className="w-full max-w-[1000px] p-8 bg-white my-4">
-
             <div className="flex flex-col items-center justify-center">
               <a href="#_" className="relative inline-block text-lg group" id="startQuizButton" onClick={() => { document.getElementById("quizContent")!.className = "block"; quizMakerUltimateHelper(); document.getElementById("startQuizButton")!.className = "hidden"; }}>
                 <span className="relative z-10 block px-5 py-3 overflow-hidden font-medium leading-tight text-gray-800 transition-colors duration-300 ease-out border-2 border-gray-900 rounded-lg group-hover:text-white">
@@ -343,7 +300,6 @@ const QuizUltimate: NextPage = () => {
                 <span className="absolute bottom-0 right-0 w-full h-12 -mb-1 -mr-1 transition-all duration-200 ease-linear bg-gray-900 rounded-lg group-hover:mb-0 group-hover:mr-0" data-rounded="rounded-lg"></span>
               </a>
             </div>
-
             <div className="hidden" id="quizContent">
               <select id="difficulty-select" onChange={e => { removeHints(e.target.selectedIndex); }} style={{ color: "red" }} className="hidden">
                 <option value="">--Please choose difficulty--</option>
@@ -373,12 +329,9 @@ const QuizUltimate: NextPage = () => {
                 <br />
                 <input type="radio" value="d" name="gender" /> <label id="optionD">D</label>
               </div>
-
               <div className="flex flex-col items-center justify-center">
-
                 <a href="#_" className="relative inline-flex items-center justify-start py-3 pl-4 pr-12 overflow-hidden font-semibold text-indigo-600 transition-all duration-150 ease-in-out rounded hover:pl-10 hover:pr-6 bg-gray-50 group" onClick={async () => await checkAnswerUltimate()}
                   id="nextButton">
-
                   <span className="absolute bottom-0 left-0 w-full h-1 transition-all duration-150 ease-in-out bg-indigo-600 group-hover:h-full"></span>
                   <span className="absolute right-0 pr-4 duration-200 ease-out group-hover:translate-x-12">
                     <svg className="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
@@ -388,7 +341,6 @@ const QuizUltimate: NextPage = () => {
                   </span>
                   <span className="relative w-full text-left transition-colors duration-200 ease-in-out group-hover:text-white">Next</span>
                 </a>
-
                 <h1 className="text-2xl font-bold">Score</h1>
                 <div id="score" className="text-2xl font-bold"></div>
                 <div id="scoreArray" className="text-2xl font-bold"></div>
@@ -405,7 +357,6 @@ export default QuizUltimate;
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
   const session = await getServerSession(req, res, authOptions);
-
   if (!session?.user) {
     return {
       redirect: {
