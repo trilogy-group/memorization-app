@@ -26,10 +26,13 @@ const CreateListOfWords: NextPage = () => {
   // TODO: connect mnemonic image with recommendation system in the backend
   const [mnemonicImage, setMnemonicImage] = useState<string | undefined>(undefined);
   const [acronym, setAcronym] = useState<string | undefined>(undefined);
+  const [story, setStory] = useState<string | undefined>(undefined);
 
 
   const imgRecommendationMutation = trpc.useMutation("recommendImg.stabledif");
   const acroRecommendationMutation = trpc.useMutation("recommendAcro.acronym");
+  const storyRecommendationMutation = trpc.useMutation("recommendStory.story");
+
 
 
   const [inputValue, setInputValue] = useState("");
@@ -76,6 +79,26 @@ const CreateListOfWords: NextPage = () => {
         description: acronymLeters,
       });
     setAcronym("Remember " + acronymLeters + " with: " + acronymCreated?.result);
+  }
+
+  const handleRecommeddedStory = async () => {
+    var storyWordList = "";
+    
+    //Get first leter for each word in wordList
+    
+    for (let i = 0; i < wordList.length; i++) {
+      if (wordList[i] != undefined) {
+        if (i == wordList.length - 1) {
+          storyWordList += wordList[i];
+        } else {
+          storyWordList += wordList[i] + ", ";
+        }
+      }
+    }
+    const storyCreated = await storyRecommendationMutation.mutateAsync({
+        description: storyWordList,
+      });
+    setStory("Remember " + storyWordList + " with: " + storyCreated?.result);
   }
 
   const handleUpload = async () => {
@@ -140,10 +163,22 @@ const CreateListOfWords: NextPage = () => {
 
                     {acronym ? (
                       <div className="col-span-1 bg-gray-1 h-full w-full">
-                      {acronym}</div>
+                        <textarea
+                          className="w-full h-full p-1 border rounded resize-none readonly"
+                          value={acronym}
+                        />
+                      </div>
                     ) : (<div className="col-span-1 bg-gray-1 h-full w-full"></div>
                     )}
-                        <div className="col-span-1 bg-gray-1 h-full w-full"></div>
+                    {story ? (
+                      <div className="col-span-1 bg-gray-1 h-full w-full">
+                        <textarea
+                          className="w-full h-full p-1 border rounded resize-none readonly"
+                          value={story}
+                        />
+                      </div>
+                    ) : (<div className="col-span-1 bg-gray-1 h-full w-full"></div>
+                    )}
                   </>
 
                     
@@ -205,6 +240,21 @@ const CreateListOfWords: NextPage = () => {
                           <span className="w-4 h-4 border-2 border-gray-500 border-t-transparent rounded-full animate-spin"></span>
                         )}
                       Generate Acronym
+                    </button>
+
+                    <button
+                        disabled={isLoadingMnemonic}
+                        onClick={async () => {
+                          setIsLoadingMnemonic(true);
+                          await handleRecommeddedStory()
+                          setIsLoadingMnemonic(false);}}
+                        className={`flex justify-center items-center gap-2 py-3 min-w-[20px] hover:brightness-90 transition text-white bg-red-1 disabled:text-gray-400 disabled:bg-gray-200`}
+                        style={{ borderRadius: 5, padding: 5 , marginTop: 10}}
+                        >
+                        {isLoadingMnemonic && (
+                          <span className="w-4 h-4 border-2 border-gray-500 border-t-transparent rounded-full animate-spin"></span>
+                        )}
+                      Generate Story
                     </button>
 
                 </div>

@@ -2,14 +2,14 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { createRouter } from "./context";
 
-export const acronymRecommendationRouter = createRouter()
+export const storyRecommendationRouter = createRouter()
   .middleware(async ({ ctx, next }) => {
     if (!ctx.session) {
       throw new TRPCError({ code: "UNAUTHORIZED" });
     }
     return next();
   })
-  .mutation("acronym", {
+  .mutation("story", {
     input: z.object({
         description: z.string(),
       }),
@@ -25,12 +25,12 @@ export const acronymRecommendationRouter = createRouter()
             apiKey: process.env.OPENAI_API_KEY,
             });
             const openai = new OpenAIApi(configuration);
-
             const completion = await openai.createCompletion({
-            max_tokens: 50,
+            max_tokens: 500,
             model: "text-davinci-002",
-            prompt: "Create an acronym with " + wordList + ": ",
+            prompt: "Create an story to remember the words " + wordList + ": ",
             });
+
             var result = ""
             result = completion.data.choices[0].text
             return {
