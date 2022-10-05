@@ -161,6 +161,7 @@ const QuizUltimate: NextPage = () => {
     // check answer AND clear existing q/a and answer AND push score array
     let newScoooreArray = scoooreArray;
     if (arrayType[questionNumber.current - 1] == "sequence") {
+      document.getElementById("hintText")!.innerHTML = "Sort in the correct order";
       let elem = document.getElementById("sequence");
       let answers = new Array();
       let li = document.querySelectorAll("#sequence li");
@@ -180,6 +181,7 @@ const QuizUltimate: NextPage = () => {
       }
 
     } else if (arrayType[questionNumber.current - 1] == "list") {
+      document.getElementById("hintText")!.innerHTML = "Choose all that apply";
       if (JSON.stringify(optionsList) == JSON.stringify(arrayOfArrayCorrectAnswers[questionNumber.current - 1]?.sort())) {
         score.current++;
         newScoooreArray.push(1);
@@ -195,6 +197,7 @@ const QuizUltimate: NextPage = () => {
       }
     }
     else if (arrayType[questionNumber.current - 1] == "MCQ") {
+      document.getElementById("hintText")!.innerHTML = "Choose one";
       // MCQ
       if (optionMCQ == arrayOfArrayCorrectAnswers[questionNumber.current - 1]) {
         score.current++;
@@ -310,7 +313,7 @@ const QuizUltimate: NextPage = () => {
                 <option value="difficult">Difficult</option>
               </select>
               <h1 className="text-2xl font-bold" id="question"></h1>
-              <h1 id="hintText" className="text-1xl font-bold">Here's a hint</h1>
+              <h1 id="hintText" className="text-1xl font-bold">Sort in correct order</h1>
               <img id="hintImage" style={{ width: "200", height: "200" }} />
               <iframe id="hintVideo"
                 frameBorder='0'
