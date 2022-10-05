@@ -110,7 +110,7 @@ const QuizUltimate: NextPage = () => {
       "France",
     ],
     // Third question
-    ["200,000 years ago"],
+    ["Bipedalism"],
     // Fourth question
     [
       "Stone Age",
@@ -119,7 +119,7 @@ const QuizUltimate: NextPage = () => {
       "Contemporary",
     ],
     // Fifth question
-    ["2,4 million years ago"],
+    ["the Khoisan of the African Kalahari Desert"],
     // Sixth question
     ["Italy",
       "Australia",
@@ -152,7 +152,7 @@ const QuizUltimate: NextPage = () => {
 
   let arraySrc //hints
   let arrayDifficulty;
-  let arrayQuestion = ["Put WW2 events in chronological order", "Out of all these countries, which was occupied by Germany in WW2?", "First homo sapiens appeared when?", "Put eras of human story in chronological order", "When did the Ice Age began?", "Which countries were NOT part of USSR?"];
+  let arrayQuestion = ["Put WW2 events in chronological order", "Out of all these countries, which was occupied by Germany in WW2?", "How is the ability to walk on two legs called?", "Put eras of human story in chronological order", "What is an example of modern hunter-gatherer communities?", "Which countries were NOT part of USSR?"];
   let arrayIncorrectAnswer;
   let arrayType = ["sequence", "list", "MCQ", "sequence", "MCQ", "list"];
 
@@ -259,6 +259,18 @@ const QuizUltimate: NextPage = () => {
       setOptionMCQ(undefined);
       MCQOptions!.className = "block";
     }
+    if (questionNumber.current == 3) {
+      document.getElementById("hintImage")?.setAttribute("src", "/memory29.png")
+      document.getElementById("hintImage")!.className = "block";
+      document.getElementById("hintVideo")!.className = "hidden";
+    } else
+      if (questionNumber.current == 5) {
+        document.getElementById("hintImage")?.setAttribute("src", "/memory30.png")
+        document.getElementById("hintImage")!.className = "block";
+        document.getElementById("hintVideo")!.className = "hidden";
+      } else {
+        document.getElementById("hintImage")!.className = "hidden";
+      }
   }
 
 
@@ -275,7 +287,7 @@ const QuizUltimate: NextPage = () => {
 
   return (
     <>
-      <Meta title="Post Mnemonics | EdTok" description="Post Mnemonics" image="/favicon.png" />
+      <Meta title="Quiz | EdTok" description="Quiz" image="/favicon.png" />
       <div className="min-h-screen flex flex-col items-stretch">
         <Navbar />
         <div className="flex justify-center mx-2 flex-grow bg-white-1">
