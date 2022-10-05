@@ -125,7 +125,7 @@ export const videoRouter = createRouter()
       };
     },
   })
-  .mutation("create", {
+  .mutation("createVideo", {
     input: z.object({
       caption: z.string(),
       videoURL: z.string().url(),
@@ -170,6 +170,64 @@ export const videoRouter = createRouter()
           videoWidth: input.videoWidth,
           videoHeight: input.videoHeight,
           userId: session?.user?.id!,
+          contentType: 2,
+          hashtags: {
+            connect: alltagid,
+          }, // connect to all hashtags
+        },
+      });
+      await prisma.user.update({
+        where: { id: session?.user?.id as string },
+        data: {
+          points: { increment: 1 },
+        },
+      });
+      return created;
+    },
+  })
+  .mutation("createImg", {
+    input: z.object({
+      caption: z.string(),
+      coverURL: z.string().url(),
+      tagStr: z.string(),
+    }),
+    async resolve({ ctx: { prisma, session }, input }) {
+      let alltags = input.tagStr.match(/(#[a-z\d-]+)/gi);
+      let alltagid = [];
+      /*
+       * Tags hardcoded in the frontend src/upload.tsx are created in the DB, therefore "tagcreated"
+       * TODO: provided subject/chapter tags in the DB
+       */
+      if (alltags == null) {
+        throw new TRPCError({ code: "BAD_REQUEST" });
+      }
+      for (const t_ of alltags) {
+        const tagcreated = await prisma.hashtag.findUnique({
+          where: {
+            tag: t_,
+          }
+        });
+
+        if (tagcreated == null) {
+          const tagcreated = await prisma.hashtag.create({
+            data: {
+              tag: t_,
+            },
+          });
+          alltagid.push({ id: tagcreated.id });
+        } else {
+          alltagid.push({ id: tagcreated.id });
+        }
+      }
+      const created = await prisma.video.create({
+        data: {
+          caption: input.caption,
+          videoURL: "",
+          coverURL: input.coverURL,
+          videoWidth: 0,
+          videoHeight: 0,
+          userId: session?.user?.id!,
+          contentType: 1,
           hashtags: {
             connect: alltagid,
           }, // connect to all hashtags
@@ -184,3 +242,4 @@ export const videoRouter = createRouter()
       return created;
     },
   });
+

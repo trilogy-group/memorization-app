@@ -13,6 +13,14 @@ import { fetchWithProgress } from "@/utils/fetch";
 
 import { trpc } from "../utils/trpc";
 import { authOptions } from "./api/auth/[...nextauth]";
+import React from "react";
+
+enum fileDataType {
+  video,
+  image,
+  text,
+  unknown,
+}
 
 const subjects = [
   '#Biology ',
@@ -29,10 +37,12 @@ const chapters = [
 const Upload: NextPage = () => {
   const router = useRouter();
 
-  const uploadMutation = trpc.useMutation("video.create");
+  const uploadMutation = trpc.useMutation("video.createVideo");
+  const uploadImgMutation = trpc.useMutation("video.createImg");
 
   const inputRef = useRef<HTMLInputElement | null>(null);
 
+  const [fileType, setFileType] = useState<fileDataType>(fileDataType.unknown);
   const [coverImageURL, setCoverImageURL] = useState<string | null>(null);
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [videoURL, setVideoURL] = useState<string | null>(null);
@@ -41,6 +51,8 @@ const Upload: NextPage = () => {
   const [inputValue, setInputValue] = useState("");
   const [subjectValue, setSubjectValue] = useState<string[]>([]);
   const [chapterValue, setChapterValue] = useState<string[]>([]);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imageURL, setImageURL] = useState<string | null>(null);
 
   const [isLoading, setIsLoading] = useState(false);
   const [isFileDragging, setIsFileDragging] = useState(false);
@@ -53,9 +65,46 @@ const Upload: NextPage = () => {
     }
   }, [uploadMutation.error]);
 
-  const handleFileChange = (file: File) => {
+
+  const handleImageFileChange = (file: File) => {
+    const url = URL.createObjectURL(file);
+    setImageFile(file);
+    setImageURL(url);
+    setFileType(fileDataType.image);
+
+    const image = document.createElement("img");
+    image.style.opacity = "0";
+    document.body.appendChild(image);
+    image.setAttribute("src", url);
+
+    document.body.appendChild(image);
+    image.addEventListener("load", () => {
+      setTimeout(() => {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d")!;
+
+        canvas.width = image.width;
+        canvas.height = image.height;
+
+        ctx.drawImage(image, 0, 0);
+
+        setCoverImageURL(canvas.toDataURL("image/png"));
+      }, 300);
+    });
+
+    image.addEventListener("error", (error) => {
+      console.log(error);
+      document.body.removeChild(image);
+      toast.error("Failed to load the image", {
+        position: "bottom-right",
+      });
+    });
+  };
+
+
+  const handleVideoFileChange = (file: File) => {
     if (!file.type.startsWith("video")) {
-      toast("Only video file is allowed");
+      toast("Only video or image files are allowed");
       return;
     }
 
@@ -69,6 +118,7 @@ const Upload: NextPage = () => {
 
     setVideoFile(file);
     setVideoURL(url);
+    setFileType(fileDataType.video);
 
     const video = document.createElement("video");
     video.style.opacity = "0";
@@ -105,8 +155,77 @@ const Upload: NextPage = () => {
     video.load();
   };
 
-  const handleUpload = async () => {
-    console.log(`Print pls`)
+
+  const handleFileChange = (file: File) => {
+    if (file.type.startsWith("image")) {
+      handleImageFileChange(file);
+    } else if (file.type.startsWith("video")) {
+      handleVideoFileChange(file);
+    } else {
+      throw new Error("Unknown upload data type. Expected video or image");
+    }
+  };
+
+
+  const handleImageUpload = async () => {
+    if (
+      !coverImageURL ||
+      !inputValue.trim() ||
+      isLoading
+    )
+      return;
+    setIsLoading(true);
+
+    const toastID = toast.loading("Uploading...");
+    try {
+      const coverBlob = await (await fetch(coverImageURL)).blob();
+
+      const formData = new FormData();
+      formData.append("file", coverBlob, "cover.png");
+      formData.append("content", "From webhook");
+
+      const uploadedCover = (
+        await (
+          await fetch(process.env.NEXT_PUBLIC_IMAGE_UPLOAD_URL!, {
+            method: "POST",
+            body: formData,
+          })
+        ).json()
+      ).attachments[0].proxy_url;
+
+
+      toast.loading("Uploading metadata...", { id: toastID });
+
+      const tagStr = subjectValue.join() + chapterValue.join();
+
+      const created = await uploadImgMutation.mutateAsync({
+        caption: inputValue.trim(),
+        coverURL: uploadedCover,
+        tagStr,
+      });
+      toast.loading("Mnemonics Created! Points +1", { id: toastID });
+      await new Promise(r => setTimeout(r, 800));
+
+      toast.dismiss(toastID);
+
+      setIsLoading(false);
+
+      router.push(`/video/${created.id}`);
+    } catch (error) {
+      console.log(error);
+      toast.dismiss(toastID);
+      setIsLoading(false);
+      toast.error("Failed to upload video", {
+        position: "bottom-right",
+        id: toastID,
+      });
+
+      return;
+    };
+  };
+
+
+  const handleVideoUpload = async () => {
     if (
       !coverImageURL ||
       !videoFile ||
@@ -143,13 +262,10 @@ const Upload: NextPage = () => {
       formData.append("file", coverBlob, "cover.png");
       formData.append("content", "From webhook");
 
-      console.log(formData)
-
       let demo_response = await fetch(process.env.NEXT_PUBLIC_IMAGE_UPLOAD_URL!, {
         method: "POST",
         body: formData,
       })
-      console.log(`DemoResponse: `, demo_response)
       demo_response = await demo_response.json()
 
       const uploadedCover = (
@@ -165,7 +281,6 @@ const Upload: NextPage = () => {
       toast.loading("Uploading metadata...", { id: toastID });
 
       const tagStr = subjectValue.join() + chapterValue.join();
-      console.log(`tag`, tagStr);
 
       const created = await uploadMutation.mutateAsync({
         caption: inputValue.trim(),
@@ -178,7 +293,6 @@ const Upload: NextPage = () => {
       toast.loading("Mnemonics Created! Points +1", { id: toastID });
       await new Promise(r => setTimeout(r, 800));
 
-      console.log(`Created: `, created);
       toast.dismiss(toastID);
 
       setIsLoading(false);
@@ -191,6 +305,17 @@ const Upload: NextPage = () => {
         position: "bottom-right",
         id: toastID,
       });
+    }
+  };
+
+
+  const handleUpload = async () => {
+    if (fileType == fileDataType.image) {
+      handleImageUpload();
+    } else if (fileType == fileDataType.video) {
+      handleVideoUpload();
+    } else {
+      throw new Error("Unknown file type. Only support video/image uploading.");
     }
   };
 
@@ -221,6 +346,7 @@ const Upload: NextPage = () => {
     setIsFileDragging(false);
   };
 
+
   return (
     <>
       <Meta title="Upload | EdTok" description="Upload" image="/favicon.png" />
@@ -228,8 +354,8 @@ const Upload: NextPage = () => {
         <Navbar />
         <div className="flex justify-center mx-2 flex-grow bg-gray-1">
           <div className="w-full max-w-[1000px] p-8 bg-white my-4">
-            <h1 className="text-2xl font-bold">Upload video</h1>
-            <p className="text-gray-400 mt-2">Post a video to your account</p>
+            <h1 className="text-2xl font-bold">Upload mnemonic media</h1>
+            <p className="text-gray-400 mt-2">Memorize with your videos/images</p>
 
             <div className="flex items-start mt-10 gap-4">
               {videoURL ? (
@@ -253,14 +379,14 @@ const Upload: NextPage = () => {
                 >
                   <BsFillCloudUploadFill className="fill-[#B0B0B4] w-10 h-10" />
                   <h1 className="font-semibold mt-4 mb-2">
-                    Select video to upload
+                    Select a file to upload
                   </h1>
                   <p className="text-gray-500 text-sm">
                     Or drag and drop a file
                   </p>
 
                   <div className="flex flex-col items-center text-gray-400 my-4 gap-1 text-sm">
-                    <p>MP4 or WebM</p>
+                    <p>MP4, WebM, PNG, JPG ...</p>
                     <p>Any resolution</p>
                     <p>Any duration</p>
                     <p>Less than 200MB</p>
@@ -277,7 +403,7 @@ const Upload: NextPage = () => {
                 type="file"
                 hidden
                 className="hidden"
-                accept="video/mp4,video/webm"
+                accept="video/mp4,video/webm, image/*, audio/*"
                 onChange={(e) => {
                   if (e.target.files?.[0]) {
                     handleFileChange(e.target.files[0]);
@@ -353,6 +479,8 @@ const Upload: NextPage = () => {
                       setInputValue("");
                       setVideoFile(null);
                       setVideoURL(null);
+                      setImageFile(null);
+                      setImageURL(null);
                     }}
                     className="py-3 min-w-[170px] border border-gray-2 bg-white hover:bg-gray-100 transition"
                   >
@@ -362,9 +490,12 @@ const Upload: NextPage = () => {
                     onClick={async () => await handleUpload()}
                     disabled={
                       !inputValue.trim() ||
-                      !videoURL ||
-                      !videoFile ||
-                      !coverImageURL ||
+                      !((!videoURL ||
+                        !videoFile ||
+                        !coverImageURL) || (
+                        !imageFile ||
+                        !imageURL)
+                      ) ||
                       !subjectValue.length ||
                       !chapterValue.length ||
                       isLoading
