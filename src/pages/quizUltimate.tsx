@@ -161,7 +161,6 @@ const QuizUltimate: NextPage = () => {
     // check answer AND clear existing q/a and answer AND push score array
     let newScoooreArray = scoooreArray;
     if (arrayType[questionNumber.current - 1] == "sequence") {
-      document.getElementById("hintText")!.innerHTML = "Sort in the correct order";
       let elem = document.getElementById("sequence");
       let answers = new Array();
       let li = document.querySelectorAll("#sequence li");
@@ -181,7 +180,7 @@ const QuizUltimate: NextPage = () => {
       }
 
     } else if (arrayType[questionNumber.current - 1] == "list") {
-      document.getElementById("hintText")!.innerHTML = "Choose all that apply";
+
       if (JSON.stringify(optionsList) == JSON.stringify(arrayOfArrayCorrectAnswers[questionNumber.current - 1]?.sort())) {
         score.current++;
         newScoooreArray.push(1);
@@ -197,7 +196,7 @@ const QuizUltimate: NextPage = () => {
       }
     }
     else if (arrayType[questionNumber.current - 1] == "MCQ") {
-      document.getElementById("hintText")!.innerHTML = "Choose one";
+
       // MCQ
       if (optionMCQ == arrayOfArrayCorrectAnswers[questionNumber.current - 1]) {
         score.current++;
@@ -232,6 +231,7 @@ const QuizUltimate: NextPage = () => {
     document.getElementById("question")!.innerHTML = arrayQuestion[questionNumber.current - 1] as string;
     if (arrayType[questionNumber.current - 1] == "sequence") {
       let elem = document.getElementById("sequence");
+      document.getElementById("hintText")!.innerHTML = "Sort in the correct order";
       let shuffleOptions = shuffle(arrayOfArrayCorrectAnswers[questionNumber.current - 1] as Array<string>);
       for (var i = 0; i < arrayOfArrayCorrectAnswers[questionNumber.current - 1]!?.length; i++) {
         let option = document.createElement('li');
@@ -240,6 +240,7 @@ const QuizUltimate: NextPage = () => {
         elem!.appendChild(option);
       }
     } else if (arrayType[questionNumber.current - 1] == "list") {
+      document.getElementById("hintText")!.innerHTML = "Choose all that apply";
       let possibleOptions = document.getElementById("checkBoxOptions");
       for (var i = 0; i < arrayOfArrayCorrectAnswers[questionNumber.current - 1]!?.length; i++) {
         let divOption = document.createElement('div');
@@ -257,6 +258,7 @@ const QuizUltimate: NextPage = () => {
     } else if (arrayType[questionNumber.current - 1] == "MCQ") {
       // create MCQ options
       let MCQOptions = document.getElementById("MCQOptions");
+      document.getElementById("hintText")!.innerHTML = "Choose one";
       document.getElementById("optionA")!.innerHTML = arrayOfArrayCorrectAnswers[questionNumber.current - 1]![0] as string;
       setOptionA(arrayOfArrayCorrectAnswers[questionNumber.current - 1]![0] as string);
       setOptionMCQ(undefined);
