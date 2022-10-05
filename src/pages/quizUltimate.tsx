@@ -15,6 +15,9 @@ const QuizUltimate: NextPage = () => {
   const [optionMCQ, setOptionMCQ] = useState();
   const [optionsList, setOptionsList] = useState<string[]>([]);
   const [optionA, setOptionA] = useState("");
+  const [optionB, setOptionB] = useState("");
+  const [optionC, setOptionC] = useState("");
+  const [optionD, setOptionD] = useState("");
   const [scoooreArray, setScoooreArray] = useState<number[]>([]);
 
   var questionNumber = useRef(1);
@@ -61,6 +64,7 @@ const QuizUltimate: NextPage = () => {
     return myClonedArray;
   };
 
+
   function onChange(e: React.FormEvent<HTMLInputElement>) {
     // current array of options for quiz List
     const Newoptions = optionsList as Array<string>;
@@ -81,9 +85,6 @@ const QuizUltimate: NextPage = () => {
     setOptionsList(Newoptions);
   }
 
-  function onChangeMCQ(e: React.FormEvent<HTMLInputElement>) {
-    setOptionMCQ((e.target as any).value);
-  }
 
   //TODO: connect to DB for questions and answers
   const arrayOfArrayCorrectAnswers = [
@@ -150,11 +151,11 @@ const QuizUltimate: NextPage = () => {
   */
 
   let arraySrc //hints
-  let arrayDifficulty
-  let arrayQuestion = ["Put WW2 events in chronological order", "Out of all these countries, which was occupied by Germany in WW2?", "First homo sapiens appeared when?", "Put eras of human story in chronological order", "When did the Ice Age began?", "Which countries were NOT part of USSR?"]
-  let arrayAnswer
-  let arrayIncorrectAnswer
-  let arrayType = ["sequence", "list", "MCQ", "sequence", "MCQ", "list"]
+  let arrayDifficulty;
+  let arrayQuestion = ["Put WW2 events in chronological order", "Out of all these countries, which was occupied by Germany in WW2?", "First homo sapiens appeared when?", "Put eras of human story in chronological order", "When did the Ice Age began?", "Which countries were NOT part of USSR?"];
+  let arrayIncorrectAnswer;
+  let arrayType = ["sequence", "list", "MCQ", "sequence", "MCQ", "list"];
+
 
   function checkAnswerUltimate() {
     // check answer AND clear existing q/a and answer AND push score array
@@ -218,7 +219,6 @@ const QuizUltimate: NextPage = () => {
       document.getElementById("score")!.className = "text-9xl font-bold";
       document.getElementById("hintText")!.className = "hidden";
       document.getElementById("scoreArray")!.innerHTML = String(newScoooreArray);
-
     }
     // create new question and new answer options and mnemonic hint
     quizMakerUltimateHelper()
@@ -227,7 +227,6 @@ const QuizUltimate: NextPage = () => {
 
   function quizMakerUltimateHelper() {
     document.getElementById("question")!.innerHTML = arrayQuestion[questionNumber.current - 1] as string;
-
     if (arrayType[questionNumber.current - 1] == "sequence") {
       let elem = document.getElementById("sequence");
       let shuffleOptions = shuffle(arrayOfArrayCorrectAnswers[questionNumber.current - 1] as Array<string>);
@@ -237,40 +236,31 @@ const QuizUltimate: NextPage = () => {
         option.innerHTML = shuffleOptions[i] as string;
         elem!.appendChild(option);
       }
-
     } else if (arrayType[questionNumber.current - 1] == "list") {
       let possibleOptions = document.getElementById("checkBoxOptions");
       for (var i = 0; i < arrayOfArrayCorrectAnswers[questionNumber.current - 1]!?.length; i++) {
-
         let divOption = document.createElement('div');
         divOption.className = "input-group";
-
         let divOptionInput = document.createElement('input');
         divOptionInput.type = "checkbox";
         divOptionInput.value = arrayOfArrayCorrectAnswers[questionNumber.current - 1]![i] as string;
         divOptionInput.onchange = onChange.bind(this);
-
         let divOptionLabel = document.createElement('label');
         divOptionLabel.innerHTML = arrayOfArrayCorrectAnswers[questionNumber.current - 1]![i] as string;
-
         divOption.appendChild(divOptionInput);
         divOption.appendChild(divOptionLabel);
-
         possibleOptions!.appendChild(divOption);
       }
     } else if (arrayType[questionNumber.current - 1] == "MCQ") {
       // create MCQ options
       let MCQOptions = document.getElementById("MCQOptions");
-
       document.getElementById("optionA")!.innerHTML = arrayOfArrayCorrectAnswers[questionNumber.current - 1]![0] as string;
       setOptionA(arrayOfArrayCorrectAnswers[questionNumber.current - 1]![0] as string);
       setOptionMCQ(undefined);
-      MCQOptions.onchange = onChangeMCQ.bind(this);
       MCQOptions!.className = "block";
-
     }
-
   }
+
 
   function removeHints(index: number): void {
     if (index != 1) {
@@ -320,14 +310,14 @@ const QuizUltimate: NextPage = () => {
               </ul>
               <form id="checkBoxOptions">
               </form>
-              <div onChange={e => { setOptionMCQ(e.target.value); }} id="MCQOptions" className="hidden">
-                <input type="radio" value={optionA} name="gender" checked={optionA === optionMCQ} /> <label id="optionA">A</label>
+              <div onChange={e => { setOptionMCQ((e.target as any).value); }} id="MCQOptions" className="hidden">
+                <input type="radio" value={optionA} name="gender" checked={optionA === optionMCQ} onChange={e => { console.log(e.target.value); }} /> <label id="optionA">A</label>
                 <br />
-                <input type="radio" value="b" name="gender" /> <label id="optionB">B</label>
+                <input type="radio" value={optionB} name="gender" onChange={e => { console.log(e.target.value); }} /> <label id="optionB">B</label>
                 <br />
-                <input type="radio" value="c" name="gender" /> <label id="optionC">C</label>
+                <input type="radio" value={optionC} name="gender" onChange={e => { console.log(e.target.value); }} /> <label id="optionC">C</label>
                 <br />
-                <input type="radio" value="d" name="gender" /> <label id="optionD">D</label>
+                <input type="radio" value={optionD} name="gender" onChange={e => { console.log(e.target.value); }} /> <label id="optionD">D</label>
               </div>
               <div className="flex flex-col items-center justify-center">
                 <a href="#_" className="relative inline-flex items-center justify-start py-3 pl-4 pr-12 overflow-hidden font-semibold text-indigo-600 transition-all duration-150 ease-in-out rounded hover:pl-10 hover:pr-6 bg-gray-50 group" onClick={async () => await checkAnswerUltimate()}
