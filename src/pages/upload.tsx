@@ -223,7 +223,7 @@ const Upload: NextPage = () => {
 
   return (
     <>
-      <Meta title="Upload | TopTop" description="Upload" image="/favicon.png" />
+      <Meta title="Upload | EdTok" description="Upload" image="/favicon.png" />
       <div className="min-h-screen flex flex-col items-stretch">
         <Navbar />
         <div className="flex justify-center mx-2 flex-grow bg-gray-1">
