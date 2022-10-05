@@ -28,14 +28,14 @@ const CreateMnemonics: NextPage = () => {
             </div>
 
             <div className="flex items-start mt-10 gap-4">
-              <Link href={"/createlstwords"}>
+              <Link href={"/postsequence"}>
                 <a className="border rounded flex items-center gap-2 h-9 px-3 border-gray-200 bg-white hover:bg-gray-100 transition">
                   <AiOutlinePlus className="w-5 h-5" />
                   <span>A list of sequences</span>
                 </a>
               </Link>
             </div>
- 
+
             <div className="flex items-start mt-10 gap-4">
               <Link href={"/createlstwords"}>
                 <a className="border rounded flex items-center gap-2 h-9 px-3 border-gray-200 bg-white hover:bg-gray-100 transition">
