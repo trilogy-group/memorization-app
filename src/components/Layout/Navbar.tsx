@@ -5,7 +5,7 @@ import { signOut, useSession } from "next-auth/react";
 import { FC, FormEvent, useState } from "react";
 import { AiOutlinePlus } from "react-icons/ai";
 import { BiSearch, BiUser } from "react-icons/bi";
-import { IoLogOutOutline } from "react-icons/io5";
+import { IoLogOutOutline, IoNotifications } from "react-icons/io5";
 
 import ClickAwayListener from "../Shared/ClickAwayListener";
 
@@ -15,6 +15,19 @@ const Navbar: FC = () => {
   const { data: session, status } = useSession();
 
   const [isDropdownOpened, setIsDropdownOpened] = useState(false);
+
+  const [notifications, setNotifications] = useState<string[]>([]);
+
+  const [notificationVisibility, setNotificationVisibility] = useState(false);
+
+  const CustomToastWithLink = () => (
+    <div>
+      You haven't taken a quiz in a long time.
+      Look at the time! -{">"} {t}
+      <br />
+      <Link href={`/quizUltimate`}>Go to Quiz Page</Link>
+    </div>
+  );
 
   const [inputValue, setInputValue] = useState(
     router.pathname === "/search" && typeof router.query.q === "string"
@@ -29,6 +42,24 @@ const Navbar: FC = () => {
       router.push({ pathname: "/search", query: { q: inputValue.trim() } });
     }
   };
+
+  const displayNotification = ({ n }) => {
+    console.log(n);
+    console.log(notifications);
+    // action can be 1)like 2)comment 3)quiz taking time
+    let action = 1;
+
+    if (action == 1) {
+      return (
+        <span className="notification">liked your post</span>
+      )
+    } else if (action == 3) {
+      return (
+        <Link href={`/quizUltimate`}>Go to Quiz Page</Link>
+      )
+    }
+
+  }
 
   return (
     <nav className="border-b sticky top-0 z-20 bg-white">
@@ -61,6 +92,11 @@ const Navbar: FC = () => {
             </button>
           </form>
           <div className="flex items-center gap-3">
+            <div className="notificationArea border rounded bg-black" onClick={async () => { setNotifications(notifications.concat(["French"])); setNotificationVisibility(!notificationVisibility); }}>
+              <img src="/notification.svg" className="notificationBell"></img>
+              <div className="notificationCounter">{notifications.length}</div>
+              {notificationVisibility && <div className="notifications" id="notifications">{notifications.map((n) => displayNotification(n))}</div>}
+            </div>
             <Link href={status === "authenticated" ? "/create-mnemonics" : "/sign-in"}>
               <a className="border rounded flex items-center gap-2 h-9 px-3 border-gray-200 bg-white hover:bg-gray-100 transition">
                 <AiOutlinePlus className="w-5 h-5" />
