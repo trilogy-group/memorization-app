@@ -122,19 +122,6 @@ const CreateDefinition: NextPage = () => {
     // TODO: connect to the mnemonics generation backend
   };
 
-  const handleAddToSequence = async () => {
-    var entry = document.createElement("li");
-    entry.innerHTML = tableEntryValue.trim();
-    entry.className = "border rounded flex items-center gap-2 h-9 px-3 border-gray-200 bg-white hover:bg-gray-100 transition";
-    const answer = document.getElementById("answer");
-    if (answer != null) {
-      answer.appendChild(entry);
-      wordList.push(tableEntryValue);
-    } else {
-      throw new Error("Missing element 'answer' table");
-    }
-  };
-
 
   // TODO: connect list of words answer with the curricular graph
   return (
