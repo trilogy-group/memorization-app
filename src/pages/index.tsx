@@ -6,7 +6,6 @@ import type {
 } from "next";
 import { unstable_getServerSession as getServerSession } from "next-auth";
 import superjson from "superjson";
-import { useEffect } from "react";
 import { ToastContainer } from "react-toastify";
 import Main from "@/components/Home/Main";
 import Sidebar from "@/components/Home/Sidebar";

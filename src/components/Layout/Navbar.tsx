@@ -43,7 +43,6 @@ const Navbar: FC = () => {
     } else {
       return <span className="notification">Someone commented under your post</span>
     }
-
   }
 
   return (
