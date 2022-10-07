@@ -93,7 +93,7 @@ const Navbar: FC = () => {
           </form>
           <div className="flex items-center gap-3">
             <div className="notificationArea border rounded bg-black" onClick={async () => { setNotifications(notifications.concat(["French"])); setNotificationVisibility(!notificationVisibility); }}>
-              <img src="/notification.svg" className="notificationBell"></img>
+              <img src="/notificationBell.svg" className="notificationBell"></img>
               <div className="notificationCounter">{notifications.length}</div>
               {notificationVisibility && <div className="notifications" id="notifications">{notifications.map((n) => displayNotification(n))}</div>}
             </div>

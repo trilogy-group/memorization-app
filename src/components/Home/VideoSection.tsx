@@ -61,8 +61,6 @@ const VideoSection: FC<VideoSectionProps> = ({ video, refetch, origin }) => {
           setIsCurrentlyLiked(isCurrentlyLiked);
         });
       setIsCurrentlyLiked(!isCurrentlyLiked);
-      toast(session.data.user.name);
-      toast(video.caption);
     }
   };
 
