@@ -37,10 +37,10 @@ const CreateMnemonics: NextPage = () => {
             </div>
 
             <div className="flex items-start mt-10 gap-4">
-              <Link href={"/createlstwords"}>
+              <Link href={"/postdefinition"}>
                 <a className="border rounded flex items-center gap-2 h-9 px-3 border-gray-200 bg-white hover:bg-gray-100 transition">
                   <AiOutlinePlus className="w-5 h-5" />
-                  <span>definitions</span>
+                  <span>A definition</span>
                 </a>
               </Link>
             </div>
