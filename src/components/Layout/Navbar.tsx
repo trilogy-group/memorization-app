@@ -5,7 +5,7 @@ import { signOut, useSession } from "next-auth/react";
 import { FC, FormEvent, useState } from "react";
 import { AiOutlinePlus } from "react-icons/ai";
 import { BiSearch, BiUser } from "react-icons/bi";
-import { IoLogOutOutline, IoNotifications } from "react-icons/io5";
+import { IoLogOutOutline } from "react-icons/io5";
 
 import ClickAwayListener from "../Shared/ClickAwayListener";
 
@@ -19,15 +19,6 @@ const Navbar: FC = () => {
   const [notifications, setNotifications] = useState<string[]>([]);
 
   const [notificationVisibility, setNotificationVisibility] = useState(false);
-
-  const CustomToastWithLink = () => (
-    <div>
-      You haven't taken a quiz in a long time.
-      Look at the time! -{">"} {t}
-      <br />
-      <Link href={`/quizUltimate`}>Go to Quiz Page</Link>
-    </div>
-  );
 
   const [inputValue, setInputValue] = useState(
     router.pathname === "/search" && typeof router.query.q === "string"
@@ -43,7 +34,7 @@ const Navbar: FC = () => {
     }
   };
 
-  const displayNotification = (n) => {
+  const displayNotification = (n: string) => {
     console.log(notifications);
     if (n == "Quiz") {
       return <Link href={`/quizUltimate`}>Go to Quiz Page</Link>
