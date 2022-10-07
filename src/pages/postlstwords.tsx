@@ -14,6 +14,7 @@ import { trpc } from "../utils/trpc";
 import { authOptions } from "./api/auth/[...nextauth]";
 import { borderRadius } from "@mui/system";
 import { getSystemErrorMap } from "util";
+import { table } from "console";
 
 const wordList: string[] = [];
 
@@ -113,6 +114,7 @@ const CreateListOfWords: NextPage = () => {
     if (answer != null) {
       answer.appendChild(entry);
       wordList.push(tableEntryValue);
+      setTableEntryValue("");
     } else {
       throw new Error("Missing element 'answer' table");
     }
@@ -149,7 +151,7 @@ const CreateListOfWords: NextPage = () => {
                       }}
                     />
                   </div>
-                  <div className="grid grid-cols-3 gap-2 p-2 border h-[170px] mt-3 mb-2">
+                  <div className="grid grid-cols-3 rows-1 gap-2 p-0 border h-[170px] mt-3 mb-2">
                   <>
                     {mnemonicImage ? (
                       <div className="col-span-1 bg-gray-1 h-full w-full">
@@ -177,7 +179,7 @@ const CreateListOfWords: NextPage = () => {
                           value={story}
                         />
                       </div>
-                    ) : (<div className="col-span-1 bg-gray-1 h-full w-full"></div>
+                    ) : (<div className="col-span-1 bg-gray-1 h-full w-full clear: both"></div>
                     )}
                   </>
 
@@ -191,11 +193,13 @@ const CreateListOfWords: NextPage = () => {
                           setIsLoadingMnemonic(true);
                           await handleRecommeddedImage()
                           setIsLoadingMnemonic(false);}}
-                        className={`flex justify-center items-center gap-2 py-3 min-w-[170px] hover:brightness-90 transition text-white bg-red-1 disabled:text-gray-400 disabled:bg-gray-200`}
+                        className={`flex justify-center items-center gap-2 py-3 min-w-[20px] hover:brightness-90 transition text-white bg-red-1 disabled:text-gray-400 disabled:bg-gray-200`}
+                        style={{ borderRadius: 5, padding: 5 , marginTop: 10}}
                         >
                         {isLoadingMnemonic && (
                           <span className="w-4 h-4 border-2 border-gray-500 border-t-transparent rounded-full animate-spin"></span>
                         )}
+                      
                       Generate Mnemonic image
                     </button>
                     
@@ -221,7 +225,7 @@ const CreateListOfWords: NextPage = () => {
                   <button
                     onClick={async () => await handleAddToSequence()}
                     className={`flex justify-center items-center gap-2 py-3 min-w-[20px] hover:brightness-90 transition text-white bg-red-1 disabled:text-gray-400 disabled:bg-gray-200`}
-                    style={{ borderRadius: 5, padding: 5 }}
+                    style={{ borderRadius: 5, padding: 5, width: 200}}
                   >
                     <AiOutlinePlus className="w-5 h-5" />
 
@@ -233,8 +237,8 @@ const CreateListOfWords: NextPage = () => {
                           setIsLoadingMnemonic(true);
                           await handleRecommeddedAcronym()
                           setIsLoadingMnemonic(false);}}
-                        className={`flex justify-center items-center gap-2 py-3 min-w-[20px] hover:brightness-90 transition text-white bg-red-1 disabled:text-gray-400 disabled:bg-gray-200`}
-                        style={{ borderRadius: 5, padding: 5 , marginTop: 10}}
+                        className={` flex justify-center items-center gap-2 py-3 min-w-[20px] hover:brightness-90 transition text-white bg-red-1 disabled:text-gray-400 disabled:bg-gray-200`}
+                        style={{ borderRadius: 5, padding: 5 , marginTop: 10, width: 200}}
                         >
                         {isLoadingMnemonic && (
                           <span className="w-4 h-4 border-2 border-gray-500 border-t-transparent rounded-full animate-spin"></span>
@@ -249,12 +253,12 @@ const CreateListOfWords: NextPage = () => {
                           await handleRecommeddedStory()
                           setIsLoadingMnemonic(false);}}
                         className={`flex justify-center items-center gap-2 py-3 min-w-[20px] hover:brightness-90 transition text-white bg-red-1 disabled:text-gray-400 disabled:bg-gray-200`}
-                        style={{ borderRadius: 5, padding: 5 , marginTop: 10}}
+                        style={{ borderRadius: 5, padding: 5 , marginTop: 10, width: 200}}
                         >
                         {isLoadingMnemonic && (
                           <span className="w-4 h-4 border-2 border-gray-500 border-t-transparent rounded-full animate-spin"></span>
                         )}
-                      Generate Story
+                      Generate Rhyme
                     </button>
 
                 </div>

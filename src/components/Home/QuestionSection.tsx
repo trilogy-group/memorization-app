@@ -158,9 +158,8 @@ const QuestionSection: FC<QuestionSectionProps> = ({ question, refetch, origin }
               className="lg:w-12 lg:h-12 w-7 h-7 bg-[#F1F1F2] fill-black flex justify-center items-center rounded-full"
             >
               <AiFillHeart
-                className={`lg:w-7 lg:h-7 h-5 w-5 ${
-                  isCurrentlyLiked ? "fill-pink" : ""
-                }`}
+                className={`lg:w-7 lg:h-7 h-5 w-5 ${isCurrentlyLiked ? "fill-pink" : ""
+                  }`}
               />
             </button>
             <p className="text-center text-xs font-semibold">

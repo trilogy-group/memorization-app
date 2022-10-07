@@ -1,0 +1,42 @@
+.notificationBell {
+    width: 30px;
+    height: 30px;
+}
+
+.notificationArea {
+    position: relative;
+    cursor: pointer;
+}
+
+.notificationCounter {
+    width: 15px;
+    height: 15px;
+    background-color: red;
+    border-radius: 50%;
+    padding: 5px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+
+    position: absolute;
+    top: -5px;
+    right: -5px;
+}
+
+.notifications {
+    position: absolute;
+    top: 50px;
+    right: 0;
+    background-color: grey;
+    color: white;
+    font-weight: 800;
+    font-size: 12px;
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    width: 350px;
+    height: 250px;
+    overflow: auto;
+}

@@ -28,7 +28,8 @@ export const storyRecommendationRouter = createRouter()
             const completion = await openai.createCompletion({
             max_tokens: 500,
             model: "text-davinci-002",
-            prompt: "Create an story to remember the words " + wordList + ": ",
+            //prompt: "Create an story to remember the words " + wordList + ": ",
+            prompt: "Create rhyme that contains the words " + wordList + ": ",
             });
 
             var result = ""

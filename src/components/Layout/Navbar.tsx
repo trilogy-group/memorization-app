@@ -16,6 +16,10 @@ const Navbar: FC = () => {
 
   const [isDropdownOpened, setIsDropdownOpened] = useState(false);
 
+  const [notifications, setNotifications] = useState<string[]>([]);
+
+  const [notificationVisibility, setNotificationVisibility] = useState(false);
+
   const [inputValue, setInputValue] = useState(
     router.pathname === "/search" && typeof router.query.q === "string"
       ? (router.query.q as string)
@@ -29,6 +33,17 @@ const Navbar: FC = () => {
       router.push({ pathname: "/search", query: { q: inputValue.trim() } });
     }
   };
+
+  const displayNotification = (n: string) => {
+    console.log(notifications);
+    if (n == "Quiz") {
+      return <Link href={`/quizUltimate`}>Go to Quiz Page</Link>
+    } else if (n == "Like") {
+      return <span className="notification">Someone liked your post</span>
+    } else {
+      return <span className="notification">Someone commented under your post</span>
+    }
+  }
 
   return (
     <nav className="border-b sticky top-0 z-20 bg-white">
@@ -61,6 +76,17 @@ const Navbar: FC = () => {
             </button>
           </form>
           <div className="flex items-center gap-3">
+            <div className="cursor-pointer" onClick={async () => { setNotifications(notifications.concat(["Like"])); }}>
+              <span >Add like notification</span></div>
+            <div className="cursor-pointer" onClick={async () => { setNotifications(notifications.concat(["Comment"])); }}>
+              <span >Add comment notification</span></div>
+            <div className="cursor-pointer" onClick={async () => { setNotifications(notifications.concat(["Quiz"])); }}>
+              <span >Add quiz notification</span></div>
+            <div className="notificationArea border rounded" onClick={async () => { setNotificationVisibility(!notificationVisibility); }}>
+              <img src="/notificationBell.svg" className="notificationBell"></img>
+              <div className="notificationCounter">{notifications.length}</div>
+              {notificationVisibility && <div className="notifications" id="notifications">{notifications.map((n) => displayNotification(n))}</div>}
+            </div>
             <Link href={status === "authenticated" ? "/create-mnemonics" : "/sign-in"}>
               <a className="border rounded flex items-center gap-2 h-9 px-3 border-gray-200 bg-white hover:bg-gray-100 transition">
                 <AiOutlinePlus className="w-5 h-5" />
