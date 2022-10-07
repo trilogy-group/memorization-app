@@ -43,20 +43,14 @@ const Navbar: FC = () => {
     }
   };
 
-  const displayNotification = ({ n }) => {
-    console.log(n);
+  const displayNotification = (n) => {
     console.log(notifications);
-    // action can be 1)like 2)comment 3)quiz taking time
-    let action = 1;
-
-    if (action == 1) {
-      return (
-        <span className="notification">liked your post</span>
-      )
-    } else if (action == 3) {
-      return (
-        <Link href={`/quizUltimate`}>Go to Quiz Page</Link>
-      )
+    if (n == "Quiz") {
+      return <Link href={`/quizUltimate`}>Go to Quiz Page</Link>
+    } else if (n == "Like") {
+      return <span className="notification">Someone liked your post</span>
+    } else {
+      return <span className="notification">Someone commented under your post</span>
     }
 
   }
@@ -92,7 +86,13 @@ const Navbar: FC = () => {
             </button>
           </form>
           <div className="flex items-center gap-3">
-            <div className="notificationArea border rounded bg-black" onClick={async () => { setNotifications(notifications.concat(["French"])); setNotificationVisibility(!notificationVisibility); }}>
+            <div className="cursor-pointer" onClick={async () => { setNotifications(notifications.concat(["Like"])); }}>
+              <span >Add like notification</span></div>
+            <div className="cursor-pointer" onClick={async () => { setNotifications(notifications.concat(["Comment"])); }}>
+              <span >Add comment notification</span></div>
+            <div className="cursor-pointer" onClick={async () => { setNotifications(notifications.concat(["Quiz"])); }}>
+              <span >Add quiz notification</span></div>
+            <div className="notificationArea border rounded" onClick={async () => { setNotificationVisibility(!notificationVisibility); }}>
               <img src="/notificationBell.svg" className="notificationBell"></img>
               <div className="notificationCounter">{notifications.length}</div>
               {notificationVisibility && <div className="notifications" id="notifications">{notifications.map((n) => displayNotification(n))}</div>}
