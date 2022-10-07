@@ -6,21 +6,22 @@ import type {
 } from "next";
 import { unstable_getServerSession as getServerSession } from "next-auth";
 import superjson from "superjson";
-
+import { ToastContainer } from "react-toastify";
 import Main from "@/components/Home/Main";
 import Sidebar from "@/components/Home/Sidebar";
 import Navbar from "@/components/Layout/Navbar";
 import Meta from "@/components/Shared/Meta";
 import { prisma } from "@/server/db/client";
 import { appRouter } from "@/server/router";
-
 import { authOptions } from "./api/auth/[...nextauth]";
+
 
 const Home: NextPage<HomeProps> = ({
   leaderboardAccounts,
   followingAccounts,
   origin,
 }) => {
+
   return (
     <>
       <Meta
@@ -36,7 +37,11 @@ const Home: NextPage<HomeProps> = ({
             followingAccounts={followingAccounts!}
           />
           <Main origin={origin!} />
+          <div id="notificationArea" className="w-1/6">
+            <ToastContainer />
+          </div>
         </div>
+
       </div>
     </>
   );
