@@ -9,7 +9,25 @@ import { IoLogOutOutline } from "react-icons/io5";
 
 import ClickAwayListener from "../Shared/ClickAwayListener";
 
+import Autocomplete from '@mui/material/Autocomplete';
+import TextField from '@mui/material/TextField';
+
 const Navbar: FC = () => {
+  const [subjectValue, setSubjectValue] = useState<string[]>([]);
+  const [chapterValue, setChapterValue] = useState<string[]>([]);
+
+  const subjects = [
+    '#Biology ',
+    '#History ',
+    '#Spanish ',
+  ];
+
+  const chapters = [
+    '#Chapter1 ',
+    '#Chapter2 ',
+    '#Chapter3 ',
+  ];
+
   const router = useRouter();
 
   const { data: session, status } = useSession();
@@ -26,14 +44,14 @@ const Navbar: FC = () => {
     e.preventDefault();
 
     if (inputValue.trim()) {
-      router.push({ pathname: "/search", query: { q: inputValue.trim() } });
+      router.push({ pathname: "/search", query: { q: subjectValue + " " + chapterValue + " " + inputValue.trim() } });
     }
   };
 
   return (
     <nav className="border-b sticky top-0 z-20 bg-white">
       <div className="flex justify-center mx-4">
-        <div className="w-full max-w-[1150px] flex justify-between items-center h-[60px]">
+        <div className="w-full max-w-[1150px] flex justify-between items-center h-[70px]">
           <Link href="/">
             <a className="flex items-end gap-1">
               <Image src="/logo.png" alt="Logo" width={30} height={30} />
@@ -41,9 +59,43 @@ const Navbar: FC = () => {
               <span className="text-2xl leading-[1] font-bold">EdTok</span>
             </a>
           </Link>
+          <div className='flex space-x-2 min-w-[30%]'>
+                  <Autocomplete
+                    value={subjectValue}
+                    onChange={(event, newValue) => {
+                      setSubjectValue(newValue);
+                    }}
+                    options={subjects}
+                    multiple
+                    limitTags={2}
+                    id="caption"
+                    className="p-1 w-full mt-1 mb-3 outline-none focus:border-gray-400 transition"
+                    style={{ paddingTop: 20, paddingBottom: 20, maxHeight: 90 }}
+                    renderInput={(params) => (
+                      <TextField {...params} label="Subject" placeholder="Biology, History, Spanish ..." />
+                    )}
+                    sx={{ width: '1/2' }}
+                  />
+                  <Autocomplete
+                    value={chapterValue}
+                    onChange={(event, newValue) => {
+                      setChapterValue(newValue);
+                    }}
+                    options={chapters}
+                    multiple
+                    limitTags={2}
+                    id="caption"
+                    className="p-1 w-full mt-1 mb-3 outline-none focus:border-gray-400 transition"
+                    style={{ paddingTop: 20, maxHeight: 90 }}
+                    renderInput={(params) => (
+                      <TextField {...params} label="Chapters" placeholder="Chapter 1, 2 ..." />
+                    )}
+                    sx={{ width: '1/2', height: '10' }}
+                  />
+          </div>
           <form
             onSubmit={handleFormSubmit}
-            className="relative w-[360px] h-[46px] hidden md:block"
+            className="relative w-[400px] h-[56px] hidden md:block"
           >
             <input
               className="w-full h-full outline-none bg-gray-1 rounded-full pl-4 pr-14 border border-transparent focus:border-gray-400 transition"
