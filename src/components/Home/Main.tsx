@@ -17,8 +17,8 @@ const Main: FC<MainProps> = ({ origin }) => {
     trpc.useInfiniteQuery(
       [
         Boolean(Number(router.query.following))
-          ? "video.following"
-          : "video.for-you",
+          ? "question.following"
+          : "question.for-you",
         {},
       ],
       {
@@ -81,10 +81,10 @@ const Main: FC<MainProps> = ({ origin }) => {
   return (
     <div className="flex-grow">
       {data?.pages.map((page) =>
-        page.items.map((video) => (
+        page.items.map((question) => (
           <VideoSection
-            video={video}
-            key={video.id}
+            question={question}
+            key={question.id}
             refetch={refetch}
             origin={origin}
           />
