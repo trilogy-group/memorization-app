@@ -124,11 +124,18 @@ const VideoSection: FC<VideoSectionProps> = ({ question, refetch, origin }) => {
             <div className="flex-shrink-0">
               <button
                 onClick={() => toggleFollow()}
+<<<<<<< HEAD
                 className={`py-1 px-3 rounded text-sm mt-2 ${
                   isCurrentlyFollowed ?? question.followedByMe
                     ? "border hover:bg-[#F8F8F8] transition"
                     : "border border-pink text-pink hover:bg-[#FFF4F5] transition"
                 }`}
+=======
+                className={`py-1 px-3 rounded text-sm mt-2 ${isCurrentlyFollowed ?? video.followedByMe
+                  ? "border hover:bg-[#F8F8F8] transition"
+                  : "border border-pink text-pink hover:bg-[#FFF4F5] transition"
+                  }`}
+>>>>>>> master
               >
                 {isCurrentlyFollowed ?? question.followedByMe
                   ? "Following"
@@ -140,11 +147,18 @@ const VideoSection: FC<VideoSectionProps> = ({ question, refetch, origin }) => {
         <div className="flex items-end gap-5">
           <Link href={`/question/${question.id}`}>
             <a
+<<<<<<< HEAD
               className={`${
                 question.videoHeight > question.videoWidth * 1.3
                   ? "md:h-[600px]"
                   : "flex-grow h-auto"
               } block bg-[#3D3C3D] rounded-md overflow-hidden flex-grow h-auto md:flex-grow-0`}
+=======
+              className={`${video.videoHeight > video.videoWidth * 1.3
+                ? "md:h-[600px]"
+                : "flex-grow h-auto"
+                } block bg-[#3D3C3D] rounded-md overflow-hidden flex-grow h-auto md:flex-grow-0`}
+>>>>>>> master
             >
               <VideoPlayer
                 src={question.videoURL}
@@ -158,9 +172,8 @@ const VideoSection: FC<VideoSectionProps> = ({ question, refetch, origin }) => {
               className="lg:w-12 lg:h-12 w-7 h-7 bg-[#F1F1F2] fill-black flex justify-center items-center rounded-full"
             >
               <AiFillHeart
-                className={`lg:w-7 lg:h-7 h-5 w-5 ${
-                  isCurrentlyLiked ? "fill-pink" : ""
-                }`}
+                className={`lg:w-7 lg:h-7 h-5 w-5 ${isCurrentlyLiked ? "fill-pink" : ""
+                  }`}
               />
             </button>
             <p className="text-center text-xs font-semibold">
