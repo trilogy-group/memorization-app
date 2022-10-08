@@ -11,10 +11,12 @@ import Navbar from "@/components/Layout/Navbar";
 import Meta from "@/components/Shared/Meta";
 
 import { authOptions } from "./api/auth/[...nextauth]";
+import { useMutation } from "react-query";
 
 const SignIn: NextPage = () => {
   const router = useRouter();
   const error = router.query.error as string;
+  const notificationMutation = useMutation("notification.createQuiz");
 
   useEffect(() => {
     if (error) {
@@ -43,6 +45,8 @@ const SignIn: NextPage = () => {
         position: "bottom-right",
       });
     });
+    // Refresh quiz reminder in the DB
+    notificationMutation.mutateAsync();
   };
 
   return (

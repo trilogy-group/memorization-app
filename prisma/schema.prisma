@@ -40,21 +40,21 @@ model Session {
 }
 
 model User {
-    id                 String         @id @default(cuid())
-    name               String?
-    email              String?        @unique
-    emailVerified      DateTime?
-    image              String?
-    accounts           Account[]
-    sessions           Session[]
-    questions          Question[]
-    likes              Like[]
-    comments           Comment[]
-    followers          Follow[]       @relation("followings")
-    followings         Follow[]       @relation("followers")
-    points             Int            @default(0)
-    progress           Progress[]
-    notifications      Notification[]
+    id            String         @id @default(cuid())
+    name          String?
+    email         String?        @unique
+    emailVerified DateTime?
+    image         String?
+    accounts      Account[]
+    sessions      Session[]
+    questions     Question[]
+    likes         Like[]
+    comments      Comment[]
+    followers     Follow[]       @relation("followings")
+    followings    Follow[]       @relation("followers")
+    points        Int            @default(0)
+    progress      Progress[]
+    notifications Notification[]
 
     @@fulltext([name, email])
 }

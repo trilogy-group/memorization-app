@@ -53,7 +53,8 @@ const QuestionSection: FC<QuestionSectionProps> = ({ question, refetch, origin }
         if (!isCurrentlyLiked) {
           notificationMutation.mutateAsync({
             content: session.data.user.name + " liked your post ",
-            questionId: question.id,
+            questionId: question.id as string,
+            userId: question.user.id as string,
           });
         }
       } catch {

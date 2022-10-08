@@ -108,6 +108,7 @@ const Question: NextPage<QuestionProps> = ({ question, href, title }) => {
       notificationMutation.mutateAsync({
         content: session.data?.user?.name + " commented your post " + "\"" + inputValue.trim() + "\"",
         questionId: question?.id as string,
+        userId: question?.user.id as string,
       });
     } catch {
       throw new Error("Cannot update notifications");
