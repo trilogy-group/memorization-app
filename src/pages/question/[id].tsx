@@ -41,6 +41,7 @@ const Question: NextPage<QuestionProps> = ({ question, href, title }) => {
   const likeMutation = trpc.useMutation("like.toggle");
   const followMutation = trpc.useMutation("follow.toggle");
   const postCommentMutation = trpc.useMutation("comment.post");
+  const notificationMutation = trpc.useMutation("notification.createComment");
 
   const [isCurrentlyLiked, setIsCurrentlyLiked] = useState(question?.likedByMe);
   const [isCurrentlyFollowed, setIsCurrentlyFollowed] = useState(
@@ -103,6 +104,16 @@ const Question: NextPage<QuestionProps> = ({ question, href, title }) => {
         console.log(err);
         toast.error("Post comment failed");
       });
+    try {
+      notificationMutation.mutateAsync({
+        content: session.data?.user?.name + " commented your post " + "\"" + inputValue.trim() + "\"",
+        questionId: question?.id as string,
+      });
+    } catch {
+      throw new Error("Cannot update notifications");
+    }
+
+
   };
 
   if (!question) return <></>;
@@ -179,11 +190,10 @@ const Question: NextPage<QuestionProps> = ({ question, href, title }) => {
                 <div className="flex-shrink-0">
                   <button
                     onClick={() => toggleFollow()}
-                    className={`py-1 px-3 rounded text-sm mt-2 ${
-                      isCurrentlyFollowed ?? question.followedByMe
+                    className={`py-1 px-3 rounded text-sm mt-2 ${isCurrentlyFollowed ?? question.followedByMe
                         ? "border hover:bg-[#F8F8F8] transition"
                         : "border border-pink text-pink hover:bg-[#FFF4F5] transition"
-                    }`}
+                      }`}
                   >
                     {isCurrentlyFollowed ?? question.followedByMe
                       ? "Following"
@@ -207,9 +217,8 @@ const Question: NextPage<QuestionProps> = ({ question, href, title }) => {
                     className="w-9 h-9 bg-[#F1F1F2] fill-black flex justify-center items-center rounded-full"
                   >
                     <AiFillHeart
-                      className={`w-5 h-5 ${
-                        isCurrentlyLiked ? "fill-pink" : ""
-                      }`}
+                      className={`w-5 h-5 ${isCurrentlyLiked ? "fill-pink" : ""
+                        }`}
                     />
                   </button>
                   <span className="text-center text-xs font-semibold">
@@ -326,11 +335,10 @@ const Question: NextPage<QuestionProps> = ({ question, href, title }) => {
             <button
               disabled={postCommentMutation.isLoading || !inputValue.trim()}
               type="submit"
-              className={`transition ${
-                postCommentMutation.isLoading || !inputValue.trim()
+              className={`transition ${postCommentMutation.isLoading || !inputValue.trim()
                   ? ""
                   : "text-pink"
-              }`}
+                }`}
             >
               {postCommentMutation.isLoading ? "Posting..." : "Post"}
             </button>
@@ -407,9 +415,8 @@ export const getServerSideProps = async ({
           followedByMe,
         },
         session,
-        href: `${
-          req.headers.host?.includes("localhost") ? "http" : "https"
-        }://${req.headers.host}/question/${id}`,
+        href: `${req.headers.host?.includes("localhost") ? "http" : "https"
+          }://${req.headers.host}/question/${id}`,
         title: `${question.user.name} on EdTok`,
       },
     };

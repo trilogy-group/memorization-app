@@ -75,38 +75,38 @@ const Navbar: FC = () => {
             </a>
           </Link>
           <div className='flex space-x-2 min-w-[30%]'>
-                  <Autocomplete
-                    value={subjectValue}
-                    onChange={(event, newValue) => {
-                      setSubjectValue(newValue);
-                    }}
-                    options={subjects}
-                    multiple
-                    limitTags={2}
-                    id="caption"
-                    className="p-1 w-full mt-1 mb-3 outline-none focus:border-gray-400 transition"
-                    style={{ paddingTop: 20, paddingBottom: 20, maxHeight: 90 }}
-                    renderInput={(params) => (
-                      <TextField {...params} label="Subject" placeholder="Biology, History, Spanish ..." />
-                    )}
-                    sx={{ width: '1/2' }}
-                  />
-                  <Autocomplete
-                    value={chapterValue}
-                    onChange={(event, newValue) => {
-                      setChapterValue(newValue);
-                    }}
-                    options={chapters}
-                    multiple
-                    limitTags={2}
-                    id="caption"
-                    className="p-1 w-full mt-1 mb-3 outline-none focus:border-gray-400 transition"
-                    style={{ paddingTop: 20, maxHeight: 90 }}
-                    renderInput={(params) => (
-                      <TextField {...params} label="Chapters" placeholder="Chapter 1, 2 ..." />
-                    )}
-                    sx={{ width: '1/2', height: '10' }}
-                  />
+            <Autocomplete
+              value={subjectValue}
+              onChange={(event, newValue) => {
+                setSubjectValue(newValue);
+              }}
+              options={subjects}
+              multiple
+              limitTags={2}
+              id="caption"
+              className="p-1 w-full mt-1 mb-3 outline-none focus:border-gray-400 transition"
+              style={{ paddingTop: 20, paddingBottom: 20, maxHeight: 90 }}
+              renderInput={(params) => (
+                <TextField {...params} label="Subject" placeholder="Biology, History, Spanish ..." />
+              )}
+              sx={{ width: '1/2' }}
+            />
+            <Autocomplete
+              value={chapterValue}
+              onChange={(event, newValue) => {
+                setChapterValue(newValue);
+              }}
+              options={chapters}
+              multiple
+              limitTags={2}
+              id="caption"
+              className="p-1 w-full mt-1 mb-3 outline-none focus:border-gray-400 transition"
+              style={{ paddingTop: 20, maxHeight: 90 }}
+              renderInput={(params) => (
+                <TextField {...params} label="Chapters" placeholder="Chapter 1, 2 ..." />
+              )}
+              sx={{ width: '1/2', height: '10' }}
+            />
           </div>
           <form
             onSubmit={handleFormSubmit}

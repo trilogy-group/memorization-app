@@ -35,6 +35,7 @@ const QuestionSection: FC<QuestionSectionProps> = ({ question, refetch, origin }
   const session = useSession();
 
   const likeMutation = trpc.useMutation("like.toggle");
+  const notificationMutation = trpc.useMutation("notification.createLike");
   const followMutation = trpc.useMutation("follow.toggle");
 
   const [isCurrentlyLiked, setIsCurrentlyLiked] = useState(question.likedByMe);
@@ -48,6 +49,17 @@ const QuestionSection: FC<QuestionSectionProps> = ({ question, refetch, origin }
     if (!session.data?.user) {
       toast("You need to login");
     } else {
+      try {
+        if (!isCurrentlyLiked) {
+          notificationMutation.mutateAsync({
+            content: session.data.user.name + " liked your post ",
+            questionId: question.id,
+          });
+        }
+      } catch {
+        throw new Error("Cannot update notifications");
+      }
+
       likeMutation
         .mutateAsync({
           isLiked: !isCurrentlyLiked,
@@ -120,15 +132,14 @@ const QuestionSection: FC<QuestionSectionProps> = ({ question, refetch, origin }
             </p>
           </div>
           {/* @ts-ignore */}
-          {question.userId !== session.data?.user.id && (
+          {question.userId !== session.data?.user?.id && (
             <div className="flex-shrink-0">
               <button
                 onClick={() => toggleFollow()}
-                className={`py-1 px-3 rounded text-sm mt-2 ${
-                  isCurrentlyFollowed ?? question.followedByMe
-                    ? "border hover:bg-[#F8F8F8] transition"
-                    : "border border-pink text-pink hover:bg-[#FFF4F5] transition"
-                }`}
+                className={`py-1 px-3 rounded text-sm mt-2 ${isCurrentlyFollowed ?? question.followedByMe
+                  ? "border hover:bg-[#F8F8F8] transition"
+                  : "border border-pink text-pink hover:bg-[#FFF4F5] transition"
+                  }`}
               >
                 {isCurrentlyFollowed ?? question.followedByMe
                   ? "Following"
@@ -140,11 +151,10 @@ const QuestionSection: FC<QuestionSectionProps> = ({ question, refetch, origin }
         <div className="flex items-end gap-5">
           <Link href={`/question/${question.id}`}>
             <a
-              className={`${
-                question.videoHeight > question.videoWidth * 1.3
-                  ? "md:h-[600px]"
-                  : "flex-grow h-auto"
-              } block bg-[#3D3C3D] rounded-md overflow-hidden flex-grow h-auto md:flex-grow-0`}
+              className={`${question.videoHeight > question.videoWidth * 1.3
+                ? "md:h-[600px]"
+                : "flex-grow h-auto"
+                } block bg-[#3D3C3D] rounded-md overflow-hidden flex-grow h-auto md:flex-grow-0`}
             >
               <VideoPlayer
                 src={question.videoURL}
