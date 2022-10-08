@@ -133,7 +133,7 @@ const Main: FC<MainProps> = ({ origin }) => {
     <div className="flex-grow">
       {data?.pages.map((page) =>
         page.items.map((question) => (
-          <QuestionSection
+          <VideoSection
             question={question}
             key={question.id}
             refetch={refetch}
