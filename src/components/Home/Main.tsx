@@ -29,28 +29,13 @@ const arrayOfArrayCorrectAnswers = [
     "Belgium",
     "Netherlands",
     "France",
-  ],
-  // Third question
-  ["Bipedalism"],
-  // Fourth question
-  [
-    "Stone Age",
-    "Medieval times",
-    "Modern Age",
-    "Contemporary",
-  ],
-  // Fifth question
-  ["the Khoisan of the African Kalahari Desert"],
-  // Sixth question
-  ["Italy",
-    "Australia",
-    "Canada"
   ]
+
 ]
 
-let arraySrc //hints
-let arrayDifficulty;
-let arrayQuestion = ["Put WW2 events in chronological order", "Out of all these countries, which was occupied by Germany in WW2?", "How is the ability to walk on two legs called?", "Put eras of human story in chronological order", "What is an example of modern hunter-gatherer communities?", "Which countries were NOT part of USSR?"];
+let arraySrc: string[] //hints
+let arrayDifficulty: string[];
+let arrayQuestion = ["Put WW2 events in chronological order", "Out of all these countries, which was occupied by Germany in WW2?", "How is the ability to walk on two legs called?"];
 let arrayIncorrectAnswer = [
   [
 
@@ -61,20 +46,9 @@ let arrayIncorrectAnswer = [
   ["Atavism",
     "Unipedalism",
     "Locomotion"
-  ],
-  [
-
-  ],
-  [
-    "Lunarian",
-    "R'lyeh",
-    "Innsmouth"
-  ],
-  [
-
   ]
 ];
-let arrayType = ["sequence", "list", "MCQ", "sequence", "MCQ", "list"];
+let arrayType = ["sequence", "list", "MCQ"];
 
 
 interface MainProps {
@@ -170,7 +144,7 @@ const Main: FC<MainProps> = ({ origin }) => {
 
       <div>{
         <QuizMicro
-          arrayQuestion={["Put WW2 events in chronological order", "Out of all these countries, which was occupied by Germany in WW2?", "How is the ability to walk on two legs called?", "Put eras of human story in chronological order", "What is an example of modern hunter-gatherer communities?", "Which countries were NOT part of USSR?"]}
+          arrayQuestion={arrayQuestion}
           arrayOfArrayCorrectAnswers={[
             // First question
             [
@@ -194,47 +168,12 @@ const Main: FC<MainProps> = ({ origin }) => {
               "France",
             ],
             // Third question
-            ["Bipedalism"],
-            // Fourth question
-            [
-              "Stone Age",
-              "Medieval times",
-              "Modern Age",
-              "Contemporary",
-            ],
-            // Fifth question
-            ["the Khoisan of the African Kalahari Desert"],
-            // Sixth question
-            ["Italy",
-              "Australia",
-              "Canada"
-            ]
+            ["Bipedalism"]
+
           ]}
           arrayType={["sequence", "list", "MCQ", "sequence", "MCQ", "list"]}
-          arrayIncorrectAnswer={[
-            [
-
-            ],
-            ["USA",
-              "Mexico"
-            ],
-            ["Atavism",
-              "Unipedalism",
-              "Locomotion"
-            ],
-            [
-
-            ],
-            [
-              "Lunarian",
-              "R'lyeh",
-              "Innsmouth"
-            ],
-            [
-
-            ]
-          ]}
-          arraySrc={[]}
+          arrayIncorrectAnswer={arrayIncorrectAnswer}
+          arraySrc={arraySrc}
           arrayDifficulty={[]}
         />
 
