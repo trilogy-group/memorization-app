@@ -17,7 +17,7 @@ import { trpc } from "@/utils/trpc";
 
 import VideoPlayer from "./VideoPlayer";
 
-interface VideoSectionProps {
+interface QuestionSectionProps {
   question: Video & {
     user: User;
     _count: {
@@ -31,7 +31,7 @@ interface VideoSectionProps {
   refetch: Function;
 }
 
-const VideoSection: FC<VideoSectionProps> = ({ question, refetch, origin }) => {
+const QuestionSection: FC<QuestionSectionProps> = ({ question, refetch, origin }) => {
   const session = useSession();
 
   const likeMutation = trpc.useMutation("like.toggle");
@@ -235,4 +235,4 @@ const VideoSection: FC<VideoSectionProps> = ({ question, refetch, origin }) => {
   );
 };
 
-export default VideoSection;
+export default QuestionSection;

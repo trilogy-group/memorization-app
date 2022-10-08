@@ -4,7 +4,7 @@ import { InView } from "react-intersection-observer";
 
 import { trpc } from "@/utils/trpc";
 
-import VideoSection from "./VideoSection";
+import QuestionSection from "./QuestionSection";
 
 interface MainProps {
   origin: string;
@@ -75,14 +75,14 @@ const Main: FC<MainProps> = ({ origin }) => {
 
   if (data?.pages.length === 0 || data?.pages[0]?.items.length === 0)
     return (
-      <div className="flex-grow text-center my-4">There is no video yet</div>
+      <div className="flex-grow text-center my-4">There is no question yet</div>
     );
 
   return (
     <div className="flex-grow">
       {data?.pages.map((page) =>
         page.items.map((question) => (
-          <VideoSection
+          <QuestionSection
             question={question}
             key={question.id}
             refetch={refetch}

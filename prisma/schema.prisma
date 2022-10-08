@@ -97,6 +97,7 @@ model Question {
     comments    Comment[]
     hashtags    Hashtag[]
     progress    Progress[]
+    contentType Int       @default(3) // 1: image, 2: video, 3: unknown
 
     @@fulltext([caption])
 }
