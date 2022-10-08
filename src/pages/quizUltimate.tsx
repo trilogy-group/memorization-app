@@ -11,7 +11,7 @@ import React from "react";
 
 
 const QuizUltimate: NextPage = () => {
-  const uploadMutation = trpc.useMutation("video.create");
+  const uploadMutation = trpc.useMutation("question.create");
   const [optionMCQ, setOptionMCQ] = useState();
   const [optionsList, setOptionsList] = useState<string[]>([]);
   const [optionA, setOptionA] = useState("");

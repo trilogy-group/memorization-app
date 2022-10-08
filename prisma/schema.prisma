@@ -40,19 +40,19 @@ model Session {
 }
 
 model User {
-    id            String    @id @default(cuid())
+    id            String     @id @default(cuid())
     name          String?
-    email         String?   @unique
+    email         String?    @unique
     emailVerified DateTime?
     image         String?
     accounts      Account[]
     sessions      Session[]
-    videos        Video[]
+    questions     Question[]
     likes         Like[]
     comments      Comment[]
-    followers     Follow[]  @relation("followings")
-    followings    Follow[]  @relation("followers")
-    points        Int       @default(0)
+    followers     Follow[]   @relation("followings")
+    followings    Follow[]   @relation("followers")
+    points        Int        @default(0)
     progress      Progress[]
 
     @@fulltext([name, email])
@@ -60,17 +60,17 @@ model User {
 
 //TODO: implement Question model and relate to the Progress
 model Progress {
-    lastEvaluated  DateTime   @updatedAt
-    interval       Float      @default(0)
-    repetition     Float      @default(0)
-    efactor        Float      @default(2.5)
-    userId         String
-    user           User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-    videoId        String
-    video          Video      @relation(fields: [videoId], references: [id], onDelete: Cascade)
+    lastEvaluated DateTime @updatedAt
+    interval      Float    @default(0)
+    repetition    Float    @default(0)
+    efactor       Float    @default(2.5)
+    userId        String
+    user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    questionId    String
+    question      Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
 
-    @@id([userId, videoId], name: "progress_identifier")
-    @@unique([userId, videoId])
+    @@id([userId, questionId], name: "progress_identifier")
+    @@unique([userId, questionId])
 }
 
 model VerificationToken {
@@ -82,49 +82,50 @@ model VerificationToken {
 }
 
 // Main models
-model Video {
-    id          String    @id @default(cuid())
-    caption     String    @db.Text
-    videoURL    String    @db.Text
-    coverURL    String    @db.Text
+model Question {
+    id          String     @id @default(cuid())
+    caption     String     @db.Text
+    videoURL    String     @db.Text
+    coverURL    String     @db.Text
     videoWidth  Int
     videoHeight Int
     userId      String
-    createdAt   DateTime  @default(now())
-    updatedAt   DateTime  @updatedAt
-    user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+    createdAt   DateTime   @default(now())
+    updatedAt   DateTime   @updatedAt
+    user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
     likes       Like[]
     comments    Comment[]
     hashtags    Hashtag[]
     progress    Progress[]
+    contentType Int       @default(3) // 1: image, 2: video, 3: unknown
 
     @@fulltext([caption])
 }
 
 model Hashtag {
-    id      Int     @id @default(autoincrement())
-    tag     String  @unique
-    videos  Video[]
+    id        Int        @id @default(autoincrement())
+    tag       String     @unique
+    questions Question[]
 }
 
 model Like {
-    videoId String
-    userId  String
-    user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-    video   Video  @relation(fields: [videoId], references: [id], onDelete: Cascade)
+    questionId String
+    userId     String
+    user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
 
-    @@id([videoId, userId])
+    @@id([questionId, userId])
 }
 
 model Comment {
-    id        String   @id @default(cuid())
-    videoId   String
-    userId    String
-    content   String
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-    user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-    video     Video    @relation(fields: [videoId], references: [id], onDelete: Cascade)
+    id         String   @id @default(cuid())
+    questionId String
+    userId     String
+    content    String
+    createdAt  DateTime @default(now())
+    updatedAt  DateTime @updatedAt
+    user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
 }
 
 model Follow {

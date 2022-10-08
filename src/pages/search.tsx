@@ -15,10 +15,10 @@ import { authOptions } from "./api/auth/[...nextauth]";
 
 enum Tabs {
   accounts,
-  videos,
+  questions,
 }
 
-const Search: FC<SearchProps> = ({ videos, accounts }) => {
+const Search: FC<SearchProps> = ({ questions, accounts }) => {
   const [currentTab, setCurrentTab] = useState(Tabs.accounts);
   const router = useRouter();
 
@@ -43,8 +43,8 @@ const Search: FC<SearchProps> = ({ videos, accounts }) => {
               Accounts
             </button>
             <button
-              onClick={() => setCurrentTab(Tabs.videos)}
-              className={`py-1 font-medium transition border-b-2 ${currentTab === Tabs.videos
+              onClick={() => setCurrentTab(Tabs.questions)}
+              className={`py-1 font-medium transition border-b-2 ${currentTab === Tabs.questions
                 ? "border-black"
                 : "text-gray-500 border-transparent"
                 } `}
@@ -94,36 +94,36 @@ const Search: FC<SearchProps> = ({ videos, accounts }) => {
             </>
           ) : (
             <>
-              {videos?.length === 0 ? (
+              {questions?.length === 0 ? (
                 <p className="text-center my-5">No result found</p>
               ) : (
                 <div className="grid gap-4 grid-cols-[repeat(auto-fill,_minmax(120px,_1fr))] lg:grid-cols-[repeat(auto-fill,_minmax(200px,_1fr))]">
-                  {videos?.map((video) => (
-                    <div key={video.id}>
-                      <Link href={`/video/${video.id}`}>
+                  {questions?.map((question) => (
+                    <div key={question.id}>
+                      <Link href={`/question${question.id}`}>
                         <a className="block h-0 relative pb-[131%]">
                           <img
                             className="absolute inset-0 h-full w-full object-cover rounded"
-                            src={video.coverURL}
+                            src={question.coverURL}
                             alt=""
                           />
                           <BsPlay className="absolute left-3 bottom-3 fill-white w-7 h-7" />
                         </a>
                       </Link>
                       <p className="whitespace-nowrap overflow-hidden text-ellipsis my-1">
-                        {video.caption}
+                        {question.caption}
                       </p>
                       <div className="flex items-center justify-between">
-                        <Link href={`/user/${video.user.id}`}>
+                        <Link href={`/user/${question.user.id}`}>
                           <a className="flex items-center gap-1">
                             <Image
-                              src={video.user.image!}
+                              src={question.user.image!}
                               width={20}
                               height={20}
                               alt=""
                               className="rounded-full object-cover"
                             />
-                            <span>{formatAccountName(video.user.name!)}</span>
+                            <span>{formatAccountName(question.user.name!)}</span>
                           </a>
                         </Link>
                         <BsPlay className="fill-black w-5 h-5" />
@@ -170,9 +170,9 @@ export const getServerSideProps = async ({
 
   const session = await getServerSession(req, res, authOptions);
 
-  let accounts, videos;
+  let accounts, questions;
   if (tags != null) {
-    [accounts, videos] = await Promise.all([
+    [accounts, questions] = await Promise.all([
       prisma.user.findMany({
         where: {
           OR: {
@@ -197,7 +197,7 @@ export const getServerSideProps = async ({
           name: true,
         },
       }),
-      prisma.video.findMany({
+      prisma.question.findMany({
         where: {
           hashtags: {
             some: {
@@ -223,7 +223,7 @@ export const getServerSideProps = async ({
 
   }
   else {
-    [accounts, videos] = await Promise.all([
+    [accounts, questions] = await Promise.all([
       prisma.user.findMany({
         where: {
           OR: {
@@ -248,7 +248,7 @@ export const getServerSideProps = async ({
           name: true,
         },
       }),
-      prisma.video.findMany({
+      prisma.question.findMany({
         where: {
           caption: {
             search: q,
@@ -274,7 +274,7 @@ export const getServerSideProps = async ({
   return {
     props: {
       session,
-      videos,
+      questions,
       accounts,
     },
   };

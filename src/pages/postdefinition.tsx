@@ -12,16 +12,13 @@ import Meta from "@/components/Shared/Meta";
 
 import { trpc } from "../utils/trpc";
 import { authOptions } from "./api/auth/[...nextauth]";
-import { borderRadius } from "@mui/system";
-import { getSystemErrorMap } from "util";
-import { table } from "console";
 
 const wordList: string[] = [];
 
 
-const CreateListOfWords: NextPage = () => {
+const CreateDefinition: NextPage = () => {
 
-  const uploadMutation = trpc.useMutation("question.create");
+  const uploadMutation = trpc.useMutation("video.create");
 
 
   // TODO: connect mnemonic image with recommendation system in the backend
@@ -46,6 +43,25 @@ const CreateListOfWords: NextPage = () => {
 
   const [isLoadingMnemonic, setIsLoadingMnemonic] = useState(false);
 
+  function downloadImage() {
+    fetch(mnemonicImage as RequestInfo, {
+      mode: 'no-cors',
+    })
+      .then(response => response.blob())
+      .then(blob => {
+        let blobUrl = window.URL.createObjectURL(blob);
+        let a = document.createElement('a');
+        if (mnemonicImage != null) {
+          a.download = mnemonicImage.replace(/^.*[\\\/]/, '');
+          a.href = blobUrl;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+        }
+
+      })
+  }
+
 
   useEffect(() => {
     if (uploadMutation.error) {
@@ -57,16 +73,16 @@ const CreateListOfWords: NextPage = () => {
 
   const handleRecommeddedImage = async () => {
     const created = await imgRecommendationMutation.mutateAsync({
-        description: inputPromptValue,
-      });
+      description: inputPromptValue,
+    });
     setMnemonicImage(created?.filename);
   }
 
   const handleRecommeddedAcronym = async () => {
     var acronymLeters = "";
-    
+
     //Get first leter for each word in wordList
-    
+
     for (let i = 0; i < wordList.length; i++) {
       if (wordList[i] != undefined) {
         const arrayOfLeters = wordList[i]?.split("");
@@ -74,19 +90,19 @@ const CreateListOfWords: NextPage = () => {
           acronymLeters += arrayOfLeters[0];
         }
       }
-    acronymLeters = acronymLeters.toUpperCase();
+      acronymLeters = acronymLeters.toUpperCase();
     }
     const acronymCreated = await acroRecommendationMutation.mutateAsync({
-        description: acronymLeters,
-      });
+      description: acronymLeters,
+    });
     setAcronym("Remember " + acronymLeters + " with: " + acronymCreated?.result);
   }
 
   const handleRecommeddedStory = async () => {
     var storyWordList = "";
-    
+
     //Get first leter for each word in wordList
-    
+
     for (let i = 0; i < wordList.length; i++) {
       if (wordList[i] != undefined) {
         if (i == wordList.length - 1) {
@@ -97,27 +113,13 @@ const CreateListOfWords: NextPage = () => {
       }
     }
     const storyCreated = await storyRecommendationMutation.mutateAsync({
-        description: storyWordList,
-      });
+      description: storyWordList,
+    });
     setStory("Remember " + storyWordList + " with: " + storyCreated?.result);
   }
 
   const handleUpload = async () => {
     // TODO: connect to the mnemonics generation backend
-  };
-
-  const handleAddToSequence = async () => {
-    var entry = document.createElement("li");
-    entry.innerHTML = tableEntryValue.trim();
-    entry.className = "border rounded flex items-center gap-2 h-9 px-3 border-gray-200 bg-white hover:bg-gray-100 transition";
-    const answer = document.getElementById("answer");
-    if (answer != null) {
-      answer.appendChild(entry);
-      wordList.push(tableEntryValue);
-      setTableEntryValue("");
-    } else {
-      throw new Error("Missing element 'answer' table");
-    }
   };
 
 
@@ -129,7 +131,7 @@ const CreateListOfWords: NextPage = () => {
         <Navbar />
         <div className="flex justify-center mx-2 flex-grow place-items-center">
           <div className="w-full max-w-[1000px] p-8 bg-white my-4">
-            <h1 className="text-2xl font-bold">Memorize a list of words</h1>
+            <h1 className="text-2xl font-bold">Memorize a definition</h1>
             <div className="flex items-start mt-10 gap-4">
               <div className="grid grid-cols-2 gap-11 p-2 w-[100%] h-[75%] mt-5 mb-2">
                 <div className="col-span-1 h-full w-full">
@@ -151,58 +153,63 @@ const CreateListOfWords: NextPage = () => {
                       }}
                     />
                   </div>
-                  <div className="grid grid-cols-3 rows-1 gap-2 p-0 border h-[170px] mt-3 mb-2">
-                  <>
-                    {mnemonicImage ? (
-                      <div className="col-span-1 bg-gray-1 h-full w-full">
-                      <img
-                        className="h-full w-auto object-contain"
-                        src={mnemonicImage}
-                        alt=""
-                      /></div>
-                    ) : (<div className="col-span-1 bg-gray-1 h-full w-full"></div>
-                    )}
+                  <div className="grid grid-cols-3 gap-2 p-2 border h-[170px] mt-3 mb-2">
+                    <>
+                      {mnemonicImage ? (
+                        <div className="col-span-1 bg-gray-1 h-full w-full">
+                          <img
+                            className="h-full w-auto object-contain"
+                            src={mnemonicImage}
+                            alt=""
+                          /></div>
+                      ) : (<div className="col-span-1 bg-gray-1 h-full w-full"></div>
+                      )}
 
-                    {acronym ? (
-                      <div className="col-span-1 bg-gray-1 h-full w-full">
-                        <textarea
-                          className="w-full h-full p-1 border rounded resize-none readonly"
-                          value={acronym}
-                        />
-                      </div>
-                    ) : (<div className="col-span-1 bg-gray-1 h-full w-full"></div>
-                    )}
-                    {story ? (
-                      <div className="col-span-1 bg-gray-1 h-full w-full">
-                        <textarea
-                          className="w-full h-full p-1 border rounded resize-none readonly"
-                          value={story}
-                        />
-                      </div>
-                    ) : (<div className="col-span-1 bg-gray-1 h-full w-full clear: both"></div>
-                    )}
-                  </>
+                      {acronym ? (
+                        <div className="col-span-1 bg-gray-1 h-full w-full">
+                          <textarea
+                            className="w-full h-full p-1 border rounded resize-none readonly"
+                            value={acronym}
+                          />
+                        </div>
+                      ) : (<div className="col-span-1 bg-gray-1 h-full w-full"></div>
+                      )}
+                      {story ? (
+                        <div className="col-span-1 bg-gray-1 h-full w-full">
+                          <textarea
+                            className="w-full h-full p-1 border rounded resize-none readonly"
+                            value={story}
+                          />
+                        </div>
+                      ) : (<div className="col-span-1 bg-gray-1 h-full w-full"></div>
+                      )}
+                    </>
 
-                    
+
                   </div>
                   <div className="flex flex-wrap gap-3 place-content-center ">
                     <div className="flex items-start mt-1 gap-4">
+                      <button className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded inline-flex items-center" onClick={async () => {
+                        downloadImage();
+                      }}>
+                        <svg className="fill-current w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M13 8V2H7v6H2l8 8 8-8h-5zM0 18h20v2H0v-2z" /></svg>
+                        <span>Download Image</span>
+                      </button>
                       <button
                         disabled={isLoadingMnemonic}
                         onClick={async () => {
                           setIsLoadingMnemonic(true);
                           await handleRecommeddedImage()
-                          setIsLoadingMnemonic(false);}}
-                        className={`flex justify-center items-center gap-2 py-3 min-w-[20px] hover:brightness-90 transition text-white bg-red-1 disabled:text-gray-400 disabled:bg-gray-200`}
-                        style={{ borderRadius: 5, padding: 5 , marginTop: 10}}
-                        >
+                          setIsLoadingMnemonic(false);
+                        }}
+                        className={`flex justify-center items-center gap-2 py-3 min-w-[170px] hover:brightness-90 transition text-white bg-red-1 disabled:text-gray-400 disabled:bg-gray-200`}
+                      >
                         {isLoadingMnemonic && (
                           <span className="w-4 h-4 border-2 border-gray-500 border-t-transparent rounded-full animate-spin"></span>
                         )}
-                      
-                      Generate Mnemonic image
-                    </button>
-                    
+                        Generate Mnemonic image
+                      </button>
+
                     </div>
 
                   </div>
@@ -210,85 +217,54 @@ const CreateListOfWords: NextPage = () => {
                 </div>
                 <div className="col-span-1 h-full w-full">
                   <ul id="answer">
-                    
+
                   </ul>
                   <p>Input below:</p>
-                  <input
-                    type="text"
-                    id="newEntry"
-                    className="p-2 w-full border border-gray-2 mt-1 mb-3 outline-none focus:border-gray-400 transition"
-                    value={tableEntryValue}
-                    onChange={(e) => {
-                      setTableEntryValue(e.target.value);
+                  <textarea name="definition" className="border-2 border-gray-500">Sample text</textarea>
+                  <button
+                    disabled={isLoadingMnemonic}
+                    onClick={async () => {
+                      setIsLoadingMnemonic(true);
+                      await handleRecommeddedAcronym()
+                      setIsLoadingMnemonic(false);
                     }}
-                  />
-                  <button
-                    onClick={async () => await handleAddToSequence()}
                     className={`flex justify-center items-center gap-2 py-3 min-w-[20px] hover:brightness-90 transition text-white bg-red-1 disabled:text-gray-400 disabled:bg-gray-200`}
-                    style={{ borderRadius: 5, padding: 5, width: 200}}
+                    style={{ borderRadius: 5, padding: 5, marginTop: 10 }}
                   >
-                    <AiOutlinePlus className="w-5 h-5" />
-
-                    Add entry
+                    {isLoadingMnemonic && (
+                      <span className="w-4 h-4 border-2 border-gray-500 border-t-transparent rounded-full animate-spin"></span>
+                    )}
+                    Generate Acronym
                   </button>
-                  <button
-                        disabled={isLoadingMnemonic}
-                        onClick={async () => {
-                          setIsLoadingMnemonic(true);
-                          await handleRecommeddedAcronym()
-                          setIsLoadingMnemonic(false);}}
-                        className={` flex justify-center items-center gap-2 py-3 min-w-[20px] hover:brightness-90 transition text-white bg-red-1 disabled:text-gray-400 disabled:bg-gray-200`}
-                        style={{ borderRadius: 5, padding: 5 , marginTop: 10, width: 200}}
-                        >
-                        {isLoadingMnemonic && (
-                          <span className="w-4 h-4 border-2 border-gray-500 border-t-transparent rounded-full animate-spin"></span>
-                        )}
-                      Generate Acronym
-                    </button>
 
-                    <button
-                        disabled={isLoadingMnemonic}
-                        onClick={async () => {
-                          setIsLoadingMnemonic(true);
-                          await handleRecommeddedStory()
-                          setIsLoadingMnemonic(false);}}
-                        className={`flex justify-center items-center gap-2 py-3 min-w-[20px] hover:brightness-90 transition text-white bg-red-1 disabled:text-gray-400 disabled:bg-gray-200`}
-                        style={{ borderRadius: 5, padding: 5 , marginTop: 10, width: 200}}
-                        >
-                        {isLoadingMnemonic && (
-                          <span className="w-4 h-4 border-2 border-gray-500 border-t-transparent rounded-full animate-spin"></span>
-                        )}
-                      Generate Rhyme
-                    </button>
+                  <button
+                    disabled={isLoadingMnemonic}
+                    onClick={async () => {
+                      setIsLoadingMnemonic(true);
+                      await handleRecommeddedStory()
+                      setIsLoadingMnemonic(false);
+                    }}
+                    className={`flex justify-center items-center gap-2 py-3 min-w-[20px] hover:brightness-90 transition text-white bg-red-1 disabled:text-gray-400 disabled:bg-gray-200`}
+                    style={{ borderRadius: 5, padding: 5, marginTop: 10 }}
+                  >
+                    {isLoadingMnemonic && (
+                      <span className="w-4 h-4 border-2 border-gray-500 border-t-transparent rounded-full animate-spin"></span>
+                    )}
+                    Generate Story
+                  </button>
 
                 </div>
               </div>
             </div>
 
             <div className="flex flex-wrap gap-3">
-              <p className="text-2xl font-bold">I want to upload my own</p>
-              <Link href={"/upload"}>
+              <Link href={"/upload"} className="" style={{ right: "-5px" }}>
                 <a className="border rounded flex items-center gap-2 h-9 px-3 border-gray-200 bg-white hover:bg-gray-100 transition">
-                  <span>Videos</span>
+                  <span>Next</span>
                 </a>
               </Link>
             </div>
             <div>
-              <button
-                onClick={async () => await handleUpload()}
-                disabled={
-                  !inputValue.trim() ||
-                  isLoading
-                }
-                className={`flex justify-center items-center gap-2 py-3 min-w-[170px] hover:brightness-90 transition text-white bg-red-1 disabled:text-gray-400 disabled:bg-gray-200`}
-
-                style={{ borderRadius: 5, padding: 5 }}
-              >
-                {isLoading && (
-                  <span className="w-4 h-4 border-2 border-gray-500 border-t-transparent rounded-full animate-spin"></span>
-                )}
-                Post
-              </button>
             </div>
           </div>
         </div>
@@ -297,7 +273,7 @@ const CreateListOfWords: NextPage = () => {
   );
 };
 
-export default CreateListOfWords;
+export default CreateDefinition;
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
   const session = await getServerSession(req, res, authOptions);
