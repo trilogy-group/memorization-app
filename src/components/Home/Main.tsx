@@ -3,8 +3,8 @@ import { FC, useEffect, useRef } from "react";
 import { InView } from "react-intersection-observer";
 
 import { trpc } from "@/utils/trpc";
+import QuestionSection from "./QuestionSection";
 
-import VideoSection from "./VideoSection";
 import QuizMicro from "@/pages/quizMicro";
 
 //TODO: connect to DB for questions and answers
@@ -133,7 +133,7 @@ const Main: FC<MainProps> = ({ origin }) => {
     <div className="flex-grow">
       {data?.pages.map((page) =>
         page.items.map((question) => (
-          <VideoSection
+          <QuestionSection
             question={question}
             key={question.id}
             refetch={refetch}
