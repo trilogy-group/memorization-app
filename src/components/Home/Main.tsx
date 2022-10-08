@@ -5,9 +5,86 @@ import { InView } from "react-intersection-observer";
 import { trpc } from "@/utils/trpc";
 
 import VideoSection from "./VideoSection";
+import QuizMicro from "@/pages/quizMicro";
+
+//TODO: connect to DB for questions and answers
+const arrayOfArrayCorrectAnswers = [
+  // First question
+  [
+    "Mussolini becomes leader of Italy",
+    "Emperor Hirohito leads Japan",
+    "The great depression",
+    "Hirohito invades Manchuria",
+    "Hitler becomes leader of Germany",
+    "Mussolini invades Abyssinia",
+    "Hitler invades Sudetenland",
+    "Germany unifies Austria",
+    "Germany invades Poland"
+  ]
+  ,
+  // Second question
+  [
+    "Denmark",
+    "Norway",
+    "Belgium",
+    "Netherlands",
+    "France",
+  ],
+  // Third question
+  ["Bipedalism"],
+  // Fourth question
+  [
+    "Stone Age",
+    "Medieval times",
+    "Modern Age",
+    "Contemporary",
+  ],
+  // Fifth question
+  ["the Khoisan of the African Kalahari Desert"],
+  // Sixth question
+  ["Italy",
+    "Australia",
+    "Canada"
+  ]
+]
+
+let arraySrc //hints
+let arrayDifficulty;
+let arrayQuestion = ["Put WW2 events in chronological order", "Out of all these countries, which was occupied by Germany in WW2?", "How is the ability to walk on two legs called?", "Put eras of human story in chronological order", "What is an example of modern hunter-gatherer communities?", "Which countries were NOT part of USSR?"];
+let arrayIncorrectAnswer = [
+  [
+
+  ],
+  ["USA",
+    "Mexico"
+  ],
+  ["Atavism",
+    "Unipedalism",
+    "Locomotion"
+  ],
+  [
+
+  ],
+  [
+    "Lunarian",
+    "R'lyeh",
+    "Innsmouth"
+  ],
+  [
+
+  ]
+];
+let arrayType = ["sequence", "list", "MCQ", "sequence", "MCQ", "list"];
+
 
 interface MainProps {
   origin: string;
+  arrayQuestion: string[];
+  arrayOfArrayCorrectAnswers: string[];
+  arrayType: string[];
+  arrayIncorrectAnswer: string[];
+  arraySrc: string[];
+  arrayDifficulty: string[];
 }
 
 const Main: FC<MainProps> = ({ origin }) => {
@@ -91,6 +168,78 @@ const Main: FC<MainProps> = ({ origin }) => {
         ))
       )}
 
+      <div>{
+        <QuizMicro
+          arrayQuestion={["Put WW2 events in chronological order", "Out of all these countries, which was occupied by Germany in WW2?", "How is the ability to walk on two legs called?", "Put eras of human story in chronological order", "What is an example of modern hunter-gatherer communities?", "Which countries were NOT part of USSR?"]}
+          arrayOfArrayCorrectAnswers={[
+            // First question
+            [
+              "Mussolini becomes leader of Italy",
+              "Emperor Hirohito leads Japan",
+              "The great depression",
+              "Hirohito invades Manchuria",
+              "Hitler becomes leader of Germany",
+              "Mussolini invades Abyssinia",
+              "Hitler invades Sudetenland",
+              "Germany unifies Austria",
+              "Germany invades Poland"
+            ]
+            ,
+            // Second question
+            [
+              "Denmark",
+              "Norway",
+              "Belgium",
+              "Netherlands",
+              "France",
+            ],
+            // Third question
+            ["Bipedalism"],
+            // Fourth question
+            [
+              "Stone Age",
+              "Medieval times",
+              "Modern Age",
+              "Contemporary",
+            ],
+            // Fifth question
+            ["the Khoisan of the African Kalahari Desert"],
+            // Sixth question
+            ["Italy",
+              "Australia",
+              "Canada"
+            ]
+          ]}
+          arrayType={["sequence", "list", "MCQ", "sequence", "MCQ", "list"]}
+          arrayIncorrectAnswer={[
+            [
+
+            ],
+            ["USA",
+              "Mexico"
+            ],
+            ["Atavism",
+              "Unipedalism",
+              "Locomotion"
+            ],
+            [
+
+            ],
+            [
+              "Lunarian",
+              "R'lyeh",
+              "Innsmouth"
+            ],
+            [
+
+            ]
+          ]}
+          arraySrc={[]}
+          arrayDifficulty={[]}
+        />
+
+      }</div>
+
       {/* At the bottom to detect infinite scroll */}
       <InView
         fallbackInView
@@ -103,6 +252,7 @@ const Main: FC<MainProps> = ({ origin }) => {
       >
         {({ ref }) => <div ref={ref} className="h-10"></div>}
       </InView>
+
     </div>
   );
 };

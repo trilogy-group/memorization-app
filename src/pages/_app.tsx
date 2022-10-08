@@ -1,5 +1,6 @@
 import "../styles/globals.css";
 import "../styles/notification.css";
+import "../styles/rating.css";
 import { withTRPC } from "@trpc/next";
 import type { AppType } from "next/dist/shared/lib/utils";
 import Head from "next/head";

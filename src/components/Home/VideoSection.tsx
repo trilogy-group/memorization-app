@@ -226,6 +226,9 @@ const VideoSection: FC<VideoSectionProps> = ({ video, refetch, origin }) => {
                 </button>
               </div>
             </div>
+            <button className="lg:w-12 lg:h-12 w-7 h-7 bg-[#F1F1F2] fill-black rounded-full" onClick={() => console.log("I will memorize that")}>
+              <img src="/memorizeThatIcon.png"></img>
+            </button>
           </div>
         </div>
       </div>
