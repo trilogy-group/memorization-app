@@ -42,7 +42,7 @@ const QuestionSection: FC<QuestionSectionProps> = ({ question, refetch, origin }
     undefined | boolean
   >(undefined);
 
-  const videoURL = `${origin}/video/${question.id}`;
+  const videoURL = `${origin}/question/${question.id}`;
 
   const toggleLike = () => {
     if (!session.data?.user) {
@@ -51,7 +51,7 @@ const QuestionSection: FC<QuestionSectionProps> = ({ question, refetch, origin }
       likeMutation
         .mutateAsync({
           isLiked: !isCurrentlyLiked,
-          videoId: question.id,
+          questionId: question.id,
         })
         .then(() => {
           refetch();
@@ -138,7 +138,7 @@ const QuestionSection: FC<QuestionSectionProps> = ({ question, refetch, origin }
           )}
         </div>
         <div className="flex items-end gap-5">
-          <Link href={`/video/${question.id}`}>
+          <Link href={`/question/${question.id}`}>
             <a
               className={`${
                 question.videoHeight > question.videoWidth * 1.3
@@ -165,7 +165,7 @@ const QuestionSection: FC<QuestionSectionProps> = ({ question, refetch, origin }
             <p className="text-center text-xs font-semibold">
               {formatNumber(question._count.likes)}
             </p>
-            <Link href={`/video/${question.id}`}>
+            <Link href={`/question/${question.id}`}>
               <a className="lg:w-12 lg:h-12 w-7 h-7 bg-[#F1F1F2] fill-black flex justify-center items-center rounded-full">
                 <FaCommentDots className="lg:w-6 lg:h-6 h-4 w-4 scale-x-[-1]" />
               </a>

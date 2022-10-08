@@ -6,7 +6,7 @@ import { createRouter } from "./context";
 
 
 export type ProgressWhereUniqueInput = {
-  videoId?: string | null,
+  questionId?: string | null,
   userId?: string | null,
 }
 
@@ -21,14 +21,14 @@ export const progressRouter = createRouter()
   .mutation("post-quiz-results", {
     // create or update interval, easy factor, repetition per question
     input: z.object({
-      videoIdArr: z.string(),
+      questionIdArr: z.string(),
       quizScoreArr: z.string(),
     }),
     async resolve({ ctx: { prisma, session }, input }) {
-      const videoIdArr = input.videoIdArr.split(';');
+      const questionIdArr = input.questionIdArr.split(';');
       const quizScores = input.quizScoreArr.split(';');
-      for (var i = 0; i < videoIdArr.length; i++) {
-        const id = videoIdArr[i];
+      for (var i = 0; i < questionIdArr.length; i++) {
+        const id = questionIdArr[i];
         const grade = quizScores[i] == "true" ? 5 : 0;
 
         if (id == null) {
@@ -38,7 +38,7 @@ export const progressRouter = createRouter()
         const existingProgress = await prisma.progress.findFirst({
           where: {
             userId: session?.user?.id!,
-            videoId: id,
+            questionId: id,
           }
         });
 
@@ -50,7 +50,7 @@ export const progressRouter = createRouter()
               efactor: repetitionItem.efactor,
               interval: repetitionItem.interval,
               userId: session?.user?.id!,
-              videoId: id,
+              questionId: id,
             }
           });
         }
@@ -65,7 +65,7 @@ export const progressRouter = createRouter()
             where: {
               progress_identifier: {
                 userId: session?.user?.id!,
-                videoId: id
+                questionId: id
               }
             },
             data: {

@@ -17,8 +17,8 @@ const Main: FC<MainProps> = ({ origin }) => {
     trpc.useInfiniteQuery(
       [
         Boolean(Number(router.query.following))
-          ? "video.following"
-          : "video.for-you",
+          ? "question.following"
+          : "question.for-you",
         {},
       ],
       {

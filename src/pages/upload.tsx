@@ -37,8 +37,8 @@ const chapters = [
 const Upload: NextPage = () => {
   const router = useRouter();
 
-  const uploadMutation = trpc.useMutation("video.createVideo");
-  const uploadImgMutation = trpc.useMutation("video.createImg");
+  const uploadMutation = trpc.useMutation("question.createVideo");
+  const uploadImgMutation = trpc.useMutation("question.createImg");
 
   const inputRef = useRef<HTMLInputElement | null>(null);
 
@@ -297,7 +297,7 @@ const Upload: NextPage = () => {
 
       setIsLoading(false);
 
-      router.push(`/video/${created.id}`);
+      router.push(`/question/${created.id}`);
     } catch (error) {
       console.log(error);
       setIsLoading(false);

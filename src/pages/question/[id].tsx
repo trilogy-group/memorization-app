@@ -24,27 +24,27 @@ import { trpc } from "@/utils/trpc";
 
 import { authOptions } from "../api/auth/[...nextauth]";
 
-const Video: NextPage<VideoProps> = ({ video, href, title }) => {
+const Question: NextPage<QuestionProps> = ({ question, href, title }) => {
   const session = useSession();
   const router = useRouter();
 
   const [isBackButtonVisible, setIsBackButtonVisible] = useState(false);
 
   const likeCountQuery = trpc.useQuery(
-    ["like.count", { videoId: video?.id! }],
-    { initialData: { count: video?._count.likes! } }
+    ["like.count", { questionId: question?.id! }],
+    { initialData: { count: question?._count.likes! } }
   );
   const commentsQuery = trpc.useQuery(
-    ["comment.by-video", { videoID: video?.id! }],
-    { initialData: video?.comments! }
+    ["comment.by-question", { questionID: question?.id! }],
+    { initialData: question?.comments! }
   );
   const likeMutation = trpc.useMutation("like.toggle");
   const followMutation = trpc.useMutation("follow.toggle");
   const postCommentMutation = trpc.useMutation("comment.post");
 
-  const [isCurrentlyLiked, setIsCurrentlyLiked] = useState(video?.likedByMe);
+  const [isCurrentlyLiked, setIsCurrentlyLiked] = useState(question?.likedByMe);
   const [isCurrentlyFollowed, setIsCurrentlyFollowed] = useState(
-    video?.followedByMe
+    question?.followedByMe
   );
   const [inputValue, setInputValue] = useState("");
   const { isMuted, setIsMuted } = useContext(VolumeContext);
@@ -60,7 +60,7 @@ const Video: NextPage<VideoProps> = ({ video, href, title }) => {
       likeMutation
         .mutateAsync({
           isLiked: !isCurrentlyLiked,
-          videoId: video?.id!,
+          questionId: question?.id!,
         })
         .then(() => {
           likeCountQuery.refetch();
@@ -78,7 +78,7 @@ const Video: NextPage<VideoProps> = ({ video, href, title }) => {
       return;
     }
     followMutation.mutateAsync({
-      followingId: video?.user.id!,
+      followingId: question?.user.id!,
       isFollowed: !isCurrentlyFollowed,
     });
     setIsCurrentlyFollowed(!isCurrentlyFollowed);
@@ -94,7 +94,7 @@ const Video: NextPage<VideoProps> = ({ video, href, title }) => {
     postCommentMutation
       .mutateAsync({
         content: inputValue.trim(),
-        videoId: video?.id!,
+        questionId: question?.id!,
       })
       .then(() => {
         commentsQuery.refetch();
@@ -105,33 +105,33 @@ const Video: NextPage<VideoProps> = ({ video, href, title }) => {
       });
   };
 
-  if (!video) return <></>;
+  if (!question) return <></>;
 
   return (
     <>
       <Meta
-        title={`${video.user.name} on EdTok`}
+        title={`${question.user.name} on EdTok`}
         description="Video | EdTok"
-        image={video.coverURL}
+        image={question.coverURL}
       />
 
       <div className="flex flex-col lg:flex-row lg:h-screen items-stretch">
         <div className="lg:flex-grow flex justify-center items-center relative bg-[#1E1619]">
           <video
             className="w-auto h-auto max-w-full max-h-[600px] lg:max-h-full"
-            src={video.videoURL}
+            src={question.videoURL}
             muted={isMuted}
             onVolumeChange={(e: any) => setIsMuted(e.target.muted)}
             autoPlay
             loop
-            poster={video.coverURL}
+            poster={question.coverURL}
             controls
             playsInline
           ></video>
           <div className="absolute top-5 left-5 flex gap-3">
             {isBackButtonVisible && (
               <button
-                onClick={() => router.back()}
+                onClick={() => router.push("/")}
                 className="bg-[#3D3C3D] w-[40px] h-[40px] rounded-full flex justify-center items-center"
               >
                 <FaTimes className="w-5 h-5 fill-white" />
@@ -151,10 +151,10 @@ const Video: NextPage<VideoProps> = ({ video, href, title }) => {
         <div className="w-full lg:w-[500px] flex-shrink-0 flex flex-col items-stretch h-screen">
           <div className="px-4 pt-6 pb-4 flex-shrink-0 border-b">
             <div className="flex">
-              <Link href={`/user/${video.user.id}`}>
+              <Link href={`/user/${question.user.id}`}>
                 <a className="mr-3 flex-shrink-0 rounded-full">
                   <Image
-                    src={video.user.image!}
+                    src={question.user.image!}
                     alt=""
                     height={40}
                     width={40}
@@ -163,29 +163,29 @@ const Video: NextPage<VideoProps> = ({ video, href, title }) => {
                 </a>
               </Link>
               <div className="flex-grow">
-                <Link href={`/user/${video.user.id}`}>
+                <Link href={`/user/${question.user.id}`}>
                   <a className="font-bold block hover:underline">
-                    {formatAccountName(video.user.name!)}
+                    {formatAccountName(question.user.name!)}
                   </a>
                 </Link>
-                <Link href={`/user/${video.user.id}`}>
+                <Link href={`/user/${question.user.id}`}>
                   <a className="text-sm block hover:underline">
-                    {video.user.name}
+                    {question.user.name}
                   </a>
                 </Link>
               </div>
               {/* @ts-ignore */}
-              {video.user.id !== session.data?.user?.id && (
+              {question.user.id !== session.data?.user?.id && (
                 <div className="flex-shrink-0">
                   <button
                     onClick={() => toggleFollow()}
                     className={`py-1 px-3 rounded text-sm mt-2 ${
-                      isCurrentlyFollowed ?? video.followedByMe
+                      isCurrentlyFollowed ?? question.followedByMe
                         ? "border hover:bg-[#F8F8F8] transition"
                         : "border border-pink text-pink hover:bg-[#FFF4F5] transition"
                     }`}
                   >
-                    {isCurrentlyFollowed ?? video.followedByMe
+                    {isCurrentlyFollowed ?? question.followedByMe
                       ? "Following"
                       : "Follow"}
                   </button>
@@ -196,7 +196,7 @@ const Video: NextPage<VideoProps> = ({ video, href, title }) => {
               className="my-3"
               style={{ wordWrap: "break-word", overflowWrap: "break-word" }}
             >
-              {video.caption}
+              {question.caption}
             </p>
 
             <div className="flex justify-between items-center">
@@ -341,9 +341,9 @@ const Video: NextPage<VideoProps> = ({ video, href, title }) => {
   );
 };
 
-export default Video;
+export default Question;
 
-type VideoProps = InferGetServerSidePropsType<typeof getServerSideProps>;
+type QuestionProps = InferGetServerSidePropsType<typeof getServerSideProps>;
 
 export const getServerSideProps = async ({
   params,
@@ -356,7 +356,7 @@ export const getServerSideProps = async ({
 
     if (!id) throw new Error();
 
-    const video = await prisma.video.findFirstOrThrow({
+    const question = await prisma.question.findFirstOrThrow({
       where: { id },
       select: {
         id: true,
@@ -385,13 +385,13 @@ export const getServerSideProps = async ({
         prisma.like.findFirst({
           where: {
             userId: session?.user?.id,
-            videoId: video.id,
+            questionId: question.id,
           },
         }),
         prisma.follow.findFirst({
           where: {
             followerId: session.user.id,
-            followingId: video.user.id,
+            followingId: question.user.id,
           },
         }),
       ]);
@@ -401,16 +401,16 @@ export const getServerSideProps = async ({
 
     return {
       props: {
-        video: {
-          ...video,
+        question: {
+          ...question,
           likedByMe,
           followedByMe,
         },
         session,
         href: `${
           req.headers.host?.includes("localhost") ? "http" : "https"
-        }://${req.headers.host}/video/${id}`,
-        title: `${video.user.name} on EdTok`,
+        }://${req.headers.host}/question/${id}`,
+        title: `${question.user.name} on EdTok`,
       },
     };
   } catch (error) {
