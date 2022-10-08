@@ -181,6 +181,7 @@ const QuizMicro: FC<QuizMicroProps> = ({ arrayQuestion, arrayOfArrayCorrectAnswe
     if (questionNumber.current - 1 == arrayOfArrayCorrectAnswers.length) {
       document.getElementById("question")!.style.display = 'none';
       document.getElementById("hintVideo")!.className = "hidden";
+      document.getElementById("hintImage")!.className = "hidden"
       document.getElementById("nextButton")!.className = "hidden";
       document.getElementById("hintText")!.className = "hidden";
       setRatingVisibility(true);
@@ -249,18 +250,7 @@ const QuizMicro: FC<QuizMicroProps> = ({ arrayQuestion, arrayOfArrayCorrectAnswe
       setOptionMCQ(undefined);
       MCQOptions!.className = "block";
     }
-    if (questionNumber.current == 3) {
-      document.getElementById("hintImage")?.setAttribute("src", "/memory29.PNG")
-      document.getElementById("hintImage")!.className = "block";
-      document.getElementById("hintVideo")!.className = "hidden";
-    } else
-      if (questionNumber.current == 5) {
-        document.getElementById("hintImage")?.setAttribute("src", "/memory30.PNG")
-        document.getElementById("hintImage")!.className = "block";
-        document.getElementById("hintVideo")!.className = "hidden";
-      } else {
-        document.getElementById("hintImage")!.className = "hidden";
-      }
+    document.getElementById("hintImage")?.setAttribute("src", arraySrc[questionNumber.current - 1])
   }
 
 

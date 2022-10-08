@@ -9,46 +9,20 @@ import QuizMicro from "@/pages/quizMicro";
 
 //TODO: connect to DB for questions and answers
 const arrayOfArrayCorrectAnswers = [
-  // First question
-  [
-    "Mussolini becomes leader of Italy",
-    "Emperor Hirohito leads Japan",
-    "The great depression",
-    "Hirohito invades Manchuria",
-    "Hitler becomes leader of Germany",
-    "Mussolini invades Abyssinia",
-    "Hitler invades Sudetenland",
-    "Germany unifies Austria",
-    "Germany invades Poland"
-  ]
-  ,
-  // Second question
-  [
-    "Denmark",
-    "Norway",
-    "Belgium",
-    "Netherlands",
-    "France",
-  ]
+  ["Bipedalism"]
 
 ]
 
-let arraySrc: string[] //hints
+let arraySrc = ["/memory29.PNG"] //hints
 let arrayDifficulty: string[];
-let arrayQuestion = ["Put WW2 events in chronological order", "Out of all these countries, which was occupied by Germany in WW2?", "How is the ability to walk on two legs called?"];
+let arrayQuestion = ["How is the ability to walk on two legs called?"];
 let arrayIncorrectAnswer = [
-  [
-
-  ],
-  ["USA",
-    "Mexico"
-  ],
   ["Atavism",
     "Unipedalism",
     "Locomotion"
   ]
 ];
-let arrayType = ["sequence", "list", "MCQ"];
+let arrayType = ["MCQ"];
 
 
 interface MainProps {
@@ -146,32 +120,11 @@ const Main: FC<MainProps> = ({ origin }) => {
         <QuizMicro
           arrayQuestion={arrayQuestion}
           arrayOfArrayCorrectAnswers={[
-            // First question
-            [
-              "Mussolini becomes leader of Italy",
-              "Emperor Hirohito leads Japan",
-              "The great depression",
-              "Hirohito invades Manchuria",
-              "Hitler becomes leader of Germany",
-              "Mussolini invades Abyssinia",
-              "Hitler invades Sudetenland",
-              "Germany unifies Austria",
-              "Germany invades Poland"
-            ]
-            ,
-            // Second question
-            [
-              "Denmark",
-              "Norway",
-              "Belgium",
-              "Netherlands",
-              "France",
-            ],
             // Third question
             ["Bipedalism"]
 
           ]}
-          arrayType={["sequence", "list", "MCQ", "sequence", "MCQ", "list"]}
+          arrayType={["MCQ"]}
           arrayIncorrectAnswer={arrayIncorrectAnswer}
           arraySrc={arraySrc}
           arrayDifficulty={[]}
