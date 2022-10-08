@@ -4,14 +4,14 @@ import { z } from "zod";
 
 import { createRouter } from "./context";
 
-export const videoRouter = createRouter()
+export const questionRouter = createRouter()
   .query("for-you", {
     input: z.object({
       cursor: z.number().nullish(),
     }),
     resolve: async ({ ctx: { prisma, session }, input }) => {
       const skip = input.cursor || 0;
-      const items = await prisma.video.findMany({
+      const items = await prisma.question.findMany({
         take: 10,
         skip,
         include: {
@@ -30,7 +30,7 @@ export const videoRouter = createRouter()
           prisma.like.findMany({
             where: {
               userId: session.user.id,
-              videoId: { in: items.map((item) => item.id) },
+              questionId: { in: items.map((item) => item.id) },
             },
           }),
           prisma.follow.findMany({
@@ -47,7 +47,7 @@ export const videoRouter = createRouter()
       return {
         items: items.map((item) => ({
           ...item,
-          likedByMe: likes.some((like) => like.videoId === item.id),
+          likedByMe: likes.some((like) => like.questionId === item.id),
           followedByMe: followings.some(
             (following) => following.followingId === item.userId
           ),
@@ -79,7 +79,7 @@ export const videoRouter = createRouter()
       ).map((item) => item.followingId);
 
       const skip = input.cursor || 0;
-      const items = await prisma.video.findMany({
+      const items = await prisma.question.findMany({
         take: 10,
         skip,
         where: {
@@ -100,7 +100,7 @@ export const videoRouter = createRouter()
         prisma.like.findMany({
           where: {
             userId: session?.user?.id!,
-            videoId: { in: items.map((item) => item.id) },
+            questionId: { in: items.map((item) => item.id) },
           },
         }),
         prisma.follow.findMany({
@@ -116,7 +116,7 @@ export const videoRouter = createRouter()
       return {
         items: items.map((item) => ({
           ...item,
-          likedByMe: likes.some((like) => like.videoId === item.id),
+          likedByMe: likes.some((like) => like.questionId === item.id),
           followedByMe: followings.some(
             (following) => following.followingId === item.userId
           ),
@@ -162,7 +162,8 @@ export const videoRouter = createRouter()
           alltagid.push({ id: tagcreated.id });
         }
       }
-      const created = await prisma.video.create({
+      console.log("debug");
+      const created = await prisma.question.create({
         data: {
           caption: input.caption,
           videoURL: input.videoURL,
@@ -175,12 +176,14 @@ export const videoRouter = createRouter()
           }, // connect to all hashtags
         },
       });
+      console.log("debug2");
       await prisma.user.update({
         where: { id: session?.user?.id as string },
         data: {
           points: { increment: 1 },
         },
       });
+      console.log("debug3");
       return created;
     },
   });
