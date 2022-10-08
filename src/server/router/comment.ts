@@ -4,14 +4,14 @@ import { z } from "zod";
 import { createRouter } from "./context";
 
 export const commentRouter = createRouter()
-  .query("by-video", {
+  .query("by-question", {
     input: z.object({
-      videoID: z.string(),
+      questionID: z.string(),
     }),
     resolve: async ({ ctx: { prisma }, input }) => {
       const comments = await prisma.comment.findMany({
         where: {
-          videoId: input.videoID,
+          questionId: input.questionID,
         },
         orderBy: {
           createdAt: "desc",
@@ -40,14 +40,14 @@ export const commentRouter = createRouter()
   })
   .mutation("post", {
     input: z.object({
-      videoId: z.string(),
+      questionId: z.string(),
       content: z.string().max(5000),
     }),
     resolve: async ({ ctx: { prisma, session }, input }) => {
       const created = await prisma.comment.create({
         data: {
           content: input.content,
-          videoId: input.videoId,
+          questionId: input.questionId,
           userId: session?.user?.id!,
         },
       });

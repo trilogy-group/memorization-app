@@ -11,7 +11,7 @@ import React from "react";
 
 
 const QuizUltimate: NextPage = () => {
-  const uploadMutation = trpc.useMutation("video.create");
+  const uploadMutation = trpc.useMutation("question.create");
   const [optionMCQ, setOptionMCQ] = useState();
   const [optionsList, setOptionsList] = useState<string[]>([]);
   const [optionA, setOptionA] = useState("");
@@ -153,7 +153,29 @@ const QuizUltimate: NextPage = () => {
   let arraySrc //hints
   let arrayDifficulty;
   let arrayQuestion = ["Put WW2 events in chronological order", "Out of all these countries, which was occupied by Germany in WW2?", "How is the ability to walk on two legs called?", "Put eras of human story in chronological order", "What is an example of modern hunter-gatherer communities?", "Which countries were NOT part of USSR?"];
-  let arrayIncorrectAnswer;
+  let arrayIncorrectAnswer = [
+    [
+
+    ],
+    ["USA",
+      "Mexico"
+    ],
+    ["Atavism",
+      "Unipedalism",
+      "Locomotion"
+    ],
+    [
+
+    ],
+    [
+      "Lunarian",
+      "R'lyeh",
+      "Innsmouth"
+    ],
+    [
+
+    ]
+  ];
   let arrayType = ["sequence", "list", "MCQ", "sequence", "MCQ", "list"];
 
 
@@ -196,6 +218,7 @@ const QuizUltimate: NextPage = () => {
       }
     }
     else if (arrayType[questionNumber.current - 1] == "MCQ") {
+      console.log(optionMCQ);
 
       // MCQ
       if (optionMCQ == arrayOfArrayCorrectAnswers[questionNumber.current - 1]) {
@@ -255,12 +278,34 @@ const QuizUltimate: NextPage = () => {
         divOption.appendChild(divOptionLabel);
         possibleOptions!.appendChild(divOption);
       }
+
+      for (var i = 0; i < arrayIncorrectAnswer[questionNumber.current - 1]!?.length; i++) {
+        let divOption = document.createElement('div');
+        divOption.className = "input-group";
+        let divOptionInput = document.createElement('input');
+        divOptionInput.type = "checkbox";
+        divOptionInput.value = arrayIncorrectAnswer[questionNumber.current - 1]![i] as string;
+        divOptionInput.onchange = onChange.bind(this);
+        let divOptionLabel = document.createElement('label');
+        divOptionLabel.innerHTML = arrayIncorrectAnswer[questionNumber.current - 1]![i] as string;
+        divOption.appendChild(divOptionInput);
+        divOption.appendChild(divOptionLabel);
+        possibleOptions!.appendChild(divOption);
+      }
     } else if (arrayType[questionNumber.current - 1] == "MCQ") {
       // create MCQ options
       let MCQOptions = document.getElementById("MCQOptions");
       document.getElementById("hintText")!.innerHTML = "Choose one";
       document.getElementById("optionA")!.innerHTML = arrayOfArrayCorrectAnswers[questionNumber.current - 1]![0] as string;
       setOptionA(arrayOfArrayCorrectAnswers[questionNumber.current - 1]![0] as string);
+
+      document.getElementById("optionB")!.innerHTML = arrayIncorrectAnswer[questionNumber.current - 1]![0] as string;
+      setOptionB(arrayIncorrectAnswer[questionNumber.current - 1]![0] as string);
+      document.getElementById("optionC")!.innerHTML = arrayIncorrectAnswer[questionNumber.current - 1]![1] as string;
+      setOptionC(arrayIncorrectAnswer[questionNumber.current - 1]![1] as string);
+      document.getElementById("optionD")!.innerHTML = arrayIncorrectAnswer[questionNumber.current - 1]![2] as string;
+      setOptionD(arrayIncorrectAnswer[questionNumber.current - 1]![2] as string);
+
       setOptionMCQ(undefined);
       MCQOptions!.className = "block";
     }
@@ -330,11 +375,11 @@ const QuizUltimate: NextPage = () => {
               <div onChange={e => { setOptionMCQ((e.target as any).value); }} id="MCQOptions" className="hidden">
                 <input type="radio" value={optionA} name="gender" checked={optionA === optionMCQ} onChange={e => { console.log(e.target.value); }} /> <label id="optionA">A</label>
                 <br />
-                <input type="radio" value={optionB} name="gender" onChange={e => { console.log(e.target.value); }} /> <label id="optionB">B</label>
+                <input type="radio" value={optionB} name="gender" checked={optionB === optionMCQ} onChange={e => { console.log(e.target.value); }} /> <label id="optionB">B</label>
                 <br />
-                <input type="radio" value={optionC} name="gender" onChange={e => { console.log(e.target.value); }} /> <label id="optionC">C</label>
+                <input type="radio" value={optionC} name="gender" checked={optionC === optionMCQ} onChange={e => { console.log(e.target.value); }} /> <label id="optionC">C</label>
                 <br />
-                <input type="radio" value={optionD} name="gender" onChange={e => { console.log(e.target.value); }} /> <label id="optionD">D</label>
+                <input type="radio" value={optionD} name="gender" checked={optionD === optionMCQ} onChange={e => { console.log(e.target.value); }} /> <label id="optionD">D</label>
               </div>
               <div className="flex flex-col items-center justify-center">
                 <a href="#_" className="relative inline-flex items-center justify-start py-3 pl-4 pr-12 overflow-hidden font-semibold text-indigo-600 transition-all duration-150 ease-in-out rounded hover:pl-10 hover:pr-6 bg-gray-50 group" onClick={async () => await checkAnswerUltimate()}
