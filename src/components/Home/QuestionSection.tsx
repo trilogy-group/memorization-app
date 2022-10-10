@@ -38,7 +38,10 @@ const QuestionSection: FC<QuestionSectionProps> = ({ question, refetch, origin }
   const notificationMutation = trpc.useMutation("notification.createLike");
   const followMutation = trpc.useMutation("follow.toggle");
 
+  const gotItMutation = trpc.useMutation("progress.post-got-it");
+
   const [isCurrentlyLiked, setIsCurrentlyLiked] = useState(question.likedByMe);
+  const [isChosenToMemorize, setIsChosenToMemorize] = useState(false);
   const [isCurrentlyFollowed, setIsCurrentlyFollowed] = useState<
     undefined | boolean
   >(undefined);
@@ -102,6 +105,26 @@ const QuestionSection: FC<QuestionSectionProps> = ({ question, refetch, origin }
         ? !question.followedByMe
         : !isCurrentlyFollowed
     );
+  };
+
+
+  const toggleGotIt = () => {
+    if (!session.data?.user) {
+      toast("You need to login");
+    } else {
+      gotItMutation
+        .mutateAsync({
+          questionId: question.id,
+        })
+        .then(() => {
+          refetch();
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+
+      setIsChosenToMemorize(!isChosenToMemorize);
+    }
   };
 
   return (
@@ -239,7 +262,8 @@ const QuestionSection: FC<QuestionSectionProps> = ({ question, refetch, origin }
                 </button>
               </div>
             </div>
-            <button className="lg:w-12 lg:h-12 w-7 h-7 bg-[#F1F1F2] fill-black rounded-full" onClick={() => console.log("I will memorize that")}>
+            <button className={`lg:w-12 lg:h-12 w-7 h-7 fill-black rounded-full ${isChosenToMemorize ? "bg-[#11ab30]" : "bg-[#de2814]"
+              }`} onClick={() => { toast("You chose to memorize this"); toggleGotIt(); }}>
               <img src="/memorizeThatIcon.png"></img>
             </button>
           </div>
@@ -248,5 +272,8 @@ const QuestionSection: FC<QuestionSectionProps> = ({ question, refetch, origin }
     </div>
   );
 };
+
+
+
 
 export default QuestionSection;
