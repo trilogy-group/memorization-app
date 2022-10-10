@@ -109,7 +109,7 @@ export const progressRouter = createRouter()
       return;
     },
   })
-  .mutation("post-one-quiz", {
+  .mutation("post-one-quiz-result", {
     // create or update interval, easy factor, repetition per question
     input: z.object({
       questionId: z.string(),
@@ -170,7 +170,7 @@ export const progressRouter = createRouter()
       return;
     },
   })
-  .mutation("post-quiz-results", {
+  .mutation("post-multiple-quiz-results", {
     // create or update interval, easy factor, repetition per question
     input: z.object({
       questionIdArr: z.string(),
