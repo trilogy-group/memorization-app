@@ -25,10 +25,38 @@ const QuizMicro: FC<QuizMicroProps> = ({ arrayQuestion, arrayOfArrayCorrectAnswe
   const [optionC, setOptionC] = useState("");
   const [optionD, setOptionD] = useState("");
   const [scoooreArray, setScoooreArray] = useState<number[]>([]);
-  const [ratingVisibility, setRatingVisibility] = useState(false);
 
   var questionNumber = useRef(1);
   var score = useRef(0);
+
+  var quizStart = useRef(0);
+  var quizEnd: number;
+
+  let [milliseconds, seconds, minutes, hours] = [0, 0, 0, 0];
+  let timerRef;
+  let int = null;
+
+  function displayTimer() {
+    milliseconds += 10;
+    if (milliseconds == 1000) {
+      milliseconds = 0;
+      seconds++;
+      if (seconds == 60) {
+        seconds = 0;
+        minutes++;
+        if (minutes == 60) {
+          minutes = 0;
+          hours++;
+        }
+      }
+    }
+    let h = hours < 10 ? "0" + hours : hours;
+    let m = minutes < 10 ? "0" + minutes : minutes;
+    let s = seconds < 10 ? "0" + seconds : seconds;
+    let ms = milliseconds < 10 ? "00" + milliseconds : milliseconds < 100 ? "0" + milliseconds : milliseconds;
+
+    timerRef.innerHTML = ` ${h} : ${m} : ${s} : ${ms}`;
+  }
 
   useEffect(() => {
     if (uploadMutation.error) {
@@ -41,11 +69,31 @@ const QuizMicro: FC<QuizMicroProps> = ({ arrayQuestion, arrayOfArrayCorrectAnswe
     script.src = "https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js";
     script.async = true;
     document.body.appendChild(script);
+    quizMakerUltimateHelper()
     // adding script that makes elements of the list able to be dragged PART 2
     setTimeout(() => {
       let quizScript = document.createElement('script');
       quizScript.innerHTML = "new Sortable(sequence);"
       document.body.appendChild(quizScript);
+
+      timerRef = document.querySelector('.timerDisplay');
+      document.getElementById('startTimer').addEventListener('click', () => {
+        quizStart.current = performance.now();
+        if (int !== null) {
+          clearInterval(int);
+        }
+        int = setInterval(displayTimer, 10);
+      });
+
+      document.getElementById('pauseTimer').addEventListener('click', () => {
+        clearInterval(int);
+      });
+
+      document.getElementById('resetTimer').addEventListener('click', () => {
+        clearInterval(int);
+        [milliseconds, seconds, minutes, hours] = [0, 0, 0, 0];
+        timerRef.innerHTML = '00 : 00 : 00 : 000 ';
+      });
     }, 300);
     return () => {
       document.body.removeChild(script);
@@ -124,6 +172,12 @@ const QuizMicro: FC<QuizMicroProps> = ({ arrayQuestion, arrayOfArrayCorrectAnswe
   function checkAnswerUltimate() {
     // check answer AND clear existing q/a and answer AND push score array
     let newScoooreArray = scoooreArray;
+    quizEnd = performance.now()
+
+    console.log("quiz start is ", quizStart.current);
+    console.log("quiz end is ", quizEnd);
+    let quizTime = quizEnd - quizStart.current;
+    console.log(`It took quizTime milliseconds.`);
     if (arrayType[questionNumber.current - 1] == "sequence") {
       let elem = document.getElementById("sequence");
       let answers = new Array();
@@ -132,9 +186,22 @@ const QuizMicro: FC<QuizMicroProps> = ({ arrayQuestion, arrayOfArrayCorrectAnswe
         answers.push(text.innerHTML);
       });
       if (JSON.stringify(arrayOfArrayCorrectAnswers[questionNumber.current - 1]) === JSON.stringify(answers)) {
-        score.current++;
+        if (quizTime < 5000) {
+          score.current = 5;
+        } else if (quizTime < 7000) {
+          score.current = 4;
+        } else {
+          score.current = 3;
+        }
         newScoooreArray.push(1);
       } else {
+        if (quizTime < 7000) {
+          score.current = 2;
+        } else if (quizTime < 5000) {
+          score.current = 1;
+        } else {
+          score.current = 0;
+        }
         newScoooreArray.push(0);
       }
       setScoooreArray(newScoooreArray);
@@ -146,9 +213,22 @@ const QuizMicro: FC<QuizMicroProps> = ({ arrayQuestion, arrayOfArrayCorrectAnswe
     } else if (arrayType[questionNumber.current - 1] == "list") {
 
       if (JSON.stringify(optionsList) == JSON.stringify(arrayOfArrayCorrectAnswers[questionNumber.current - 1]?.sort())) {
-        score.current++;
+        if (quizTime < 5000) {
+          score.current = 5;
+        } else if (quizTime < 7000) {
+          score.current = 4;
+        } else {
+          score.current = 3;
+        }
         newScoooreArray.push(1);
       } else {
+        if (quizTime < 7000) {
+          score.current = 2;
+        } else if (quizTime < 5000) {
+          score.current = 1;
+        } else {
+          score.current = 0;
+        }
         newScoooreArray.push(0);
       }
       setScoooreArray(newScoooreArray);
@@ -164,9 +244,22 @@ const QuizMicro: FC<QuizMicroProps> = ({ arrayQuestion, arrayOfArrayCorrectAnswe
 
       // MCQ
       if (optionMCQ == arrayOfArrayCorrectAnswers[questionNumber.current - 1]) {
-        score.current++;
+        if (quizTime < 5000) {
+          score.current = 5;
+        } else if (quizTime < 7000) {
+          score.current = 4;
+        } else {
+          score.current = 3;
+        }
         newScoooreArray.push(1);
       } else {
+        if (quizTime < 7000) {
+          score.current = 2;
+        } else if (quizTime < 5000) {
+          score.current = 1;
+        } else {
+          score.current = 0;
+        }
         newScoooreArray.push(0);
       }
       setScoooreArray(newScoooreArray);
@@ -184,8 +277,9 @@ const QuizMicro: FC<QuizMicroProps> = ({ arrayQuestion, arrayOfArrayCorrectAnswe
       document.getElementById("hintImage")!.className = "hidden"
       document.getElementById("nextButton")!.className = "hidden";
       document.getElementById("hintText")!.className = "hidden";
-      setRatingVisibility(true);
     }
+    console.log("it took ", quizTime, "milliseconds");
+    console.log(score.current);
     // create new question and new answer options and mnemonic hint
     quizMakerUltimateHelper()
   }
@@ -267,26 +361,22 @@ const QuizMicro: FC<QuizMicroProps> = ({ arrayQuestion, arrayOfArrayCorrectAnswe
 
   return (
     <>
-      <div className="min-h-screen flex flex-col items-stretch">
+      <div className="min-h-screen flex flex-col items-stretch microQuiz">
         <div className="flex justify-center mx-2 flex-grow bg-white-1">
           <div className="w-full max-w-[1000px] p-8 bg-white my-4">
             <div className="flex flex-col items-center justify-center">
-              <a className="relative inline-block text-lg group cursor-pointer" id="startQuizButton" onClick={() => { document.getElementById("quizContent")!.className = "block"; quizMakerUltimateHelper(); document.getElementById("startQuizButton")!.className = "hidden"; }}>
-                <span className="relative z-10 block px-5 py-3 overflow-hidden font-medium leading-tight text-gray-800 transition-colors duration-300 ease-out border-2 border-gray-900 rounded-lg group-hover:text-white">
-                  <span className="absolute inset-0 w-full h-full px-5 py-3 rounded-lg bg-gray-50"></span>
-                  <span className="absolute left-0 w-48 h-48 -ml-2 transition-all duration-300 origin-top-right -rotate-90 -translate-x-full translate-y-12 bg-gray-900 group-hover:-rotate-180 ease"></span>
-                  <span className="relative">Start Quiz</span>
-                </span>
-                <span className="absolute bottom-0 right-0 w-full h-12 -mb-1 -mr-1 transition-all duration-200 ease-linear bg-gray-900 rounded-lg group-hover:mb-0 group-hover:mr-0" data-rounded="rounded-lg"></span>
-              </a>
             </div>
-            <div className="hidden" id="quizContent">
-              <select id="difficulty-select" onChange={e => { removeHints(e.target.selectedIndex); }} style={{ color: "red" }} className="hidden">
-                <option value="">--Please choose difficulty--</option>
-                <option value="easy">Easy</option>
-                <option value="standard">Standard</option>
-                <option value="difficult">Difficult</option>
-              </select>
+            <div id="quizContent">
+              <div className="stopwatch">
+                <div className="timerDisplay">
+                  00 : 00 : 00 : 000
+                </div>
+                <div className="buttons">
+                  <button id="pauseTimer">Pause</button>
+                  <button id="startTimer">Start</button>
+                  <button id="resetTimer">Reset</button>
+                </div>
+              </div>
               <h1 className="text-2xl font-bold" id="question"></h1>
               <h1 id="hintText" className="text-1xl font-bold">Sort in correct order</h1>
               <img id="hintImage" style={{ width: "200", height: "200" }} />
@@ -323,22 +413,6 @@ const QuizMicro: FC<QuizMicroProps> = ({ arrayQuestion, arrayOfArrayCorrectAnswe
                 </a>
               </div>
             </div>
-            {ratingVisibility && <div id="ratingArea">
-              Rate your memorization of the answer:
-              <br></br>
-              <div className="rate" onChange={e => console.log((e.target as any).value)} >
-                <input type="radio" id="star5" name="rate" value="5" />
-                <label for="star5" title="text">5 stars</label>
-                <input type="radio" id="star4" name="rate" value="4" />
-                <label for="star4" title="text">4 stars</label>
-                <input type="radio" id="star3" name="rate" value="3" />
-                <label for="star3" title="text">3 stars</label>
-                <input type="radio" id="star2" name="rate" value="2" />
-                <label for="star2" title="text">2 stars</label>
-                <input type="radio" id="star1" name="rate" value="1" />
-                <label for="star1" title="text">1 star</label>
-              </div>
-            </div>}
           </div>
         </div>
       </div>

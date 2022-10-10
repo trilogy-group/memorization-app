@@ -65,6 +65,10 @@ const Main: FC<MainProps> = ({ origin }) => {
       document.querySelectorAll("video")
     ) as HTMLVideoElement[];
 
+    let quizElements = Array.from(
+      document.querySelectorAll("div.microQuiz")
+    ) as HTMLVideoElement[];
+
     observer.current = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
@@ -82,11 +86,37 @@ const Main: FC<MainProps> = ({ origin }) => {
           }
         }, null as HTMLVideoElement | null);
 
+        const mostVisibleQuiz = quizElements.reduce((prev, current) => {
+          if (
+            // @ts-ignore
+            current.intersectionRatio > (prev ? prev.intersectionRatio : 0)
+          ) {
+            return current;
+          } else {
+            return prev;
+          }
+        }, null as HTMLVideoElement | null);
+
         if (mostVisible && mostVisible.paused) mostVisible.play();
+
+        if (mostVisibleQuiz) {
+          console.log("starting quiz");
+          mostVisibleQuiz.querySelector("#startTimer")!.click();
+        }
 
         videoElements.forEach((item) => {
           if (item !== mostVisible && !item.paused) item.pause();
         });
+
+        quizElements.forEach((item) => {
+          if (item !== mostVisibleQuiz) {
+            item.querySelector("#pauseTimer")!.click();
+            console.log("pausing quiz");
+          }
+        });
+        // My code for post timer begins
+
+        // My code for post timer ends
       },
       {
         threshold: [0, 0.2, 0.4, 0.6, 0.8, 1],
@@ -94,6 +124,7 @@ const Main: FC<MainProps> = ({ origin }) => {
     );
 
     videoElements.forEach((item) => observer.current?.observe(item));
+    quizElements.forEach((item) => observer.current?.observe(item));
 
     // eslint-disable-next-line
   }, [data?.pages.length, Boolean(Number(router.query.following))]);
@@ -120,7 +151,6 @@ const Main: FC<MainProps> = ({ origin }) => {
         <QuizMicro
           arrayQuestion={arrayQuestion}
           arrayOfArrayCorrectAnswers={[
-            // Third question
             ["Bipedalism"]
 
           ]}
@@ -131,6 +161,7 @@ const Main: FC<MainProps> = ({ origin }) => {
         />
 
       }</div>
+
 
       {/* At the bottom to detect infinite scroll */}
       <InView
