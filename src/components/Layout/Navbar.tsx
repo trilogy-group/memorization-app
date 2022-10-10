@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import Image from "next/future/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -11,10 +12,13 @@ import ClickAwayListener from "../Shared/ClickAwayListener";
 
 import Autocomplete from '@mui/material/Autocomplete';
 import TextField from '@mui/material/TextField';
+import { trpc } from "@/utils/trpc";
 
 const Navbar: FC = () => {
   const [subjectValue, setSubjectValue] = useState<string[]>([]);
   const [chapterValue, setChapterValue] = useState<string[]>([]);
+
+  const [notifications, setNotifications] = useState<{ content: string[], status: number[] }>({ content: [], status: [] });
 
   const subjects = [
     '#Biology ',
@@ -29,12 +33,12 @@ const Navbar: FC = () => {
   ];
 
   const router = useRouter();
+  const notificationMutation = trpc.useMutation("notification.for-you");
 
   const { data: session, status } = useSession();
 
   const [isDropdownOpened, setIsDropdownOpened] = useState(false);
 
-  const [notifications, setNotifications] = useState<string[]>([]);
 
   const [notificationVisibility, setNotificationVisibility] = useState(false);
 
@@ -44,6 +48,12 @@ const Navbar: FC = () => {
       : ""
   );
 
+  useEffect(()=>{
+    notificationMutation.mutateAsync().then(notifs => {
+      console.log(notifs);
+      setNotifications(notifs)});
+  }, []);
+
   const handleFormSubmit = (e: FormEvent) => {
     e.preventDefault();
 
@@ -52,15 +62,18 @@ const Navbar: FC = () => {
     }
   };
 
-  const displayNotification = (n: string) => {
-    console.log(notifications);
-    if (n == "Quiz") {
-      return <Link href={`/quizUltimate`}>Go to Quiz Page</Link>
-    } else if (n == "Like") {
-      return <span className="notification">Someone liked your post</span>
-    } else {
-      return <span className="notification">Someone commented under your post</span>
-    }
+
+  const displayNotification = () => {
+    const contentLst: string[] = notifications.content;
+    const statusLst: number[] = notifications.status;
+
+    return contentLst.map((n) => {
+      if (n == "Quiz") {
+        return <Link href={`/quizUltimate`}>Go to Quiz Page</Link>
+      } else {
+        return <span className="notification">{n}</span>
+      }
+    })
   }
 
   return (
@@ -75,38 +88,38 @@ const Navbar: FC = () => {
             </a>
           </Link>
           <div className='flex space-x-2 min-w-[30%]'>
-                  <Autocomplete
-                    value={subjectValue}
-                    onChange={(event, newValue) => {
-                      setSubjectValue(newValue);
-                    }}
-                    options={subjects}
-                    multiple
-                    limitTags={2}
-                    id="caption"
-                    className="p-1 w-full mt-1 mb-3 outline-none focus:border-gray-400 transition"
-                    style={{ paddingTop: 20, paddingBottom: 20, maxHeight: 90 }}
-                    renderInput={(params) => (
-                      <TextField {...params} label="Subject" placeholder="Biology, History, Spanish ..." />
-                    )}
-                    sx={{ width: '1/2' }}
-                  />
-                  <Autocomplete
-                    value={chapterValue}
-                    onChange={(event, newValue) => {
-                      setChapterValue(newValue);
-                    }}
-                    options={chapters}
-                    multiple
-                    limitTags={2}
-                    id="caption"
-                    className="p-1 w-full mt-1 mb-3 outline-none focus:border-gray-400 transition"
-                    style={{ paddingTop: 20, maxHeight: 90 }}
-                    renderInput={(params) => (
-                      <TextField {...params} label="Chapters" placeholder="Chapter 1, 2 ..." />
-                    )}
-                    sx={{ width: '1/2', height: '10' }}
-                  />
+            <Autocomplete
+              value={subjectValue}
+              onChange={(event, newValue) => {
+                setSubjectValue(newValue);
+              }}
+              options={subjects}
+              multiple
+              limitTags={2}
+              id="caption"
+              className="p-1 w-full mt-1 mb-3 outline-none focus:border-gray-400 transition"
+              style={{ paddingTop: 20, paddingBottom: 20, maxHeight: 90 }}
+              renderInput={(params) => (
+                <TextField {...params} label="Subject" placeholder="Biology, History, Spanish ..." />
+              )}
+              sx={{ width: '1/2' }}
+            />
+            <Autocomplete
+              value={chapterValue}
+              onChange={(event, newValue) => {
+                setChapterValue(newValue);
+              }}
+              options={chapters}
+              multiple
+              limitTags={2}
+              id="caption"
+              className="p-1 w-full mt-1 mb-3 outline-none focus:border-gray-400 transition"
+              style={{ paddingTop: 20, maxHeight: 90 }}
+              renderInput={(params) => (
+                <TextField {...params} label="Chapters" placeholder="Chapter 1, 2 ..." />
+              )}
+              sx={{ width: '1/2', height: '10' }}
+            />
           </div>
           <form
             onSubmit={handleFormSubmit}
@@ -128,16 +141,10 @@ const Navbar: FC = () => {
             </button>
           </form>
           <div className="flex items-center gap-3">
-            <div className="cursor-pointer" onClick={async () => { setNotifications(notifications.concat(["Like"])); }}>
-              <span >Add like notification</span></div>
-            <div className="cursor-pointer" onClick={async () => { setNotifications(notifications.concat(["Comment"])); }}>
-              <span >Add comment notification</span></div>
-            <div className="cursor-pointer" onClick={async () => { setNotifications(notifications.concat(["Quiz"])); }}>
-              <span >Add quiz notification</span></div>
             <div className="notificationArea border rounded" onClick={async () => { setNotificationVisibility(!notificationVisibility); }}>
               <img src="/notificationBell.svg" className="notificationBell"></img>
-              <div className="notificationCounter">{notifications.length}</div>
-              {notificationVisibility && <div className="notifications" id="notifications">{notifications.map((n) => displayNotification(n))}</div>}
+              <div className="notificationCounter">{notifications.content.length}</div>
+              {notificationVisibility && <div className="notifications" id="notifications">{displayNotification()}</div>}
             </div>
             <Link href={status === "authenticated" ? "/create-mnemonics" : "/sign-in"}>
               <a className="border rounded flex items-center gap-2 h-9 px-3 border-gray-200 bg-white hover:bg-gray-100 transition">

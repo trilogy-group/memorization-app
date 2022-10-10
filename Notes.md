@@ -12,6 +12,10 @@ Run this
 ```
 npx prisma migrate dev --name init
 ```
+Or
+```
+npx prisma db push --preview-feature
+```
 Check your mysql now, it should have the tables created.
 
 #### 5. npm run dev
