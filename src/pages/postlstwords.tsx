@@ -22,7 +22,6 @@ import Grid from "@mui/material/Unstable_Grid2";
 import Paper from "@mui/material/Paper";
 import Box from "@mui/material/Box";
 
-import React from "react";
 import Tab from "@mui/material/Tab";
 import TabContext from "@mui/lab/TabContext";
 import TabList from "@mui/lab/TabList";
@@ -64,9 +63,11 @@ const CreateListOfWords: NextPage = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const [isLoadingMnemonic, setIsLoadingMnemonic] = useState(false);
-  const [value, setValue] = React.useState("1");
+  const [value, setValue] = useState("1");
   const [storyGenerated, setStoryGenerated] = useState(false);
   const [acronymGenerated, setAcronymGenerated] = useState(false);
+  const [selectedMnemonic, setSelectedMnemonic] = useState(false);
+  const [selectedMnemonicType, setSelectedMnemonicType] = useState("");
 
   const handleChange = (event: React.SyntheticEvent, newValue: string) => {
     setValue(newValue);
@@ -301,170 +302,244 @@ const CreateListOfWords: NextPage = () => {
                   </div>
                 </div>
 
-                <div className="col-span-1 h-full w-full">
-                  <TabContext value={value}>
-                    <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-                      <TabList
-                        onChange={handleChange}
-                        aria-label="lab API tabs example"
-                      >
-                        <Tab label="Acronyms" value="1" />
-                        <Tab label="Images" value="2" />
-                        <Tab label="Storys" value="3" />
-                      </TabList>
-                    </Box>
-                    <TabPanel value="1">
-                      <Grid
-                        container
-                        spacing={{ xs: 1, md: 1 }}
-                        columns={{ xs: 4, sm: 8, md: 12 }}
-                      >
-                        {Array.from(Array(4)).map((_, index) => (
-                          <Grid xs={4} sm={6} md={6} key={index}>
-                            <Item>
-                              {acronym[index]}
-                              <div className="flex justify-center items-center grid-cols-2">
-                                {isLoadingMnemonic && (
-                                  <span className="w-10 h-10 border-2 border-gray-500 border-t-transparent rounded-full animate-spin"></span>
-                                )}
-                              </div>
-                            </Item>
-                            <Button
-                              variant="outlined"
-                              color="success"
-                              style={{
-                                bottom: 0,
-                                float: "left",
-                                margin: 5,
-                              }}
-                            >
-                              Accept
-                            </Button>
-                            <Button
-                              onClick={async () => {
-                                console.log(index);
-                                await handleRecommeddedAcronym(index);
-                              }}
-                              variant="outlined"
-                              color="error"
-                              style={{
-                                bottom: 0,
-                                float: "right",
-                                margin: 5,
-                              }}
-                            >
-                              {" "}
-                              <RefreshIcon />
-                            </Button>
-                          </Grid>
-                        ))}
-                      </Grid>
-                    </TabPanel>
-                    <TabPanel value="2">
-                      <div className="grid grid-cols-2">
-                        <TextareaAutosize
-                          aria-label="empty textarea"
-                          placeholder="Prompt for image generation"
-                          value={inputPromptValue}
-                          onChange={(e) => {
-                            setInputPromptValue(e.target.value);
-                          }}
-                          style={{ width: 200, marginBottom: 10, padding: 5 }}
-                        />
-                        <button
-                          onClick={async () => {
-                            setIsLoadingMnemonic(true);
-                            await handleRecommeddedImageList();
-                            setIsLoadingMnemonic(false);
-                          }}
-                          disabled={
-                            !inputPromptValue.trim() || isLoadingMnemonic
-                          }
-                          className={`flex justify-center items-center gap-2 py-3 hover:brightness-90 transition text-white bg-red-1 disabled:text-gray-400 disabled:bg-gray-200`}
-                          style={{
-                            borderRadius: 10,
-                            padding: 5,
-                            width: 100,
-                            height: 38,
-                            marginLeft: 10,
-                          }}
+                {selectedMnemonic != null && !selectedMnemonic && (
+                  <div className="col-span-1 h-full w-full">
+                    <TabContext value={value}>
+                      <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+                        <TabList
+                          onChange={handleChange}
+                          aria-label="lab API tabs example"
                         >
-                          Generate
-                        </button>
-                      </div>
-                      <Grid
-                        container
-                        spacing={{ xs: 1, md: 1 }}
-                        columns={{ xs: 4, sm: 8, md: 12 }}
-                      >
-                        {Array.from(Array(4)).map((_, index) => (
-                          <Grid xs={4} sm={6} md={6} key={index}>
-                            <Item>
-                              {mnemonicImage[index] ? (
-                                <div className="col-span-1 bg-gray-1 h-full w-full">
-                                  <div className="flex justify-center items-center grid-cols-2">
-                                    {isLoadingMnemonic && (
-                                      <span className="w-10 h-10 border-2 border-gray-500 border-t-transparent rounded-full animate-spin"></span>
-                                    )}
-                                  </div>
-                                  <img
-                                    className="h-full w-auto object-contain"
-                                    src={mnemonicImage[index]}
-                                    alt=""
-                                  />
+                          <Tab label="Acronyms" value="1" />
+                          <Tab label="Images" value="2" />
+                          <Tab label="Storys" value="3" />
+                        </TabList>
+                      </Box>
+                      <TabPanel value="1">
+                        <Grid
+                          container
+                          spacing={{ xs: 1, md: 1 }}
+                          columns={{ xs: 4, sm: 8, md: 12 }}
+                        >
+                          {Array.from(Array(4)).map((_, index) => (
+                            <Grid xs={4} sm={6} md={6} key={index}>
+                              <Item>
+                                {acronym[index]}
+                                <div className="flex justify-center items-center grid-cols-2">
+                                  {isLoadingMnemonic && (
+                                    <span className="w-10 h-10 border-2 border-gray-500 border-t-transparent rounded-full animate-spin"></span>
+                                  )}
                                 </div>
-                              ) : (
-                                <div className="col-span-1 bg-gray-1 h-full w-full"></div>
-                              )}
-                            </Item>
-                            <Button
-                              variant="outlined"
-                              color="success"
-                              style={{
-                                bottom: 0,
-                                float: "left",
-                                margin: 5,
-                              }}
-                            >
-                              Accept
-                            </Button>
-                            <Button
-                              onClick={async () => {
-                                console.log(index);
-                                await handleRecommeddedImage(index);
-                              }}
-                              variant="outlined"
-                              color="error"
-                              style={{
-                                bottom: 0,
-                                float: "right",
-                                margin: 5,
-                              }}
-                            >
-                              {" "}
-                              <RefreshIcon />
-                            </Button>
-                          </Grid>
-                        ))}
-                      </Grid>
-                    </TabPanel>
-                    <TabPanel value="3">
-                      <Grid
-                        container
-                        spacing={{ xs: 1, md: 1 }}
-                        columns={{ xs: 4, sm: 8, md: 12 }}
-                      >
-                        {Array.from(Array(4)).map((_, index) => (
-                          <Grid xs={4} sm={6} md={6} key={index}>
-                            <Item>
-                              {story[index]}
-                              <div className="flex justify-center items-center">
-                                {isLoadingMnemonic && (
-                                  <span className="w-10 h-10 border-2 border-gray-500 border-t-transparent rounded-full animate-spin"></span>
+                              </Item>
+                              <Button
+                                className="disabled:text-gray-400 disabled:bg-gray-200`"
+                                disabled={
+                                  !acronymGenerated || isLoadingMnemonic
+                                }
+                                variant="outlined"
+                                color="success"
+                                style={{
+                                  bottom: 0,
+                                  float: "left",
+                                  margin: 5,
+                                }}
+                                onClick={async () => {
+                                  setSelectedMnemonicType(acronym[index]);
+                                  setSelectedMnemonic(true);
+                                }}
+                              >
+                                Accept
+                              </Button>
+                              <Button
+                                className="disabled:text-gray-400 disabled:bg-gray-200`"
+                                disabled={
+                                  !acronymGenerated || isLoadingMnemonic
+                                }
+                                onClick={async () => {
+                                  console.log(index);
+                                  await handleRecommeddedAcronym(index);
+                                }}
+                                variant="outlined"
+                                color="error"
+                                style={{
+                                  bottom: 0,
+                                  float: "right",
+                                  margin: 5,
+                                }}
+                              >
+                                {" "}
+                                <RefreshIcon />
+                              </Button>
+                            </Grid>
+                          ))}
+                        </Grid>
+                      </TabPanel>
+                      <TabPanel value="2">
+                        <div className="grid grid-cols-2">
+                          <TextareaAutosize
+                            aria-label="empty textarea"
+                            placeholder="Prompt for image generation"
+                            value={inputPromptValue}
+                            onChange={(e) => {
+                              setInputPromptValue(e.target.value);
+                            }}
+                            style={{ width: 200, marginBottom: 10, padding: 5 }}
+                          />
+                          <button
+                            onClick={async () => {
+                              setIsLoadingMnemonic(true);
+                              await handleRecommeddedImageList();
+                              setIsLoadingMnemonic(false);
+                            }}
+                            disabled={
+                              !inputPromptValue.trim() || isLoadingMnemonic
+                            }
+                            className={`flex justify-center items-center gap-2 py-3 hover:brightness-90 transition text-white bg-red-1 disabled:text-gray-400 disabled:bg-gray-200`}
+                            style={{
+                              borderRadius: 10,
+                              padding: 5,
+                              width: 100,
+                              height: 38,
+                              marginLeft: 10,
+                            }}
+                          >
+                            Generate
+                          </button>
+                        </div>
+                        <Grid
+                          container
+                          spacing={{ xs: 1, md: 1 }}
+                          columns={{ xs: 4, sm: 8, md: 12 }}
+                        >
+                          {Array.from(Array(4)).map((_, index) => (
+                            <Grid xs={4} sm={6} md={6} key={index}>
+                              <Item>
+                                {mnemonicImage[index] ? (
+                                  <div className="col-span-1 bg-gray-1 h-full w-full">
+                                    <div className="flex justify-center items-center grid-cols-2">
+                                      {isLoadingMnemonic && (
+                                        <span className="w-10 h-10 border-2 border-gray-500 border-t-transparent rounded-full animate-spin"></span>
+                                      )}
+                                    </div>
+                                    <img
+                                      className="h-full w-auto object-contain"
+                                      src={mnemonicImage[index]}
+                                      alt=""
+                                    />
+                                  </div>
+                                ) : (
+                                  <div className="col-span-1 bg-gray-1 h-full w-full"></div>
                                 )}
-                              </div>
-                            </Item>
+                              </Item>
+                              <Button
+                                variant="outlined"
+                                color="success"
+                                style={{
+                                  bottom: 0,
+                                  float: "left",
+                                  margin: 5,
+                                }}
+                              >
+                                Accept
+                              </Button>
+                              <Button
+                                onClick={async () => {
+                                  console.log(index);
+                                  await handleRecommeddedImage(index);
+                                }}
+                                variant="outlined"
+                                color="error"
+                                style={{
+                                  bottom: 0,
+                                  float: "right",
+                                  margin: 5,
+                                }}
+                              >
+                                {" "}
+                                <RefreshIcon />
+                              </Button>
+                            </Grid>
+                          ))}
+                        </Grid>
+                      </TabPanel>
+                      <TabPanel value="3">
+                        <Grid
+                          container
+                          spacing={{ xs: 1, md: 1 }}
+                          columns={{ xs: 4, sm: 8, md: 12 }}
+                        >
+                          {Array.from(Array(4)).map((_, index) => (
+                            <Grid xs={4} sm={6} md={6} key={index}>
+                              <Item>
+                                {story[index]}
+                                <div className="flex justify-center items-center">
+                                  {isLoadingMnemonic && (
+                                    <span className="w-10 h-10 border-2 border-gray-500 border-t-transparent rounded-full animate-spin"></span>
+                                  )}
+                                </div>
+                              </Item>
+                              <Button
+                                className="disabled:text-gray-400 disabled:bg-gray-200`"
+                                disabled={!storyGenerated || isLoadingMnemonic}
+                                variant="outlined"
+                                color="success"
+                                style={{
+                                  bottom: 0,
+                                  float: "left",
+                                  margin: 5,
+                                }}
+                              >
+                                Accept
+                              </Button>
+                              <Button
+                                className="disabled:text-gray-400 disabled:bg-gray-200`"
+                                disabled={!storyGenerated || isLoadingMnemonic}
+                                onClick={async () => {
+                                  console.log(index);
+                                  await handleRecommeddedStory(index);
+                                }}
+                                variant="outlined"
+                                color="error"
+                                style={{
+                                  bottom: 0,
+                                  float: "right",
+                                  margin: 5,
+                                }}
+                              >
+                                {" "}
+                                <RefreshIcon />
+                              </Button>
+                            </Grid>
+                          ))}
+                        </Grid>
+                      </TabPanel>
+                    </TabContext>
+                  </div>
+                )}
+                {selectedMnemonic != null && selectedMnemonic && (
+                  <div className="col-span-1 h-full w-full">
+                    <TabContext value={value}>
+                      <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+                        <TabList
+                          onChange={handleChange}
+                          aria-label="lab API tabs example"
+                        >
+                          <Tab label="Acronyms" value="1" />
+                          <Tab label="Images" value="2" />
+                          <Tab label="Storys" value="3" />
+                        </TabList>
+                      </Box>
+                      <TabPanel value="1" >
+                        <Grid
+                          container
+                          spacing={{ xs: 1, md: 1 }}
+                          columns={{ xs: 4, sm: 8, md: 12 }}
+                        >
+                          <Grid xs={4} sm={6} md={12}>
+                            <Item>{selectedMnemonicType}</Item>
                             <Button
+                              className="disabled:text-gray-400 disabled:bg-gray-200`"
+                              disabled={!acronymGenerated || isLoadingMnemonic}
                               variant="outlined"
                               color="success"
                               style={{
@@ -472,13 +547,18 @@ const CreateListOfWords: NextPage = () => {
                                 float: "left",
                                 margin: 5,
                               }}
+                              onClick={async () => {
+                                //handleConfirmMnemonic();
+                                setSelectedMnemonic(true);
+                              }}
                             >
                               Accept
                             </Button>
                             <Button
+                              className="disabled:text-gray-400 disabled:bg-gray-200`"
+                              disabled={!acronymGenerated || isLoadingMnemonic}
                               onClick={async () => {
-                                console.log(index);
-                                await handleRecommeddedStory(index);
+                                setSelectedMnemonic(false);
                               }}
                               variant="outlined"
                               color="error"
@@ -492,11 +572,11 @@ const CreateListOfWords: NextPage = () => {
                               <RefreshIcon />
                             </Button>
                           </Grid>
-                        ))}
-                      </Grid>
-                    </TabPanel>
-                  </TabContext>
-                </div>
+                        </Grid>
+                      </TabPanel>
+                    </TabContext>
+                  </div>
+                )}
               </div>
             </div>
           </div>
