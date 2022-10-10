@@ -33,6 +33,9 @@ export const progressRouter = createRouter()
           lastEvaluated: "desc"
         }
       });
+      if (existingProgress == null) {
+        return null;
+      }
       const questionId = existingProgress?.questionId;
       console.log(existingProgress);
       const question = await prisma.question.findFirst({
