@@ -19,7 +19,7 @@ interface QuizMicroProps {
 
 //: FC<QuizMicroProps> = ({ inputQuestions, inputAnswer, inputType, inputIncorrectAnswer, inputHint,inputDifficulty }) =>
 const QuizMicro: FC<QuizMicroProps> = ({ arrayQuestion, arrayOfArrayCorrectAnswers, arrayType, arrayIncorrectAnswer, arraySrc, arrayDifficulty, refetch }) => {
-  const { data: session } = useSession();
+  const session = useSession();
   const quizGradeMutation = trpc.useMutation("progress.post-one-quiz-result");
   const quizQuestionAnswersEtc = trpc.useMutation("progress.get-one-quiz");
   const [optionMCQ, setOptionMCQ] = useState();

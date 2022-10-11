@@ -263,7 +263,7 @@ const QuestionSection: FC<QuestionSectionProps> = ({ question, refetch, origin }
               </div>
             </div>
             <button className={`lg:w-12 lg:h-12 w-7 h-7 fill-black rounded-full ${isChosenToMemorize ? "bg-[#11ab30]" : "bg-[#de2814]"
-              }`} onClick={() => { toast("You chose to memorize this"); toggleGotIt(); }}>
+              }`} onClick={() => { toast("You chose to memorize this post"); toggleGotIt(); }}>
               <img src="/memorizeThatIcon.png"></img>
             </button>
           </div>
