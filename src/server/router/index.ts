@@ -10,6 +10,7 @@ import { imgRecommendationRouter } from "./recommendImg";
 import { acronymRecommendationRouter } from "./recommendAcro";
 import { storyRecommendationRouter } from "./recommendStory";
 import { notificationRouter } from "./notification";
+import { contentTreeRouter } from "./contentTree";
 
 export const appRouter = createRouter()
   .transformer(superjson)
@@ -21,6 +22,7 @@ export const appRouter = createRouter()
   .merge("notification.", notificationRouter)
   .merge("recommendImg.", imgRecommendationRouter)
   .merge("recommendAcro.", acronymRecommendationRouter)
-  .merge("recommendStory.", storyRecommendationRouter);
+  .merge("recommendStory.", storyRecommendationRouter)
+  .merge("getContentTree.", contentTreeRouter);
 
 export type AppRouter = typeof appRouter;

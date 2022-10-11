@@ -32,6 +32,8 @@ import Button from "@mui/material/Button";
 
 import RefreshIcon from "@mui/icons-material/Refresh";
 
+import { Navigation } from "../components/navigation/navigation";
+
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#fff",
   ...theme.typography.body2,
@@ -347,14 +349,26 @@ const CreateListOfWords: NextPage = () => {
       />
       <div className="min-h-screen flex flex-col items-stretch">
         <Navbar />
+
         <div className="flex justify-center mx-2 flex-grow place-items-center">
           <div className="w-full max-w-[1000px] p-1 bg-white my-1">
             <div className="flex items-start mt-10 gap-4">
               <div className="grid grid-cols-2 gap-11 p-2 w-[100%] h-[75%] mt-5 mb-2">
                 <div className="col-span-1 h-full w-full">
                   <h1 className="text-2xl font-bold">
-                    Memorize a list of words
+                    Memorize a list of words{" "}
+                    <Navigation
+                      open={true}
+                      onClose={function (): void {
+                        throw new Error("Function not implemented.");
+                      }}
+                      addNodeToWorkspace={function (nodeId: string): void {
+                        throw new Error("Function not implemented.");
+                      }}
+                    />
+                    
                   </h1>
+
                   <div className="grid gap-1" style={{ marginBottom: 10 }}>
                     <Textarea
                       label="Enter your question"
@@ -697,13 +711,12 @@ const CreateListOfWords: NextPage = () => {
                           <Grid xs={4} sm={6} md={12}>
                             <Item2>
                               <div className="col-span-1 bg-gray-1 h-full w-full">
-                                  <img
-                                    className="h-full w-auto object-contain"
-                                    src={selectedMnemonicType}
-                                    alt=""
-                                  />
+                                <img
+                                  className="h-full w-auto object-contain"
+                                  src={selectedMnemonicType}
+                                  alt=""
+                                />
                               </div>
-                              
                             </Item2>
                             <Button
                               className="disabled:text-gray-400 disabled:bg-gray-200`"
