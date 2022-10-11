@@ -30,6 +30,9 @@ const QuizMicro: FC<QuizMicroProps> = ({ arrayQuestion, arrayOfArrayCorrectAnswe
   const [optionD, setOptionD] = useState("");
   const [scoooreArray, setScoooreArray] = useState<number[]>([]);
 
+  const [quizSetOfVariables, setQuizVariables] = useState<{ id: string, caption: string, videoURL: string, coverURL: string }>({ id: "", caption: "", videoURL: "", coverURL: "" });
+  var deleteThis = useRef<{ id: string, caption: string, videoURL: string, coverURL: string }>({ id: "", caption: "", videoURL: "", coverURL: "" });
+
   var questionNumber = useRef(1);
   var score = useRef(0);
 
@@ -38,8 +41,12 @@ const QuizMicro: FC<QuizMicroProps> = ({ arrayQuestion, arrayOfArrayCorrectAnswe
 
   useEffect(() => {
     quizQuestionAnswersEtc.mutateAsync().then(quizVariables => {
-      console.log("the id of the user is ", session?.user?.id)
       console.log(quizVariables);
+      setQuizVariables(quizVariables);
+      deleteThis.current = quizVariables;
+      console.log(quizSetOfVariables);
+      console.log("deletethis current ", deleteThis.current);
+      quizMakerUltimateHelper()
     });
 
     // adding script that makes elements of the list able to be dragged PART 1
@@ -47,7 +54,6 @@ const QuizMicro: FC<QuizMicroProps> = ({ arrayQuestion, arrayOfArrayCorrectAnswe
     script.src = "https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js";
     script.async = true;
     document.body.appendChild(script);
-    quizMakerUltimateHelper()
     // adding script that makes elements of the list able to be dragged PART 2
     setTimeout(() => {
       let quizScript = document.createElement('script');
@@ -58,6 +64,8 @@ const QuizMicro: FC<QuizMicroProps> = ({ arrayQuestion, arrayOfArrayCorrectAnswe
     }
 
   }, []);
+
+
 
 
   function shuffle(arr: string[]): string[] {
@@ -135,7 +143,6 @@ const QuizMicro: FC<QuizMicroProps> = ({ arrayQuestion, arrayOfArrayCorrectAnswe
     console.log("quiz start is ", quizStart.current);
     console.log("quiz end is ", quizEnd);
     let quizTime = quizEnd - quizStart.current;
-    console.log(`It took quizTime milliseconds.`);
     if (arrayType[questionNumber.current - 1] == "sequence") {
       let elem = document.getElementById("sequence");
       let answers = new Array();
@@ -254,15 +261,16 @@ const QuizMicro: FC<QuizMicroProps> = ({ arrayQuestion, arrayOfArrayCorrectAnswe
           });
       }
 
+    } else {
+      // create new question and new answer options and mnemonic hint
+      quizMakerUltimateHelper()
     }
 
-    // create new question and new answer options and mnemonic hint
-    quizMakerUltimateHelper()
   }
 
 
   function quizMakerUltimateHelper() {
-    document.getElementById("question")!.innerHTML = arrayQuestion[questionNumber.current - 1] as string;
+    document.getElementById("question")!.innerHTML = deleteThis.current.caption as string;
     if (arrayType[questionNumber.current - 1] == "sequence") {
       let elem = document.getElementById("sequence");
       document.getElementById("hintText")!.innerHTML = "Sort in the correct order";
@@ -320,7 +328,9 @@ const QuizMicro: FC<QuizMicroProps> = ({ arrayQuestion, arrayOfArrayCorrectAnswe
       setOptionMCQ(undefined);
       MCQOptions!.className = "block";
     }
-    document.getElementById("hintImage")?.setAttribute("src", arraySrc[questionNumber.current - 1] as string)
+    console.log("this is the cover url", deleteThis.current.coverURL);
+    console.log("this is the caption", deleteThis.current.caption);
+    document.getElementById("hintImage")?.setAttribute("src", deleteThis.current.coverURL as string)
   }
 
 
@@ -342,6 +352,8 @@ const QuizMicro: FC<QuizMicroProps> = ({ arrayQuestion, arrayOfArrayCorrectAnswe
           <div className="w-full max-w-[1000px] p-8 bg-white my-4">
             <div className="flex flex-col items-center justify-center">
             </div>
+            <button id="startTimer" className="hidden" onClick={async () => (quizStart.current == 0) ?
+              quizStart.current = performance.now() : 0}></button>
             <div id="quizContent">
               <h1 className="text-2xl font-bold" id="question"></h1>
               <h1 id="hintText" className="text-1xl font-bold">Sort in correct order</h1>

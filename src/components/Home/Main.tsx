@@ -100,6 +100,7 @@ const Main: FC<MainProps> = ({ origin }) => {
         if (mostVisible && mostVisible.paused) mostVisible.play();
 
         if (mostVisibleQuiz) {
+          mostVisibleQuiz.querySelector("#startTimer")!.click();
           console.log("starting quiz");
         }
 
