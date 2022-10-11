@@ -68,6 +68,7 @@ model Progress {
     efactor       Float    @default(2.5)
     userId        String
     user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    // TODO: change post to quiz
     postId        String
     posts         Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
 
@@ -188,15 +189,15 @@ model Concept {
     posts     Post[]
     quizzes   Quiz[]
     skillId   String
-    Skill     Skill     @relation(fields: [skillId], references: [id])
+    skill     Skill     @relation(fields: [skillId], references: [id])
 }
 
 model Quiz {
     id        Int     @id @default(autoincrement())
-    question  String  @db.Text
+    desc      String  @db.Text
+    type      String
     option    String  @db.Text
     answer    String  @db.Text
-    type      String
     Post      Post[]
     conceptId String
     concepts  Concept @relation(fields: [conceptId], references: [id])
