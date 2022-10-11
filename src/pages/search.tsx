@@ -15,10 +15,10 @@ import { authOptions } from "./api/auth/[...nextauth]";
 
 enum Tabs {
   accounts,
-  questions,
+  posts,
 }
 
-const Search: FC<SearchProps> = ({ questions, accounts }) => {
+const Search: FC<SearchProps> = ({ posts, accounts }) => {
   const [currentTab, setCurrentTab] = useState(Tabs.accounts);
   const router = useRouter();
 
@@ -43,8 +43,8 @@ const Search: FC<SearchProps> = ({ questions, accounts }) => {
               Accounts
             </button>
             <button
-              onClick={() => setCurrentTab(Tabs.questions)}
-              className={`py-1 font-medium transition border-b-2 ${currentTab === Tabs.questions
+              onClick={() => setCurrentTab(Tabs.posts)}
+              className={`py-1 font-medium transition border-b-2 ${currentTab === Tabs.posts
                 ? "border-black"
                 : "text-gray-500 border-transparent"
                 } `}
@@ -94,36 +94,36 @@ const Search: FC<SearchProps> = ({ questions, accounts }) => {
             </>
           ) : (
             <>
-              {questions?.length === 0 ? (
+              {posts?.length === 0 ? (
                 <p className="text-center my-5">No result found</p>
               ) : (
                 <div className="grid gap-4 grid-cols-[repeat(auto-fill,_minmax(120px,_1fr))] lg:grid-cols-[repeat(auto-fill,_minmax(200px,_1fr))]">
-                  {questions?.map((question) => (
-                    <div key={question.id}>
-                      <Link href={`/question${question.id}`}>
+                  {posts?.map((post) => (
+                    <div key={post.id}>
+                      <Link href={`/post${post.id}`}>
                         <a className="block h-0 relative pb-[131%]">
                           <img
                             className="absolute inset-0 h-full w-full object-cover rounded"
-                            src={question.coverURL}
+                            src={post.coverURL}
                             alt=""
                           />
                           <BsPlay className="absolute left-3 bottom-3 fill-white w-7 h-7" />
                         </a>
                       </Link>
                       <p className="whitespace-nowrap overflow-hidden text-ellipsis my-1">
-                        {question.caption}
+                        {post.caption}
                       </p>
                       <div className="flex items-center justify-between">
-                        <Link href={`/user/${question.user.id}`}>
+                        <Link href={`/user/${post.user.id}`}>
                           <a className="flex items-center gap-1">
                             <Image
-                              src={question.user.image!}
+                              src={post.user.image!}
                               width={20}
                               height={20}
                               alt=""
                               className="rounded-full object-cover"
                             />
-                            <span>{formatAccountName(question.user.name!)}</span>
+                            <span>{formatAccountName(post.user.name!)}</span>
                           </a>
                         </Link>
                         <BsPlay className="fill-black w-5 h-5" />
@@ -170,9 +170,9 @@ export const getServerSideProps = async ({
 
   const session = await getServerSession(req, res, authOptions);
 
-  let accounts, questions;
+  let accounts, posts;
   if (tags != null) {
-    [accounts, questions] = await Promise.all([
+    [accounts, posts] = await Promise.all([
       prisma.user.findMany({
         where: {
           OR: {
@@ -197,7 +197,7 @@ export const getServerSideProps = async ({
           name: true,
         },
       }),
-      prisma.question.findMany({
+      prisma.post.findMany({
         where: {
           hashtags: {
             some: {
@@ -223,7 +223,7 @@ export const getServerSideProps = async ({
 
   }
   else {
-    [accounts, questions] = await Promise.all([
+    [accounts, posts] = await Promise.all([
       prisma.user.findMany({
         where: {
           OR: {
@@ -248,7 +248,7 @@ export const getServerSideProps = async ({
           name: true,
         },
       }),
-      prisma.question.findMany({
+      prisma.post.findMany({
         where: {
           caption: {
             search: q,
@@ -274,7 +274,7 @@ export const getServerSideProps = async ({
   return {
     props: {
       session,
-      questions,
+      posts,
       accounts,
     },
   };

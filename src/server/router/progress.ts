@@ -6,7 +6,7 @@ import { createRouter } from "./context";
 
 
 export type ProgressWhereUniqueInput = {
-  questionId?: string | null,
+  postId?: string | null,
   userId?: string | null,
 }
 
@@ -35,25 +35,25 @@ export const progressRouter = createRouter()
       if (existingProgress == null) {
         return null;
       }
-      const questionId = existingProgress?.questionId;
+      const postId = existingProgress?.postId;
       console.log(existingProgress);
-      const question = await prisma.question.findFirst({
+      const post = await prisma.post.findFirst({
         where: {
-          id: questionId
+          id: postId
         }
       });
 
       // create progress entry if not existing
-      return question;
+      return post;
     },
   })
   .mutation("post-got-it", {
-    // create or update interval, easy factor, repetition per question
+    // create or update interval, easy factor, repetition per post
     input: z.object({
-      questionId: z.string(),
+      postId: z.string(),
     }),
     async resolve({ ctx: { prisma, session }, input }) {
-      const id = input.questionId;
+      const id = input.postId;
       const grade = 5;
 
       if (id == null) {
@@ -64,7 +64,7 @@ export const progressRouter = createRouter()
       const existingProgress = await prisma.progress.findFirst({
         where: {
           userId: session?.user?.id!,
-          questionId: id,
+          postId: id,
         }
       });
 
@@ -76,7 +76,7 @@ export const progressRouter = createRouter()
             efactor: repetitionItem.efactor,
             interval: repetitionItem.interval,
             userId: session?.user?.id!,
-            questionId: id,
+            postId: id,
           }
         });
       }
@@ -92,7 +92,7 @@ export const progressRouter = createRouter()
           where: {
             progress_identifier: {
               userId: session?.user?.id!,
-              questionId: id
+              postId: id
             }
           },
           data: {
@@ -109,13 +109,13 @@ export const progressRouter = createRouter()
     },
   })
   .mutation("post-one-quiz-result", {
-    // create or update interval, easy factor, repetition per question
+    // create or update interval, easy factor, repetition per post
     input: z.object({
-      questionId: z.string(),
+      postId: z.string(),
       grade: z.string(),
     }),
     async resolve({ ctx: { prisma, session }, input }) {
-      const id = input.questionId;
+      const id = input.postId;
       let grade: SuperMemoGrade = Number(input.grade || "") % 5 as SuperMemoGrade; // 0 ~ 5, type SuperMemoItems
 
       if (id == null) {
@@ -126,7 +126,7 @@ export const progressRouter = createRouter()
       const existingProgress = await prisma.progress.findFirst({
         where: {
           userId: session?.user?.id!,
-          questionId: id,
+          postId: id,
         }
       });
 
@@ -137,7 +137,7 @@ export const progressRouter = createRouter()
             efactor: 2.5,
             interval: 1,
             userId: session?.user?.id!,
-            questionId: id,
+            postId: id,
           }
         });
       }
@@ -153,7 +153,7 @@ export const progressRouter = createRouter()
           where: {
             progress_identifier: {
               userId: session?.user?.id!,
-              questionId: id
+              postId: id
             }
           },
           data: {
@@ -170,16 +170,16 @@ export const progressRouter = createRouter()
     },
   })
   .mutation("post-multiple-quiz-results", {
-    // create or update interval, easy factor, repetition per question
+    // create or update interval, easy factor, repetition per post
     input: z.object({
-      questionIdArr: z.string(),
+      postIdArr: z.string(),
       quizScoreArr: z.string(),
     }),
     async resolve({ ctx: { prisma, session }, input }) {
-      const questionIdArr = input.questionIdArr.split(';');
+      const postIdArr = input.postIdArr.split(';');
       const quizScores = input.quizScoreArr.split(';');
-      for (var i = 0; i < questionIdArr.length; i++) {
-        const id = questionIdArr[i];
+      for (var i = 0; i < postIdArr.length; i++) {
+        const id = postIdArr[i];
         let grade: SuperMemoGrade = Number(quizScores[i] || "") % 5 as SuperMemoGrade; // 0 ~ 5, type SuperMemoItems
 
         if (id == null) {
@@ -189,7 +189,7 @@ export const progressRouter = createRouter()
         const existingProgress = await prisma.progress.findFirst({
           where: {
             userId: session?.user?.id!,
-            questionId: id,
+            postId: id,
           }
         });
 
@@ -200,7 +200,7 @@ export const progressRouter = createRouter()
               efactor: 2.5,
               interval: 0,
               userId: session?.user?.id!,
-              questionId: id,
+              postId: id,
             }
           });
         }
@@ -215,7 +215,7 @@ export const progressRouter = createRouter()
             where: {
               progress_identifier: {
                 userId: session?.user?.id!,
-                questionId: id
+                postId: id
               }
             },
             data: {
