@@ -20,8 +20,7 @@ export const progressRouter = createRouter()
   })
   .mutation("get-one-quiz", {
     // get quizzes based on progress
-    input: z.object({}),
-    async resolve({ ctx: { prisma, session }, input }) {
+    async resolve({ ctx: { prisma, session }}) {
       const existingProgress = await prisma.progress.findFirst({
         where: {
           userId: session?.user?.id!,
