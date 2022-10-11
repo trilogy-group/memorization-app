@@ -37,8 +37,8 @@ const chapters = [
 const Upload: NextPage = () => {
   const router = useRouter();
 
-  const uploadMutation = trpc.useMutation("question.createVideo");
-  const uploadImgMutation = trpc.useMutation("question.createImg");
+  const uploadMutation = trpc.useMutation("post.createVideo");
+  const uploadImgMutation = trpc.useMutation("post.createImg");
 
   const inputRef = useRef<HTMLInputElement | null>(null);
 
@@ -196,12 +196,12 @@ const Upload: NextPage = () => {
 
       toast.loading("Uploading metadata...", { id: toastID });
 
-      const tagStr = subjectValue.join() + chapterValue.join();
+      const concept = "CH8";
 
       const created = await uploadImgMutation.mutateAsync({
         caption: inputValue.trim(),
         coverURL: uploadedCover,
-        tagStr,
+        concept,
       });
       toast.loading("Mnemonics Created! Points +1", { id: toastID });
       await new Promise(r => setTimeout(r, 800));
@@ -280,7 +280,7 @@ const Upload: NextPage = () => {
 
       toast.loading("Uploading metadata...", { id: toastID });
 
-      const tagStr = subjectValue.join() + chapterValue.join();
+      const concept = "CH8";
 
       const created = await uploadMutation.mutateAsync({
         caption: inputValue.trim(),
@@ -288,7 +288,7 @@ const Upload: NextPage = () => {
         videoURL: uploadedVideo,
         videoHeight,
         videoWidth,
-        tagStr,
+        concept,
       });
       toast.loading("Mnemonics Created! Points +1", { id: toastID });
       await new Promise(r => setTimeout(r, 800));
@@ -297,7 +297,7 @@ const Upload: NextPage = () => {
 
       setIsLoading(false);
 
-      router.push(`/question/${created.id}`);
+      router.push(`/post/${created.id}`);
     } catch (error) {
       console.log(error);
       setIsLoading(false);

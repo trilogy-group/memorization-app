@@ -4,7 +4,7 @@ import { commentRouter } from "./comment";
 import { createRouter } from "./context";
 import { followRouter } from "./follow";
 import { likeRouter } from "./like";
-import { questionRouter } from "./question";
+import { postRouter } from "./post";
 import { progressRouter } from "./progress";
 import { imgRecommendationRouter } from "./recommendImg";
 import { acronymRecommendationRouter } from "./recommendAcro";
@@ -13,7 +13,7 @@ import { notificationRouter } from "./notification";
 
 export const appRouter = createRouter()
   .transformer(superjson)
-  .merge("question.", questionRouter)
+  .merge("post.", postRouter)
   .merge("like.", likeRouter)
   .merge("follow.", followRouter)
   .merge("comment.", commentRouter)

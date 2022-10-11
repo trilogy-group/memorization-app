@@ -21,7 +21,7 @@ const wordList: string[] = [];
 
 const CreateListOfWords: NextPage = () => {
 
-  const uploadMutation = trpc.useMutation("question.createVideo");
+  const uploadMutation = trpc.useMutation("post.createVideo");
 
 
   // TODO: connect mnemonic image with recommendation system in the backend
@@ -38,7 +38,7 @@ const CreateListOfWords: NextPage = () => {
 
   const [inputValue, setInputValue] = useState("");
   const [inputPromptValue, setInputPromptValue] = useState("");
-  const [inputQuestionValue, setInputQuestionValue] = useState("");
+  const [inputPostValue, setInputPostValue] = useState("");
 
   const [tableEntryValue, setTableEntryValue] = useState("");
 
@@ -137,9 +137,9 @@ const CreateListOfWords: NextPage = () => {
                     <Textarea
                       label="Enter your question"
                       placeholder="e.g., world leaders during WW2"
-                      value={inputQuestionValue}
+                      value={inputPostValue}
                       onChange={(e) => {
-                        setInputQuestionValue(e.target.value);
+                        setInputPostValue(e.target.value);
                       }}
                     />
                     <Textarea

@@ -17,8 +17,8 @@ import { trpc } from "@/utils/trpc";
 
 import VideoPlayer from "./VideoPlayer";
 
-interface QuestionSectionProps {
-  question: Video & {
+interface PostSectionProps {
+  post: Video & {
     user: User;
     _count: {
       likes: number;
@@ -31,7 +31,7 @@ interface QuestionSectionProps {
   refetch: Function;
 }
 
-const QuestionSection: FC<QuestionSectionProps> = ({ question, refetch, origin }) => {
+const PostSection: FC<PostSectionProps> = ({ post, refetch, origin }) => {
   const session = useSession();
 
   const likeMutation = trpc.useMutation("like.toggle");
@@ -40,13 +40,13 @@ const QuestionSection: FC<QuestionSectionProps> = ({ question, refetch, origin }
 
   const gotItMutation = trpc.useMutation("progress.post-got-it");
 
-  const [isCurrentlyLiked, setIsCurrentlyLiked] = useState(question.likedByMe);
+  const [isCurrentlyLiked, setIsCurrentlyLiked] = useState(post.likedByMe);
   const [isChosenToMemorize, setIsChosenToMemorize] = useState(false);
   const [isCurrentlyFollowed, setIsCurrentlyFollowed] = useState<
     undefined | boolean
   >(undefined);
 
-  const videoURL = `${origin}/question/${question.id}`;
+  const videoURL = `${origin}/post/${post.id}`;
 
   const toggleLike = () => {
     if (!session.data?.user) {
@@ -56,8 +56,8 @@ const QuestionSection: FC<QuestionSectionProps> = ({ question, refetch, origin }
         if (!isCurrentlyLiked) {
           notificationMutation.mutateAsync({
             content: session.data.user.name + " liked your post ",
-            questionId: question.id as string,
-            userId: question.user.id as string,
+            postId: post.id as string,
+            userId: post.user.id as string,
           });
         }
       } catch {
@@ -67,7 +67,7 @@ const QuestionSection: FC<QuestionSectionProps> = ({ question, refetch, origin }
       likeMutation
         .mutateAsync({
           isLiked: !isCurrentlyLiked,
-          questionId: question.id,
+          postId: post.id,
         })
         .then(() => {
           refetch();
@@ -87,10 +87,10 @@ const QuestionSection: FC<QuestionSectionProps> = ({ question, refetch, origin }
     }
     followMutation
       .mutateAsync({
-        followingId: question.userId,
+        followingId: post.userId,
         isFollowed:
           typeof isCurrentlyFollowed === "undefined"
-            ? !question.followedByMe
+            ? !post.followedByMe
             : !isCurrentlyFollowed,
       })
       .then(() => {
@@ -102,7 +102,7 @@ const QuestionSection: FC<QuestionSectionProps> = ({ question, refetch, origin }
       });
     setIsCurrentlyFollowed(
       typeof isCurrentlyFollowed === "undefined"
-        ? !question.followedByMe
+        ? !post.followedByMe
         : !isCurrentlyFollowed
     );
   };
@@ -128,13 +128,13 @@ const QuestionSection: FC<QuestionSectionProps> = ({ question, refetch, origin }
   };
 
   return (
-    <div key={question.id} className="flex items-start p-2 lg:p-4 gap-3">
-      <Link href={`/user/${question.user.id}`}>
+    <div key={post.id} className="flex items-start p-2 lg:p-4 gap-3">
+      <Link href={`/user/${post.user.id}`}>
         <a className="flex-shrink-0 rounded-full">
           <Image
             width={60}
             height={60}
-            src={question.user.image!}
+            src={post.user.image!}
             className="rounded-full w-[30px] h-[30px] lg:w-[60px] lg:h-[60px]"
             alt=""
           />
@@ -143,29 +143,29 @@ const QuestionSection: FC<QuestionSectionProps> = ({ question, refetch, origin }
       <div className="flex flex-col items-stretch gap-3 flex-grow">
         <div className="flex">
           <div className="flex-grow">
-            <Link href={`/user/${question.user.id}`}>
+            <Link href={`/user/${post.user.id}`}>
               <a className="font-bold hover:underline mr-1">
-                {formatAccountName(question.user.name!)}
+                {formatAccountName(post.user.name!)}
               </a>
             </Link>
-            <Link href={`/user/${question.user.id}`}>
-              <a className="text-sm hover:underline">{question.user.name}</a>
+            <Link href={`/user/${post.user.id}`}>
+              <a className="text-sm hover:underline">{post.user.name}</a>
             </Link>
             <p style={{ wordWrap: "break-word", overflowWrap: "break-word" }}>
-              {question.caption}
+              {post.caption}
             </p>
           </div>
           {/* @ts-ignore */}
-          {question.userId !== session.data?.user?.id && (
+          {post.userId !== session.data?.user?.id && (
             <div className="flex-shrink-0">
               <button
                 onClick={() => toggleFollow()}
-                className={`py-1 px-3 rounded text-sm mt-2 ${isCurrentlyFollowed ?? question.followedByMe
+                className={`py-1 px-3 rounded text-sm mt-2 ${isCurrentlyFollowed ?? post.followedByMe
                   ? "border hover:bg-[#F8F8F8] transition"
                   : "border border-pink text-pink hover:bg-[#FFF4F5] transition"
                   }`}
               >
-                {isCurrentlyFollowed ?? question.followedByMe
+                {isCurrentlyFollowed ?? post.followedByMe
                   ? "Following"
                   : "Follow"}
               </button>
@@ -173,16 +173,16 @@ const QuestionSection: FC<QuestionSectionProps> = ({ question, refetch, origin }
           )}
         </div>
         <div className="flex items-end gap-5">
-          <Link href={`/question/${question.id}`}>
+          <Link href={`/post/${post.id}`}>
             <a
-              className={`${question.videoHeight > question.videoWidth * 1.3
+              className={`${post.videoHeight > post.videoWidth * 1.3
                 ? "md:h-[600px]"
                 : "flex-grow h-auto"
                 } block bg-[#3D3C3D] rounded-md overflow-hidden flex-grow h-auto md:flex-grow-0`}
             >
               <VideoPlayer
-                src={question.videoURL}
-                poster={question.coverURL}
+                src={post.videoURL}
+                poster={post.coverURL}
               ></VideoPlayer>
             </a>
           </Link>
@@ -197,15 +197,15 @@ const QuestionSection: FC<QuestionSectionProps> = ({ question, refetch, origin }
               />
             </button>
             <p className="text-center text-xs font-semibold">
-              {formatNumber(question._count.likes)}
+              {formatNumber(post._count.likes)}
             </p>
-            <Link href={`/question/${question.id}`}>
+            <Link href={`/post/${post.id}`}>
               <a className="lg:w-12 lg:h-12 w-7 h-7 bg-[#F1F1F2] fill-black flex justify-center items-center rounded-full">
                 <FaCommentDots className="lg:w-6 lg:h-6 h-4 w-4 scale-x-[-1]" />
               </a>
             </Link>
             <p className="text-center text-xs font-semibold">
-              {formatNumber(question._count.comments)}
+              {formatNumber(post._count.comments)}
             </p>
             <div className="relative group">
               <button className="lg:w-12 lg:h-12 w-7 h-7 bg-[#F1F1F2] fill-black flex justify-center items-center rounded-full">
@@ -216,7 +216,7 @@ const QuestionSection: FC<QuestionSectionProps> = ({ question, refetch, origin }
                   className="flex items-center gap-2 px-3 py-2 bg-white hover:bg-gray-100 transition"
                   href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
                     videoURL
-                  )}&t=${encodeURIComponent(`${question.user.name} on EdTok`)}`}
+                  )}&t=${encodeURIComponent(`${post.user.name} on EdTok`)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -226,7 +226,7 @@ const QuestionSection: FC<QuestionSectionProps> = ({ question, refetch, origin }
                 <a
                   className="flex items-center gap-2 px-3 py-2 bg-white hover:bg-gray-100 transition"
                   href={`http://twitter.com/share?text=${encodeURIComponent(
-                    `${question.user.name} on EdTok`
+                    `${post.user.name} on EdTok`
                   )}&url=${encodeURIComponent(videoURL)}`}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -239,7 +239,7 @@ const QuestionSection: FC<QuestionSectionProps> = ({ question, refetch, origin }
                   href={`http://www.reddit.com/submit?url=${encodeURIComponent(
                     videoURL
                   )}&title=${encodeURIComponent(
-                    `${question.user.name} on EdTok`
+                    `${post.user.name} on EdTok`
                   )}`}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -273,7 +273,4 @@ const QuestionSection: FC<QuestionSectionProps> = ({ question, refetch, origin }
   );
 };
 
-
-
-
-export default QuestionSection;
+export default PostSection;

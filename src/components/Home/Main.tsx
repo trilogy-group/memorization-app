@@ -3,7 +3,8 @@ import { FC, useEffect, useRef } from "react";
 import { InView } from "react-intersection-observer";
 
 import { trpc } from "@/utils/trpc";
-import QuestionSection from "./QuestionSection";
+import PostSection from "./PostSection";
+import { useMutation } from "react-query";
 
 import QuizMicro from "@/pages/quizMicro";
 
@@ -19,14 +20,16 @@ const Main: FC<MainProps> = ({ origin }) => {
     trpc.useInfiniteQuery(
       [
         Boolean(Number(router.query.following))
-          ? "question.following"
-          : "question.for-you",
+          ? "post.following"
+          : "post.for-you",
         {},
       ],
       {
         getNextPageParam: (lastPage) => lastPage.nextSkip,
       }
     );
+  const quizMutation = useMutation("progress.get-one-quiz");
+  // null check
 
   const observer = useRef<IntersectionObserver | null>(null);
 
@@ -108,16 +111,16 @@ const Main: FC<MainProps> = ({ origin }) => {
 
   if (data?.pages.length === 0 || data?.pages[0]?.items.length === 0)
     return (
-      <div className="flex-grow text-center my-4">There is no question yet</div>
+      <div className="flex-grow text-center my-4">There is no post yet</div>
     );
 
   return (
     <div className="flex-grow">
       {data?.pages.map((page) =>
-        page.items.map((question) => (
-          <QuestionSection
-            question={question}
-            key={question.id}
+        page.items.map((post) => (
+          <PostSection
+            post={post}
+            key={post.id}
             refetch={refetch}
             origin={origin}
           />
