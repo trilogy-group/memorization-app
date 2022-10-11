@@ -250,7 +250,7 @@ const QuizMicro: FC<QuizMicroProps> = ({ arrayQuestion, arrayOfArrayCorrectAnswe
       } else {
         quizGradeMutation
           .mutateAsync({
-            questionId: "lalalalala",
+            questionId: deleteThis.current.id,
             grade: String(score.current)
           })
           .then(() => {
