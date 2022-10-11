@@ -36,33 +36,6 @@ const QuizMicro: FC<QuizMicroProps> = ({ arrayQuestion, arrayOfArrayCorrectAnswe
   var quizStart = useRef(0);
   var quizEnd: number;
 
-  let [milliseconds, seconds, minutes, hours] = [0, 0, 0, 0];
-  let timerRef: HTMLElement;
-  let int: number | undefined;
-  int = undefined;
-
-  function displayTimer() {
-    milliseconds += 10;
-    if (milliseconds == 1000) {
-      milliseconds = 0;
-      seconds++;
-      if (seconds == 60) {
-        seconds = 0;
-        minutes++;
-        if (minutes == 60) {
-          minutes = 0;
-          hours++;
-        }
-      }
-    }
-    let h = hours < 10 ? "0" + hours : hours;
-    let m = minutes < 10 ? "0" + minutes : minutes;
-    let s = seconds < 10 ? "0" + seconds : seconds;
-    let ms = milliseconds < 10 ? "00" + milliseconds : milliseconds < 100 ? "0" + milliseconds : milliseconds;
-
-    timerRef.innerHTML = ` ${h} : ${m} : ${s} : ${ms}`;
-  }
-
   useEffect(() => {
     quizQuestionAnswersEtc.mutateAsync().then(quizVariables => {
       console.log("the id of the user is ", session?.user?.id)
@@ -80,29 +53,6 @@ const QuizMicro: FC<QuizMicroProps> = ({ arrayQuestion, arrayOfArrayCorrectAnswe
       let quizScript = document.createElement('script');
       quizScript.innerHTML = "new Sortable(sequence);"
       document.body.appendChild(quizScript);
-
-
-      timerRef = document.querySelector('.timerDisplay') as HTMLElement;
-      document.getElementById('startTimer')!.addEventListener('click', () => {
-        if (quizStart.current == 0) {
-          quizStart.current = performance.now();
-        }
-
-        if (int !== null) {
-          clearInterval(int);
-        }
-        int = setInterval(displayTimer, 10) as unknown as number;
-      });
-
-      document.getElementById('pauseTimer')!.addEventListener('click', () => {
-        clearInterval(int);
-      });
-
-      document.getElementById('resetTimer')!.addEventListener('click', () => {
-        clearInterval(int);
-        [milliseconds, seconds, minutes, hours] = [0, 0, 0, 0];
-        timerRef.innerHTML = '00 : 00 : 00 : 000 ';
-      });
     }, 600);
     return () => {
     }
@@ -393,16 +343,6 @@ const QuizMicro: FC<QuizMicroProps> = ({ arrayQuestion, arrayOfArrayCorrectAnswe
             <div className="flex flex-col items-center justify-center">
             </div>
             <div id="quizContent">
-              <div className="stopwatch">
-                <div className="timerDisplay">
-                  00 : 00 : 00 : 000
-                </div>
-                <div className="buttons">
-                  <button id="pauseTimer">Pause</button>
-                  <button id="startTimer">Start</button>
-                  <button id="resetTimer">Reset</button>
-                </div>
-              </div>
               <h1 className="text-2xl font-bold" id="question"></h1>
               <h1 id="hintText" className="text-1xl font-bold">Sort in correct order</h1>
               <img id="hintImage" style={{ width: "200", height: "200" }} />

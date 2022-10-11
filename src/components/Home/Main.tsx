@@ -101,7 +101,6 @@ const Main: FC<MainProps> = ({ origin }) => {
 
         if (mostVisibleQuiz) {
           console.log("starting quiz");
-          mostVisibleQuiz.querySelector("#startTimer")!.click();
         }
 
         videoElements.forEach((item) => {
@@ -110,7 +109,7 @@ const Main: FC<MainProps> = ({ origin }) => {
 
         quizElements.forEach((item) => {
           if (item !== mostVisibleQuiz) {
-            item.querySelector("#pauseTimer")!.click();
+
             console.log("pausing quiz");
           }
         });
