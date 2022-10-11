@@ -138,7 +138,7 @@ export const postRouter = createRouter()
     async resolve({ ctx: { prisma, session }, input }) {
       const conceptFound = await prisma.concept.findFirst({
         where: {
-          name: input.concept
+          id: input.concept
         }
       });
       if (conceptFound == null) {
@@ -177,7 +177,7 @@ export const postRouter = createRouter()
     async resolve({ ctx: { prisma, session }, input }) {
       const conceptFound = await prisma.concept.findFirst({
         where: {
-          name: input.concept
+          id: input.concept
         }
       });
       if (conceptFound == null) {
@@ -194,6 +194,43 @@ export const postRouter = createRouter()
           contentType: 1,
           conceptId: conceptFound?.id,
           mnemonic_text: "",
+        },
+      });
+      await prisma.user.update({
+        where: { id: session?.user?.id as string },
+        data: {
+          points: { increment: 1 },
+        },
+      });
+      return created;
+    },
+  })
+  .mutation("createText", {
+    input: z.object({
+      caption: z.string(),
+      concept: z.string(),
+      mnemonic_text: z.string(),
+    }),
+    async resolve({ ctx: { prisma, session }, input }) {
+      const conceptFound = await prisma.concept.findFirst({
+        where: {
+          id: input.concept
+        }
+      });
+      if (conceptFound == null) {
+        throw new Error("Concept table not populated in the DB.");
+      }
+      const created = await prisma.post.create({
+        data: {
+          caption: input.caption,
+          videoURL: "",
+          coverURL: "",
+          videoWidth: 0,
+          videoHeight: 0,
+          userId: session?.user?.id!,
+          contentType: 3,
+          conceptId: conceptFound?.id,
+          mnemonic_text: input.mnemonic_text,
         },
       });
       await prisma.user.update({

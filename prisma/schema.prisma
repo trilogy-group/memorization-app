@@ -55,7 +55,8 @@ model User {
     points        Int            @default(0)
     progress      Progress[]
     notifications Notification[]
-    mastery       Mastery?
+    masteryId     Int?
+    mastery       Mastery?       @relation(fields: [masteryId], references: [id])
 
     @@fulltext([name, email])
 }
@@ -87,7 +88,7 @@ model Post {
     id            String @id @default(cuid())
     caption       String @db.Text
     videoURL      String @db.Text
-    coverURL      String @db.Text // video cover or mnemonic image
+    coverURL      String @db.Text // video cover or mnemonic image or ""
     videoWidth    Int    @default(0)
     videoHeight   Int    @default(0)
     mnemonic_text String @db.Text
@@ -104,18 +105,18 @@ model Post {
 
     quizId    Int?
     quizzes   Quiz?    @relation(fields: [quizId], references: [id])
-    conceptId Int
+    conceptId String
     concepts  Concept? @relation(fields: [conceptId], references: [id])
 
     @@fulltext([caption])
 }
 
-// one-to-one relationship with user
+// one user has many masteries
 model Mastery {
-    id       Int       @id @default(autoincrement())
-    userId   String    @unique
-    user     User      @relation(fields: [userId], references: [id])
-    concepts Concept[]
+    id        Int     @id @default(autoincrement())
+    user      User[]
+    conceptId String
+    concepts  Concept @relation(fields: [conceptId], references: [id])
 }
 
 model Like {
@@ -159,36 +160,35 @@ model Follow {
 }
 
 model Subject {
-    id      Int      @id @default(autoincrement())
+    id      String   @id
     name    String
     domains Domain[]
 }
 
 model Domain {
-    id          Int     @id @default(autoincrement())
-    description String
-    subjectId   Int
-    subject     Subject @relation(fields: [subjectId], references: [id])
-    skills      Skill[]
+    id        String  @id
+    name      String
+    subjectId String
+    subject   Subject @relation(fields: [subjectId], references: [id])
+    skills    Skill[]
 }
 
 model Skill {
-    id       Int       @id @default(autoincrement())
+    id       String    @id
     name     String
-    domainId Int
+    domainId String
     Domain   Domain    @relation(fields: [domainId], references: [id])
     concepts Concept[]
 }
 
 model Concept {
-    id        Int     @id @default(autoincrement())
+    id        String    @id
     name      String
-    masteryId Int?
-    mastery   Mastery? @relation(fields: [masteryId], references: [id])
+    masteries Mastery[]
     posts     Post[]
     quizzes   Quiz[]
-    skillId   Int
-    Skill     Skill   @relation(fields: [skillId], references: [id])
+    skillId   String
+    Skill     Skill     @relation(fields: [skillId], references: [id])
 }
 
 model Quiz {
@@ -198,6 +198,6 @@ model Quiz {
     answer    String  @db.Text
     type      String
     Post      Post[]
-    conceptId Int
+    conceptId String
     concepts  Concept @relation(fields: [conceptId], references: [id])
 }

@@ -199,11 +199,7 @@ export const getServerSideProps = async ({
       }),
       prisma.post.findMany({
         where: {
-          hashtags: {
-            some: {
-              tag: {in: tags},
-            }
-          }
+          conceptId: {in: tags},
         },
         take: 20,
         select: {
