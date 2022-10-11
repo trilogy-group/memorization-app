@@ -7,32 +7,9 @@ import QuestionSection from "./QuestionSection";
 
 import QuizMicro from "@/pages/quizMicro";
 
-//TODO: connect to DB for questions and answers
-const arrayOfArrayCorrectAnswers = [
-  ["Bipedalism"]
-
-]
-
-let arraySrc = ["/memory29.PNG"] //hints
-let arrayDifficulty: string[];
-let arrayQuestion = ["How is the ability to walk on two legs called?"];
-let arrayIncorrectAnswer = [
-  ["Atavism",
-    "Unipedalism",
-    "Locomotion"
-  ]
-];
-let arrayType = ["MCQ"];
-
 
 interface MainProps {
   origin: string;
-  arrayQuestion: string[];
-  arrayOfArrayCorrectAnswers: string[];
-  arrayType: string[];
-  arrayIncorrectAnswer: string[];
-  arraySrc: string[];
-  arrayDifficulty: string[];
 }
 
 const Main: FC<MainProps> = ({ origin }) => {
@@ -149,15 +126,6 @@ const Main: FC<MainProps> = ({ origin }) => {
 
       <div>{
         <QuizMicro
-          arrayQuestion={arrayQuestion}
-          arrayOfArrayCorrectAnswers={[
-            ["Bipedalism"]
-
-          ]}
-          arrayType={["MCQ"]}
-          arrayIncorrectAnswer={arrayIncorrectAnswer}
-          arraySrc={arraySrc}
-          arrayDifficulty={[]}
           refetch={refetch}
         />
 

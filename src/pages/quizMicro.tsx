@@ -6,19 +6,14 @@ import { trpc } from "../utils/trpc";
 import { authOptions } from "./api/auth/[...nextauth]";
 import React from "react";
 import { useSession } from "next-auth/react";
+import { renderToString } from 'react-dom/server'
 
 interface QuizMicroProps {
-  arrayQuestion: string[];
-  arrayOfArrayCorrectAnswers: string[][];
-  arrayType: string[];
-  arrayIncorrectAnswer: string[];
-  arraySrc: string[];
-  arrayDifficulty: string[];
   refetch: Function;
 }
 
 //: FC<QuizMicroProps> = ({ inputQuestions, inputAnswer, inputType, inputIncorrectAnswer, inputHint,inputDifficulty }) =>
-const QuizMicro: FC<QuizMicroProps> = ({ arrayQuestion, arrayOfArrayCorrectAnswers, arrayType, arrayIncorrectAnswer, arraySrc, arrayDifficulty, refetch }) => {
+const QuizMicro: FC<QuizMicroProps> = ({ refetch }) => {
   const session = useSession();
   const quizGradeMutation = trpc.useMutation("progress.post-one-quiz-result");
   const quizQuestionAnswersEtc = trpc.useMutation("progress.get-one-quiz");
@@ -30,6 +25,22 @@ const QuizMicro: FC<QuizMicroProps> = ({ arrayQuestion, arrayOfArrayCorrectAnswe
   const [optionD, setOptionD] = useState("");
   const [scoooreArray, setScoooreArray] = useState<number[]>([]);
 
+  const [hintImageVisibility, setHintImageVisibility] = useState(false);
+  const [hintVideoVisibility, setHintVideoVisibility] = useState(false);
+  const [hintTextVisibility, setHintTextVisibility] = useState(false);
+
+  const [quizContentVisibility, setQuizContentVisibility] = useState(true);
+
+  var MCQVisibility = useRef(false);
+
+  var quizQuestion = useRef("no question in the beginning");
+  var quizHintText = useRef("no instruction in the beginning");
+  var optionAText = useRef("A");
+  var optionBText = useRef("B");
+  var optionCText = useRef("C");
+  var optionDText = useRef("D");
+
+
   const [quizSetOfVariables, setQuizVariables] = useState<{ id: string, caption: string, videoURL: string, coverURL: string }>({ id: "", caption: "", videoURL: "", coverURL: "" });
   var deleteThis = useRef<{ id: string, caption: string, videoURL: string, coverURL: string }>({ id: "", caption: "", videoURL: "", coverURL: "" });
 
@@ -39,12 +50,48 @@ const QuizMicro: FC<QuizMicroProps> = ({ arrayQuestion, arrayOfArrayCorrectAnswe
   var quizStart = useRef(0);
   var quizEnd: number;
 
+  const sequenceRef = useRef(null);
+  const checkBoxOptionsRef = useRef(null);
+  const MCQOptionsRef = useRef(null);
+  const questionRef = useRef(null);
+  const hintVideoRef = useRef(null);
+  const hintImageRef = useRef(null);
+  const hintTextRef = useRef(null);
+  const nextButtonRef = useRef(null);
+  const optionARef = useRef(null);
+  const optionBRef = useRef(null);
+  const optionCRef = useRef(null);
+  const optionDRef = useRef(null);
+
+
+  let arrayIncorrectAnswer = [
+    ["Atavism",
+      "Unipedalism",
+      "Locomotion"
+    ]
+  ];
+
+  let arrayType = ["MCQ"];
+
+  //TODO: connect to DB for questions and answers
+  const arrayOfArrayCorrectAnswers = [
+    ["Bipedalism"]
+
+  ]
+
+
   useEffect(() => {
     quizQuestionAnswersEtc.mutateAsync().then(quizVariables => {
       console.log(quizVariables);
       setQuizVariables(quizVariables);
       deleteThis.current = quizVariables;
       console.log(quizSetOfVariables);
+      if (quizSetOfVariables == null) {
+        deleteThis.current.id = "not found";
+        deleteThis.current.caption = "not found";
+        deleteThis.current.videoURL = "not found";
+        deleteThis.current.coverURL = "not found";
+      }
       console.log("deletethis current ", deleteThis.current);
       quizMakerUltimateHelper()
     });
@@ -64,8 +111,6 @@ const QuizMicro: FC<QuizMicroProps> = ({ arrayQuestion, arrayOfArrayCorrectAnswe
     }
 
   }, []);
-
-
 
 
   function shuffle(arr: string[]): string[] {
@@ -107,32 +152,39 @@ const QuizMicro: FC<QuizMicroProps> = ({ arrayQuestion, arrayOfArrayCorrectAnswe
   }
 
 
-  //TODO: connect to DB for questions and answers
-
-
   /*
-      A:
-    array of src -> hints
-    array of difficulty ->
-    array of questions 
-    array of answers
-    array of types
-
   function checkAnswerUltimate() {
     // check answer AND clear existing q/a and answer AND push score array
-    // increment questionnumber 'answered ith question'
+
+    // increment questionnumber
+
     // create new question and new options
     quizMakerUltimateHelper()
-  }
-
-    function  quizMakerUltimateHelper() {
-    // use src[questionnumber], difficulty[questionnumber], questions[questionnumber], answers[questionnumber], types[questionnumber]
   }
 
   quizMakerUltimateHelper(questionnumber==1) is automatically used when the page is loaded
   */
 
 
+  function getScoreBasedOnTimeTaken(correct: boolean, timeTaken: number) {
+    if (correct) {
+      if (timeTaken < 5000) {
+        return 5;
+      } else if (timeTaken < 7000) {
+        return 4;
+      } else {
+        return 3;
+      }
+    } else {
+      if (timeTaken < 7000) {
+        return 2;
+      } else if (timeTaken < 5000) {
+        return 1;
+      } else {
+        return 0;
+      }
+    }
+  }
 
 
   function checkAnswerUltimate() {
@@ -145,28 +197,18 @@ const QuizMicro: FC<QuizMicroProps> = ({ arrayQuestion, arrayOfArrayCorrectAnswe
     let quizTime = quizEnd - quizStart.current;
     if (arrayType[questionNumber.current - 1] == "sequence") {
       let elem = document.getElementById("sequence");
+      //elem=sequenceRef.current;
       let answers = new Array();
       let li = document.querySelectorAll("#sequence li");
       li.forEach(function (text) {
+        //answers.push(renderToString(text));
         answers.push(text.innerHTML);
       });
       if (JSON.stringify(arrayOfArrayCorrectAnswers[questionNumber.current - 1]) === JSON.stringify(answers)) {
-        if (quizTime < 5000) {
-          score.current = 5;
-        } else if (quizTime < 7000) {
-          score.current = 4;
-        } else {
-          score.current = 3;
-        }
+        score.current = getScoreBasedOnTimeTaken(true, quizTime);
         newScoooreArray.push(1);
       } else {
-        if (quizTime < 7000) {
-          score.current = 2;
-        } else if (quizTime < 5000) {
-          score.current = 1;
-        } else {
-          score.current = 0;
-        }
+        score.current = getScoreBasedOnTimeTaken(false, quizTime)
         newScoooreArray.push(0);
       }
       setScoooreArray(newScoooreArray);
@@ -176,24 +218,11 @@ const QuizMicro: FC<QuizMicroProps> = ({ arrayQuestion, arrayOfArrayCorrectAnswe
       }
 
     } else if (arrayType[questionNumber.current - 1] == "list") {
-
       if (JSON.stringify(optionsList) == JSON.stringify(arrayOfArrayCorrectAnswers[questionNumber.current - 1]?.sort())) {
-        if (quizTime < 5000) {
-          score.current = 5;
-        } else if (quizTime < 7000) {
-          score.current = 4;
-        } else {
-          score.current = 3;
-        }
+        score.current = getScoreBasedOnTimeTaken(true, quizTime);
         newScoooreArray.push(1);
       } else {
-        if (quizTime < 7000) {
-          score.current = 2;
-        } else if (quizTime < 5000) {
-          score.current = 1;
-        } else {
-          score.current = 0;
-        }
+        score.current = getScoreBasedOnTimeTaken(false, quizTime);
         newScoooreArray.push(0);
       }
       setScoooreArray(newScoooreArray);
@@ -205,44 +234,22 @@ const QuizMicro: FC<QuizMicroProps> = ({ arrayQuestion, arrayOfArrayCorrectAnswe
       }
     }
     else if (arrayType[questionNumber.current - 1] == "MCQ") {
-      console.log(optionMCQ);
-
-      // MCQ
       if (optionMCQ == arrayOfArrayCorrectAnswers[questionNumber.current - 1]) {
-        if (quizTime < 5000) {
-          score.current = 5;
-        } else if (quizTime < 7000) {
-          score.current = 4;
-        } else {
-          score.current = 3;
-        }
+        score.current = getScoreBasedOnTimeTaken(true, quizTime);
         newScoooreArray.push(1);
       } else {
-        if (quizTime < 7000) {
-          score.current = 2;
-        } else if (quizTime < 5000) {
-          score.current = 1;
-        } else {
-          score.current = 0;
-        }
+        score.current = getScoreBasedOnTimeTaken(false, quizTime);
         newScoooreArray.push(0);
       }
       setScoooreArray(newScoooreArray);
-      let MCQOptions = document.getElementById("MCQOptions");
-      // clearing the elments in the possible options
-      MCQOptions!.className = "hidden";
+      MCQVisibility.current = false;
     }
-    //TODO check accuracy and push score array
-    document.getElementById("hintVideo")!.className = "block";
+
     questionNumber.current = questionNumber.current + 1;
+
     // check if by any chance we have finished all the questions
     if (questionNumber.current - 1 == arrayOfArrayCorrectAnswers.length) {
-      document.getElementById("question")!.style.display = 'none';
-      document.getElementById("hintVideo")!.className = "hidden";
-      document.getElementById("hintImage")!.className = "hidden"
-      document.getElementById("nextButton")!.className = "hidden";
-      document.getElementById("hintText")!.className = "hidden";
-
+      setQuizContentVisibility(false);
       console.log("it took ", quizTime, "milliseconds");
       console.log(score.current);
       if (!session.data?.user) {
@@ -265,15 +272,14 @@ const QuizMicro: FC<QuizMicroProps> = ({ arrayQuestion, arrayOfArrayCorrectAnswe
       // create new question and new answer options and mnemonic hint
       quizMakerUltimateHelper()
     }
-
   }
 
 
   function quizMakerUltimateHelper() {
-    document.getElementById("question")!.innerHTML = deleteThis.current.caption as string;
+    quizQuestion.current = deleteThis.current.caption as string;
     if (arrayType[questionNumber.current - 1] == "sequence") {
       let elem = document.getElementById("sequence");
-      document.getElementById("hintText")!.innerHTML = "Sort in the correct order";
+      quizHintText.current = "Sort in the correct order";
       let shuffleOptions = shuffle(arrayOfArrayCorrectAnswers[questionNumber.current - 1] as unknown as Array<string>);
       for (var i = 0; i < arrayOfArrayCorrectAnswers[questionNumber.current - 1]!?.length; i++) {
         let option = document.createElement('li');
@@ -282,67 +288,47 @@ const QuizMicro: FC<QuizMicroProps> = ({ arrayQuestion, arrayOfArrayCorrectAnswe
         elem!.appendChild(option);
       }
     } else if (arrayType[questionNumber.current - 1] == "list") {
-      document.getElementById("hintText")!.innerHTML = "Choose all that apply";
+      quizHintText.current = "Choose all that apply";
       let possibleOptions = document.getElementById("checkBoxOptions");
       for (var i = 0; i < arrayOfArrayCorrectAnswers[questionNumber.current - 1]!?.length; i++) {
         let divOption = document.createElement('div');
         divOption.className = "input-group";
         let divOptionInput = document.createElement('input');
         divOptionInput.type = "checkbox";
+
+        // divOptionInput.value = arrayIncorrectAnswer[questionNumber.current - 1]![i] as string;
         divOptionInput.value = arrayOfArrayCorrectAnswers[questionNumber.current - 1]![i] as string;
         divOptionInput.onchange = onChange.bind(this);
+
         let divOptionLabel = document.createElement('label');
+
         divOptionLabel.innerHTML = arrayOfArrayCorrectAnswers[questionNumber.current - 1]![i] as string;
+        // divOptionLabel.innerHTML = arrayIncorrectAnswer[questionNumber.current - 1]![i] as string;
         divOption.appendChild(divOptionInput);
         divOption.appendChild(divOptionLabel);
         possibleOptions!.appendChild(divOption);
       }
 
-      for (var i = 0; i < arrayIncorrectAnswer[questionNumber.current - 1]!?.length; i++) {
-        let divOption = document.createElement('div');
-        divOption.className = "input-group";
-        let divOptionInput = document.createElement('input');
-        divOptionInput.type = "checkbox";
-        divOptionInput.value = arrayIncorrectAnswer[questionNumber.current - 1]![i] as string;
-        divOptionInput.onchange = onChange.bind(this);
-        let divOptionLabel = document.createElement('label');
-        divOptionLabel.innerHTML = arrayIncorrectAnswer[questionNumber.current - 1]![i] as string;
-        divOption.appendChild(divOptionInput);
-        divOption.appendChild(divOptionLabel);
-        possibleOptions!.appendChild(divOption);
-      }
     } else if (arrayType[questionNumber.current - 1] == "MCQ") {
       // create MCQ options
-      let MCQOptions = document.getElementById("MCQOptions");
-      document.getElementById("hintText")!.innerHTML = "Choose one";
-      document.getElementById("optionA")!.innerHTML = arrayOfArrayCorrectAnswers[questionNumber.current - 1]![0] as string;
+      quizHintText.current = "Choose one";
+      optionAText.current = arrayOfArrayCorrectAnswers[questionNumber.current - 1]![0] as string;
       setOptionA(arrayOfArrayCorrectAnswers[questionNumber.current - 1]![0] as string);
 
-      document.getElementById("optionB")!.innerHTML = arrayIncorrectAnswer[questionNumber.current - 1]![0] as string;
+      optionBText.current = arrayIncorrectAnswer[questionNumber.current - 1]![0] as string;
       setOptionB(arrayIncorrectAnswer[questionNumber.current - 1]![0] as string);
-      document.getElementById("optionC")!.innerHTML = arrayIncorrectAnswer[questionNumber.current - 1]![1] as string;
+      optionCText.current = arrayIncorrectAnswer[questionNumber.current - 1]![1] as string;
       setOptionC(arrayIncorrectAnswer[questionNumber.current - 1]![1] as string);
-      document.getElementById("optionD")!.innerHTML = arrayIncorrectAnswer[questionNumber.current - 1]![2] as string;
+      optionDText.current = arrayIncorrectAnswer[questionNumber.current - 1]![2] as string;
       setOptionD(arrayIncorrectAnswer[questionNumber.current - 1]![2] as string);
 
       setOptionMCQ(undefined);
-      MCQOptions!.className = "block";
+      MCQVisibility.current = true;
     }
     console.log("this is the cover url", deleteThis.current.coverURL);
     console.log("this is the caption", deleteThis.current.caption);
-    document.getElementById("hintImage")?.setAttribute("src", deleteThis.current.coverURL as string)
+
   }
-
-
-  function removeHints(index: number): void {
-    if (index != 1) {
-      document.getElementById("hint")!.style.display = 'none';
-    }
-    else {
-      document.getElementById("hint")!.style.display = 'block';
-    }
-    return;
-  };
 
 
   return (
@@ -354,43 +340,45 @@ const QuizMicro: FC<QuizMicroProps> = ({ arrayQuestion, arrayOfArrayCorrectAnswe
             </div>
             <button id="startTimer" className="hidden" onClick={async () => (quizStart.current == 0) ?
               quizStart.current = performance.now() : 0}></button>
-            <div id="quizContent">
-              <h1 className="text-2xl font-bold" id="question"></h1>
-              <h1 id="hintText" className="text-1xl font-bold">Sort in correct order</h1>
-              <img id="hintImage" style={{ width: "200", height: "200" }} />
-              <iframe id="hintVideo"
-                frameBorder='0'
-                allow='autoplay; encrypted-media'
-                allowFullScreen
-                title='video' className="hidden"
-              />
-              <ul id="sequence"  >
-              </ul>
-              <form id="checkBoxOptions">
-              </form>
-              <div onChange={e => { setOptionMCQ((e.target as any).value); }} id="MCQOptions" className="hidden">
-                <input type="radio" value={optionA} name="gender" checked={optionA === optionMCQ} onChange={e => { console.log(e.target.value); }} /> <label id="optionA">A</label>
-                <br />
-                <input type="radio" value={optionB} name="gender" checked={optionB === optionMCQ} onChange={e => { console.log(e.target.value); }} /> <label id="optionB">B</label>
-                <br />
-                <input type="radio" value={optionC} name="gender" checked={optionC === optionMCQ} onChange={e => { console.log(e.target.value); }} /> <label id="optionC">C</label>
-                <br />
-                <input type="radio" value={optionD} name="gender" checked={optionD === optionMCQ} onChange={e => { console.log(e.target.value); }} /> <label id="optionD">D</label>
+            {quizContentVisibility &&
+              <div>
+                <h1 className="text-2xl font-bold" id="question">{quizQuestion.current}</h1>
+                <h1 id="hintText" className="text-1xl font-bold" >{quizHintText.current}</h1>
+                <img id="hintImage" style={{ width: "200", height: "200" }} src={deleteThis.current.coverURL as string} />
+                <iframe id="hintVideo" ref={hintVideoRef}
+                  frameBorder='0'
+                  allow='autoplay; encrypted-media'
+                  allowFullScreen
+                  title='video' className="hidden"
+                />
+                <ul id="sequence" ref={sequenceRef}>
+                </ul>
+                <form id="checkBoxOptions" ref={checkBoxOptionsRef}>
+                </form>
+                {MCQVisibility.current && <div onChange={e => { setOptionMCQ((e.target as any).value); }} id="MCQOptions" ref={MCQOptionsRef}>
+                  <input type="radio" value={optionA} name="gender" checked={optionA === optionMCQ} onChange={e => { console.log(e.target.value); }} ref={optionARef} /> <label id="optionA">{optionAText.current}</label>
+                  <br />
+                  <input type="radio" value={optionB} name="gender" checked={optionB === optionMCQ} onChange={e => { console.log(e.target.value); }} ref={optionBRef} /> <label id="optionB">{optionBText.current}</label>
+                  <br />
+                  <input type="radio" value={optionC} name="gender" checked={optionC === optionMCQ} onChange={e => { console.log(e.target.value); }} ref={optionCRef} /> <label id="optionC">{optionCText.current}</label>
+                  <br />
+                  <input type="radio" value={optionD} name="gender" checked={optionD === optionMCQ} onChange={e => { console.log(e.target.value); }} ref={optionDRef} /> <label id="optionD">{optionDText.current}</label>
+                </div>}
+                <div className="flex flex-col items-center justify-center">
+                  <a href="#_" className="relative inline-flex items-center justify-start py-3 pl-4 pr-12 overflow-hidden font-semibold text-indigo-600 transition-all duration-150 ease-in-out rounded hover:pl-10 hover:pr-6 bg-gray-50 group" onClick={() => checkAnswerUltimate()}
+                    id="nextButton" ref={nextButtonRef}>
+                    <span className="absolute bottom-0 left-0 w-full h-1 transition-all duration-150 ease-in-out bg-indigo-600 group-hover:h-full"></span>
+                    <span className="absolute right-0 pr-4 duration-200 ease-out group-hover:translate-x-12">
+                      <svg className="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    </span>
+                    <span className="absolute left-0 pl-2.5 -translate-x-12 group-hover:translate-x-0 ease-out duration-200">
+                      <svg className="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    </span>
+                    <span className="relative w-full text-left transition-colors duration-200 ease-in-out group-hover:text-white">Check Answer</span>
+                  </a>
+                </div>
               </div>
-              <div className="flex flex-col items-center justify-center">
-                <a href="#_" className="relative inline-flex items-center justify-start py-3 pl-4 pr-12 overflow-hidden font-semibold text-indigo-600 transition-all duration-150 ease-in-out rounded hover:pl-10 hover:pr-6 bg-gray-50 group" onClick={async () => await checkAnswerUltimate()}
-                  id="nextButton">
-                  <span className="absolute bottom-0 left-0 w-full h-1 transition-all duration-150 ease-in-out bg-indigo-600 group-hover:h-full"></span>
-                  <span className="absolute right-0 pr-4 duration-200 ease-out group-hover:translate-x-12">
-                    <svg className="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                  </span>
-                  <span className="absolute left-0 pl-2.5 -translate-x-12 group-hover:translate-x-0 ease-out duration-200">
-                    <svg className="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                  </span>
-                  <span className="relative w-full text-left transition-colors duration-200 ease-in-out group-hover:text-white">Check Answer</span>
-                </a>
-              </div>
-            </div>
+            }
           </div>
         </div>
       </div>
