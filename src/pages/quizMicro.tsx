@@ -5,19 +5,23 @@ import toast from "react-hot-toast";
 import { trpc } from "../utils/trpc";
 import { authOptions } from "./api/auth/[...nextauth]";
 import React from "react";
+import { useSession } from "next-auth/react";
 
 interface QuizMicroProps {
   arrayQuestion: string[];
-  arrayOfArrayCorrectAnswers: string[];
+  arrayOfArrayCorrectAnswers: string[][];
   arrayType: string[];
   arrayIncorrectAnswer: string[];
   arraySrc: string[];
   arrayDifficulty: string[];
+  refetch: Function;
 }
 
 //: FC<QuizMicroProps> = ({ inputQuestions, inputAnswer, inputType, inputIncorrectAnswer, inputHint,inputDifficulty }) =>
-const QuizMicro: FC<QuizMicroProps> = ({ arrayQuestion, arrayOfArrayCorrectAnswers, arrayType, arrayIncorrectAnswer, arraySrc, arrayDifficulty }) => {
-  const uploadMutation = trpc.useMutation("video.create");
+const QuizMicro: FC<QuizMicroProps> = ({ arrayQuestion, arrayOfArrayCorrectAnswers, arrayType, arrayIncorrectAnswer, arraySrc, arrayDifficulty, refetch }) => {
+  const { data: session } = useSession();
+  const quizGradeMutation = trpc.useMutation("progress.post-one-quiz-result");
+  const quizQuestionAnswersEtc = trpc.useMutation("progress.get-one-quiz");
   const [optionMCQ, setOptionMCQ] = useState();
   const [optionsList, setOptionsList] = useState<string[]>([]);
   const [optionA, setOptionA] = useState("");
@@ -33,8 +37,9 @@ const QuizMicro: FC<QuizMicroProps> = ({ arrayQuestion, arrayOfArrayCorrectAnswe
   var quizEnd: number;
 
   let [milliseconds, seconds, minutes, hours] = [0, 0, 0, 0];
-  let timerRef;
-  let int = null;
+  let timerRef: HTMLElement;
+  let int: number | undefined;
+  int = undefined;
 
   function displayTimer() {
     milliseconds += 10;
@@ -59,11 +64,11 @@ const QuizMicro: FC<QuizMicroProps> = ({ arrayQuestion, arrayOfArrayCorrectAnswe
   }
 
   useEffect(() => {
-    if (uploadMutation.error) {
-      toast.error("Failed to load the video", {
-        position: "bottom-right",
-      });
-    }
+    quizQuestionAnswersEtc.mutateAsync().then(quizVariables => {
+      console.log("the id of the user is ", session?.user?.id)
+      console.log(quizVariables);
+    });
+
     // adding script that makes elements of the list able to be dragged PART 1
     const script = document.createElement('script');
     script.src = "https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js";
@@ -76,30 +81,33 @@ const QuizMicro: FC<QuizMicroProps> = ({ arrayQuestion, arrayOfArrayCorrectAnswe
       quizScript.innerHTML = "new Sortable(sequence);"
       document.body.appendChild(quizScript);
 
-      timerRef = document.querySelector('.timerDisplay');
-      document.getElementById('startTimer').addEventListener('click', () => {
-        quizStart.current = performance.now();
+
+      timerRef = document.querySelector('.timerDisplay') as HTMLElement;
+      document.getElementById('startTimer')!.addEventListener('click', () => {
+        if (quizStart.current == 0) {
+          quizStart.current = performance.now();
+        }
+
         if (int !== null) {
           clearInterval(int);
         }
-        int = setInterval(displayTimer, 10);
+        int = setInterval(displayTimer, 10) as unknown as number;
       });
 
-      document.getElementById('pauseTimer').addEventListener('click', () => {
+      document.getElementById('pauseTimer')!.addEventListener('click', () => {
         clearInterval(int);
       });
 
-      document.getElementById('resetTimer').addEventListener('click', () => {
+      document.getElementById('resetTimer')!.addEventListener('click', () => {
         clearInterval(int);
         [milliseconds, seconds, minutes, hours] = [0, 0, 0, 0];
         timerRef.innerHTML = '00 : 00 : 00 : 000 ';
       });
-    }, 300);
+    }, 600);
     return () => {
-      document.body.removeChild(script);
     }
 
-  }, [uploadMutation.error]);
+  }, []);
 
 
   function shuffle(arr: string[]): string[] {
@@ -277,9 +285,27 @@ const QuizMicro: FC<QuizMicroProps> = ({ arrayQuestion, arrayOfArrayCorrectAnswe
       document.getElementById("hintImage")!.className = "hidden"
       document.getElementById("nextButton")!.className = "hidden";
       document.getElementById("hintText")!.className = "hidden";
+
+      console.log("it took ", quizTime, "milliseconds");
+      console.log(score.current);
+      if (!session.data?.user) {
+        toast("You need to login");
+      } else {
+        quizGradeMutation
+          .mutateAsync({
+            questionId: "lalalalala",
+            grade: String(score.current)
+          })
+          .then(() => {
+            refetch();
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      }
+
     }
-    console.log("it took ", quizTime, "milliseconds");
-    console.log(score.current);
+
     // create new question and new answer options and mnemonic hint
     quizMakerUltimateHelper()
   }
@@ -290,7 +316,7 @@ const QuizMicro: FC<QuizMicroProps> = ({ arrayQuestion, arrayOfArrayCorrectAnswe
     if (arrayType[questionNumber.current - 1] == "sequence") {
       let elem = document.getElementById("sequence");
       document.getElementById("hintText")!.innerHTML = "Sort in the correct order";
-      let shuffleOptions = shuffle(arrayOfArrayCorrectAnswers[questionNumber.current - 1] as Array<string>);
+      let shuffleOptions = shuffle(arrayOfArrayCorrectAnswers[questionNumber.current - 1] as unknown as Array<string>);
       for (var i = 0; i < arrayOfArrayCorrectAnswers[questionNumber.current - 1]!?.length; i++) {
         let option = document.createElement('li');
         option.className = "border rounded flex items-center gap-2 h-9 px-3 border-black bg-white hover:bg-gray-100 transition cursor-pointer"
@@ -344,7 +370,7 @@ const QuizMicro: FC<QuizMicroProps> = ({ arrayQuestion, arrayOfArrayCorrectAnswe
       setOptionMCQ(undefined);
       MCQOptions!.className = "block";
     }
-    document.getElementById("hintImage")?.setAttribute("src", arraySrc[questionNumber.current - 1])
+    document.getElementById("hintImage")?.setAttribute("src", arraySrc[questionNumber.current - 1] as string)
   }
 
 
@@ -404,10 +430,10 @@ const QuizMicro: FC<QuizMicroProps> = ({ arrayQuestion, arrayOfArrayCorrectAnswe
                   id="nextButton">
                   <span className="absolute bottom-0 left-0 w-full h-1 transition-all duration-150 ease-in-out bg-indigo-600 group-hover:h-full"></span>
                   <span className="absolute right-0 pr-4 duration-200 ease-out group-hover:translate-x-12">
-                    <svg className="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    <svg className="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                   </span>
                   <span className="absolute left-0 pl-2.5 -translate-x-12 group-hover:translate-x-0 ease-out duration-200">
-                    <svg className="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    <svg className="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                   </span>
                   <span className="relative w-full text-left transition-colors duration-200 ease-in-out group-hover:text-white">Check Answer</span>
                 </a>

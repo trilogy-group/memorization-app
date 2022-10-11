@@ -158,6 +158,7 @@ const Main: FC<MainProps> = ({ origin }) => {
           arrayIncorrectAnswer={arrayIncorrectAnswer}
           arraySrc={arraySrc}
           arrayDifficulty={[]}
+          refetch={refetch}
         />
 
       }</div>
