@@ -38,6 +38,16 @@ const Item = styled(Paper)(({ theme }) => ({
   textAlign: "center",
   color: theme.palette.text.secondary,
   height: 200,
+  overflow: "hidden",
+}));
+
+const Item2 = styled(Paper)(({ theme }) => ({
+  backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#fff",
+  ...theme.typography.body2,
+  textAlign: "center",
+  color: theme.palette.text.secondary,
+  height: 420,
+  overflow: "hidden",
 }));
 
 const wordList: string[] = [];
@@ -63,6 +73,28 @@ const CreateListOfWords: NextPage = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const [isLoadingMnemonic, setIsLoadingMnemonic] = useState(false);
+
+  const [isLoadingImage, setIsLoadingImage] = useState<boolean[]>([
+    false,
+    false,
+    false,
+    false,
+  ]);
+
+  const [isLoadingAcronym, setIsLoadingAcronym] = useState<boolean[]>([
+    false,
+    false,
+    false,
+    false,
+  ]);
+
+  const [isLoadingStory, setIsLoadingStory] = useState<boolean[]>([
+    false,
+    false,
+    false,
+    false,
+  ]);
+
   const [value, setValue] = useState("1");
   const [storyGenerated, setStoryGenerated] = useState(false);
   const [acronymGenerated, setAcronymGenerated] = useState(false);
@@ -89,18 +121,36 @@ const CreateListOfWords: NextPage = () => {
   }, [uploadMutation.error]);
 
   const handleRecommeddedImage = async (index: Number) => {
-    setIsLoadingMnemonic(true);
+    let prevLoading = isLoadingImage;
+    prevLoading[Number(index)] = true;
+    setIsLoadingImage(prevLoading);
+
     const created = await imgRecommendationMutation.mutateAsync({
       description: inputPromptValue,
     });
     let prevMnemonicImage = mnemonicImage;
     prevMnemonicImage[Number(index)] = created?.filename;
+    setMnemonicImage(prevMnemonicImage);
     setIsLoadingMnemonic(false);
+
+    prevLoading = isLoadingImage;
+    prevLoading[Number(index)] = false;
+    setIsLoadingImage(prevLoading);
   };
 
   const handleRecommeddedImageList = async () => {
+    let prevLoading = isLoadingImage;
+    for (let i = 0; i < 4; i++) {
+      prevLoading[i] = true;
+      setIsLoadingImage(prevLoading);
+    }
+
     setIsLoadingMnemonic(true);
     for (let i = 0; i < 4; i++) {
+      prevLoading = isLoadingImage;
+      prevLoading[Number(i)] = true;
+      setIsLoadingImage(prevLoading);
+
       const imageCreated = await imgRecommendationMutation.mutateAsync({
         description: inputPromptValue,
       });
@@ -108,11 +158,19 @@ const CreateListOfWords: NextPage = () => {
         ...mnemonicImage,
         imageCreated?.filename,
       ]);
+
+      prevLoading = isLoadingImage;
+      prevLoading[Number(i)] = false;
+      setIsLoadingImage(prevLoading);
     }
     setIsLoadingMnemonic(false);
   };
 
   const handleRecommeddedAcronym = async (index: Number) => {
+    let prevLoading = isLoadingAcronym;
+    prevLoading[Number(index)] = true;
+    setIsLoadingAcronym(prevLoading);
+
     setIsLoadingMnemonic(true);
     var acronymLeters = "";
 
@@ -134,9 +192,19 @@ const CreateListOfWords: NextPage = () => {
     prevAcronym[Number(index)] =
       "Remember " + acronymLeters + " with: " + String(acronymCreated?.result);
     setIsLoadingMnemonic(false);
+
+    prevLoading = isLoadingAcronym;
+    prevLoading[Number(index)] = false;
+    setIsLoadingAcronym(prevLoading);
   };
 
   const handleRecommeddedAcronymList = async () => {
+    let prevLoading = isLoadingAcronym;
+    for (let i = 0; i < 4; i++) {
+      prevLoading[i] = true;
+      setIsLoadingAcronym(prevLoading);
+    }
+
     setIsLoadingMnemonic(true);
     var acronymLeters = "";
 
@@ -163,11 +231,18 @@ const CreateListOfWords: NextPage = () => {
           " with: " +
           String(acronymCreated?.result),
       ]);
+      prevLoading = isLoadingAcronym;
+      prevLoading[Number(i)] = false;
+      setIsLoadingAcronym(prevLoading);
     }
     setIsLoadingMnemonic(false);
   };
 
   const handleRecommeddedStory = async (index: Number) => {
+    let prevLoading = isLoadingStory;
+    prevLoading[Number(index)] = true;
+    setIsLoadingStory(prevLoading);
+
     setIsLoadingMnemonic(true);
     var storyWordList = "";
 
@@ -188,9 +263,17 @@ const CreateListOfWords: NextPage = () => {
     prevStory[Number(index)] =
       "Remember " + storyWordList + " with: " + storyCreated?.result;
     setIsLoadingMnemonic(false);
+    prevLoading = isLoadingStory;
+    prevLoading[Number(index)] = false;
+    setIsLoadingStory(prevLoading);
   };
 
   const handleRecommeddedStoryList = async () => {
+    let prevLoading = isLoadingStory;
+    for (let i = 0; i < 4; i++) {
+      prevLoading[i] = true;
+      setIsLoadingStory(prevLoading);
+    }
     setIsLoadingMnemonic(true);
     var storyWordList = "";
 
@@ -207,6 +290,10 @@ const CreateListOfWords: NextPage = () => {
     }
     setStory(() => []);
     for (let i = 0; i < 4; i++) {
+      prevLoading = isLoadingStory;
+      prevLoading[Number(i)] = true;
+      setIsLoadingStory(prevLoading);
+
       const storyCreated = await storyRecommendationMutation.mutateAsync({
         description: storyWordList,
       });
@@ -214,6 +301,10 @@ const CreateListOfWords: NextPage = () => {
         ...prevStory,
         "Remember " + storyWordList + " with: " + String(storyCreated?.result),
       ]);
+
+      prevLoading = isLoadingStory;
+      prevLoading[Number(i)] = false;
+      setIsLoadingStory(prevLoading);
     }
     setIsLoadingMnemonic(false);
   };
@@ -324,9 +415,12 @@ const CreateListOfWords: NextPage = () => {
                           {Array.from(Array(4)).map((_, index) => (
                             <Grid xs={4} sm={6} md={6} key={index}>
                               <Item>
-                                {acronym[index]}
                                 <div className="flex justify-center items-center grid-cols-2">
-                                  {isLoadingMnemonic && (
+                                  {!isLoadingAcronym[index] && acronym[index]}
+                                </div>
+
+                                <div className="flex justify-center items-center grid-cols-2">
+                                  {isLoadingAcronym[index] && (
                                     <span className="w-10 h-10 border-2 border-gray-500 border-t-transparent rounded-full animate-spin"></span>
                                   )}
                                 </div>
@@ -334,7 +428,7 @@ const CreateListOfWords: NextPage = () => {
                               <Button
                                 className="disabled:text-gray-400 disabled:bg-gray-200`"
                                 disabled={
-                                  !acronymGenerated || isLoadingMnemonic
+                                  !acronymGenerated || isLoadingAcronym[index]
                                 }
                                 variant="outlined"
                                 color="success"
@@ -353,7 +447,7 @@ const CreateListOfWords: NextPage = () => {
                               <Button
                                 className="disabled:text-gray-400 disabled:bg-gray-200`"
                                 disabled={
-                                  !acronymGenerated || isLoadingMnemonic
+                                  !acronymGenerated || isLoadingAcronym[index]
                                 }
                                 onClick={async () => {
                                   console.log(index);
@@ -414,21 +508,26 @@ const CreateListOfWords: NextPage = () => {
                           {Array.from(Array(4)).map((_, index) => (
                             <Grid xs={4} sm={6} md={6} key={index}>
                               <Item>
-                                {mnemonicImage[index] ? (
-                                  <div className="col-span-1 bg-gray-1 h-full w-full">
-                                    <div className="flex justify-center items-center grid-cols-2">
-                                      {isLoadingMnemonic && (
-                                        <span className="w-10 h-10 border-2 border-gray-500 border-t-transparent rounded-full animate-spin"></span>
-                                      )}
-                                    </div>
-                                    <img
-                                      className="h-full w-auto object-contain"
-                                      src={mnemonicImage[index]}
-                                      alt=""
-                                    />
-                                  </div>
-                                ) : (
+                                <div className="flex justify-center items-center grid-cols-1">
+                                  {isLoadingImage[index] && (
+                                    <span className="w-10 h-10 border-2 border-gray-500 border-t-transparent rounded-full animate-spin"></span>
+                                  )}
+                                </div>
+
+                                {!mnemonicImage[index] ? (
                                   <div className="col-span-1 bg-gray-1 h-full w-full"></div>
+                                ) : (
+                                  <div className="col-span-1 bg-gray-1 h-full w-full">
+                                    {!isLoadingImage[index] && (
+                                      <div className="col-span-1 bg-gray-1 h-full w-full">
+                                        <img
+                                          className="h-full w-auto object-contain"
+                                          src={mnemonicImage[index]}
+                                          alt=""
+                                        />
+                                      </div>
+                                    )}
+                                  </div>
                                 )}
                               </Item>
                               <Button
@@ -438,6 +537,10 @@ const CreateListOfWords: NextPage = () => {
                                   bottom: 0,
                                   float: "left",
                                   margin: 5,
+                                }}
+                                onClick={async () => {
+                                  setSelectedMnemonicType(mnemonicImage[index]);
+                                  setSelectedMnemonic(true);
                                 }}
                               >
                                 Accept
@@ -471,16 +574,21 @@ const CreateListOfWords: NextPage = () => {
                           {Array.from(Array(4)).map((_, index) => (
                             <Grid xs={4} sm={6} md={6} key={index}>
                               <Item>
-                                {story[index]}
+                                <div className="flex justify-center items-center grid-cols-2">
+                                  {!isLoadingStory[index] && story[index]}
+                                </div>
+
                                 <div className="flex justify-center items-center">
-                                  {isLoadingMnemonic && (
+                                  {isLoadingStory[index] && (
                                     <span className="w-10 h-10 border-2 border-gray-500 border-t-transparent rounded-full animate-spin"></span>
                                   )}
                                 </div>
                               </Item>
                               <Button
                                 className="disabled:text-gray-400 disabled:bg-gray-200`"
-                                disabled={!storyGenerated || isLoadingMnemonic}
+                                disabled={
+                                  !storyGenerated || isLoadingStory[index]
+                                }
                                 variant="outlined"
                                 color="success"
                                 style={{
@@ -488,12 +596,18 @@ const CreateListOfWords: NextPage = () => {
                                   float: "left",
                                   margin: 5,
                                 }}
+                                onClick={async () => {
+                                  setSelectedMnemonicType(story[index]);
+                                  setSelectedMnemonic(true);
+                                }}
                               >
                                 Accept
                               </Button>
                               <Button
                                 className="disabled:text-gray-400 disabled:bg-gray-200`"
-                                disabled={!storyGenerated || isLoadingMnemonic}
+                                disabled={
+                                  !storyGenerated || isLoadingStory[index]
+                                }
                                 onClick={async () => {
                                   console.log(index);
                                   await handleRecommeddedStory(index);
@@ -521,7 +635,7 @@ const CreateListOfWords: NextPage = () => {
                     <TabContext value={value}>
                       <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
                         <TabList
-                          onChange={handleChange}
+                          disabled={true}
                           aria-label="lab API tabs example"
                         >
                           <Tab label="Acronyms" value="1" />
@@ -529,14 +643,113 @@ const CreateListOfWords: NextPage = () => {
                           <Tab label="Storys" value="3" />
                         </TabList>
                       </Box>
-                      <TabPanel value="1" >
+                      <TabPanel value="1">
                         <Grid
                           container
                           spacing={{ xs: 1, md: 1 }}
                           columns={{ xs: 4, sm: 8, md: 12 }}
                         >
                           <Grid xs={4} sm={6} md={12}>
-                            <Item>{selectedMnemonicType}</Item>
+                            <Item2>{selectedMnemonicType}</Item2>
+                            <Button
+                              className="disabled:text-gray-400 disabled:bg-gray-200`"
+                              disabled={!acronymGenerated || isLoadingMnemonic}
+                              variant="outlined"
+                              color="success"
+                              style={{
+                                bottom: 0,
+                                float: "left",
+                                margin: 5,
+                              }}
+                              onClick={async () => {
+                                //handleConfirmMnemonic();
+                                setSelectedMnemonic(true);
+                              }}
+                            >
+                              Accept
+                            </Button>
+                            <Button
+                              className="disabled:text-gray-400 disabled:bg-gray-200`"
+                              disabled={!acronymGenerated || isLoadingMnemonic}
+                              onClick={async () => {
+                                setSelectedMnemonic(false);
+                              }}
+                              variant="outlined"
+                              color="error"
+                              style={{
+                                bottom: 0,
+                                float: "right",
+                                margin: 5,
+                              }}
+                            >
+                              {" "}
+                              <RefreshIcon />
+                            </Button>
+                          </Grid>
+                        </Grid>
+                      </TabPanel>
+                      <TabPanel value="2">
+                        <Grid
+                          container
+                          spacing={{ xs: 1, md: 1 }}
+                          columns={{ xs: 4, sm: 8, md: 12 }}
+                        >
+                          <Grid xs={4} sm={6} md={12}>
+                            <Item2>
+                              <div className="col-span-1 bg-gray-1 h-full w-full">
+                                  <img
+                                    className="h-full w-auto object-contain"
+                                    src={selectedMnemonicType}
+                                    alt=""
+                                  />
+                              </div>
+                              
+                            </Item2>
+                            <Button
+                              className="disabled:text-gray-400 disabled:bg-gray-200`"
+                              disabled={!acronymGenerated || isLoadingMnemonic}
+                              variant="outlined"
+                              color="success"
+                              style={{
+                                bottom: 0,
+                                float: "left",
+                                margin: 5,
+                              }}
+                              onClick={async () => {
+                                //handleConfirmMnemonic();
+                                setSelectedMnemonic(true);
+                              }}
+                            >
+                              Accept
+                            </Button>
+                            <Button
+                              className="disabled:text-gray-400 disabled:bg-gray-200`"
+                              disabled={!acronymGenerated || isLoadingMnemonic}
+                              onClick={async () => {
+                                setSelectedMnemonic(false);
+                              }}
+                              variant="outlined"
+                              color="error"
+                              style={{
+                                bottom: 0,
+                                float: "right",
+                                margin: 5,
+                              }}
+                            >
+                              {" "}
+                              <RefreshIcon />
+                            </Button>
+                          </Grid>
+                        </Grid>
+                      </TabPanel>
+                      <TabPanel value="3">
+                        <Grid
+                          container
+                          spacing={{ xs: 1, md: 1 }}
+                          columns={{ xs: 4, sm: 8, md: 12 }}
+                        >
+                          <Grid xs={4} sm={6} md={12}>
+                            <Item2>{selectedMnemonicType}</Item2>
                             <Button
                               className="disabled:text-gray-400 disabled:bg-gray-200`"
                               disabled={!acronymGenerated || isLoadingMnemonic}
