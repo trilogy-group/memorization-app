@@ -35,7 +35,7 @@ const CreateDefinition: NextPage = () => {
 
   const [inputValue, setInputValue] = useState("");
   const [inputPromptValue, setInputPromptValue] = useState("");
-  const [inputQuestionValue, setInputQuestionValue] = useState("");
+  const [inputPostValue, setInputPostValue] = useState("");
 
   const [tableEntryValue, setTableEntryValue] = useState("");
 
@@ -139,9 +139,9 @@ const CreateDefinition: NextPage = () => {
                     <Textarea
                       label="Enter your question"
                       placeholder="e.g., world leaders during WW2"
-                      value={inputQuestionValue}
+                      value={inputPostValue}
                       onChange={(e) => {
-                        setInputQuestionValue(e.target.value);
+                        setInputPostValue(e.target.value);
                       }}
                     />
                     <Textarea

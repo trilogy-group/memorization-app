@@ -6,12 +6,12 @@ import { createRouter } from "./context";
 export const likeRouter = createRouter()
   .query("count", {
     input: z.object({
-      questionId: z.string(),
+      postId: z.string(),
     }),
     resolve: async ({ ctx: { prisma }, input }) => {
       const count = await prisma.like.count({
         where: {
-          questionId: input.questionId,
+          postId: input.postId,
         },
       });
       return {
@@ -27,23 +27,23 @@ export const likeRouter = createRouter()
   })
   .mutation("toggle", {
     input: z.object({
-      questionId: z.string(),
+      postId: z.string(),
       isLiked: z.boolean(),
     }),
     resolve: async ({ ctx: { prisma, session }, input }) => {
       if (input.isLiked) {
         await prisma.like.create({
           data: {
-            questionId: input.questionId,
+            postId: input.postId,
             userId: session?.user?.id!,
           },
         });
       } else {
         await prisma.like.delete({
           where: {
-            questionId_userId: {
+            postId_userId: {
               userId: session?.user?.id!,
-              questionId: input.questionId,
+              postId: input.postId,
             },
           },
         });
