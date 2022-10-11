@@ -20,8 +20,7 @@ export const progressRouter = createRouter()
   })
   .mutation("get-one-quiz", {
     // get quizzes based on progress
-    input: z.object({}),
-    async resolve({ ctx: { prisma, session }, input }) {
+    async resolve({ ctx: { prisma, session } }) {
       const existingProgress = await prisma.progress.findFirst({
         where: {
           userId: session?.user?.id!,
@@ -37,12 +36,13 @@ export const progressRouter = createRouter()
         return null;
       }
       const questionId = existingProgress?.questionId;
-      console.log(existingProgress);
+      console.log("the existing progress", existingProgress);
       const question = await prisma.question.findFirst({
         where: {
           id: questionId
         }
       });
+      console.log("the question", question);
 
       // create progress entry if not existing
       return question;

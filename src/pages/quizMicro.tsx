@@ -19,8 +19,9 @@ interface QuizMicroProps {
 
 //: FC<QuizMicroProps> = ({ inputQuestions, inputAnswer, inputType, inputIncorrectAnswer, inputHint,inputDifficulty }) =>
 const QuizMicro: FC<QuizMicroProps> = ({ arrayQuestion, arrayOfArrayCorrectAnswers, arrayType, arrayIncorrectAnswer, arraySrc, arrayDifficulty, refetch }) => {
-  const session = useSession();
-  const quizGradeMutation = trpc.useMutation("progress.post-one-quiz");
+  const { data: session } = useSession();
+  const quizGradeMutation = trpc.useMutation("progress.post-one-quiz-result");
+  const quizQuestionAnswersEtc = trpc.useMutation("progress.get-one-quiz");
   const [optionMCQ, setOptionMCQ] = useState();
   const [optionsList, setOptionsList] = useState<string[]>([]);
   const [optionA, setOptionA] = useState("");
@@ -63,6 +64,10 @@ const QuizMicro: FC<QuizMicroProps> = ({ arrayQuestion, arrayOfArrayCorrectAnswe
   }
 
   useEffect(() => {
+    quizQuestionAnswersEtc.mutateAsync().then(quizVariables => {
+      console.log("the id of the user is ", session?.user?.id)
+      console.log(quizVariables);
+    });
 
     // adding script that makes elements of the list able to be dragged PART 1
     const script = document.createElement('script');
