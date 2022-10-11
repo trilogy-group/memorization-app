@@ -20,12 +20,7 @@ export const contentTreeRouter = createRouter()
     async resolve({ ctx: { session }, input }) {
       if (session?.user?.id) {
         try {
-            
-          /*var result = getContentTree();
-          console.log(result);
-          return {
-            result,
-          };*/
+           
           const data = await fetch(
             "https://gshnf2p56bbinmx4na3lme4oce.appsync-api.us-west-2.amazonaws.com/graphql",
             {
@@ -48,8 +43,6 @@ export const contentTreeRouter = createRouter()
             })
             .then((res) =>
               res?.json?.().then((data: ContentTree) => {
-                console.log(data.data.domains[0]?.name);
-                //console.log(data["data"]["domains"]);
                 return data;
               })
             );

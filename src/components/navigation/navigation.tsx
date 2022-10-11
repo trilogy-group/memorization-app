@@ -4,6 +4,9 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
 import LocalActivityIcon from "@mui/icons-material/LocalActivity";
+
+import RefreshIcon from "@mui/icons-material/Refresh";
+
 import { TreeView, TreeItem } from "@mui/lab";
 import {
   Button,
@@ -17,7 +20,13 @@ import {
 
 import { trpc } from "../../utils/trpc";
 
-import { Convert, ContentTree, Domain } from "../../server/router/contentTreeInterface";
+import {
+  Convert,
+  ContentTree,
+  Domain,
+  Skill,
+  Concept,
+} from "../../server/router/contentTreeInterface";
 
 const TreeElement = styled("div")`
   display: flex;
@@ -31,134 +40,101 @@ export type NavigationProps = {
   nodes?: Domain[];
 };
 
-export function Navigation({
+interface DataTreeViewProps {
+  treeItems: Domain[] | undefined;
+}
+
+function DataTreeView({ treeItems }: DataTreeViewProps) {
+  const getTreeConceptsFromData = (treeItems: Concept[]) => {
+    return treeItems.map((treeItemData) => {
+      return (
+        <TreeItem
+          key={treeItemData.id}
+          nodeId={treeItemData.id}
+          label={treeItemData.name}
+        />
+      );
+    });
+  };
+  const getTreeSkillsFromData = (treeItems: Skill[]) => {
+    return treeItems.map((treeItemData) => {
+      let children = undefined;
+      if (treeItemData.concepts && treeItemData.concepts.length > 0) {
+        children = getTreeConceptsFromData(treeItemData.concepts);
+      }
+      return (
+        <TreeItem
+          key={treeItemData.id}
+          nodeId={treeItemData.id}
+          label={treeItemData.name}
+          children={children}
+        />
+      );
+    });
+  };
+
+  const getTreeItemsFromData = (treeItems: Domain[] | undefined) => {
+    if (treeItems) {
+      return treeItems.map((treeItemData) => {
+        let children = undefined;
+        if (treeItemData.skills && treeItemData.skills.length > 0) {
+          children = getTreeSkillsFromData(treeItemData.skills);
+        }
+        return (
+          <TreeItem
+            key={treeItemData.id}
+            nodeId={treeItemData.id}
+            label={treeItemData.name}
+            children={children}
+          />
+        );
+      });
+    }
+
+    return null;
+  };
+
+  return (
+    <TreeView
+      defaultCollapseIcon={<ExpandMoreIcon />}
+      defaultExpandIcon={<ChevronRightIcon />}
+    >
+      {getTreeItemsFromData(treeItems)}
+    </TreeView>
+  );
+}
+
+const Navigation = ({
   nodes = [],
   open = false,
   onClose,
   addNodeToWorkspace,
-}: NavigationProps) {
+}: NavigationProps) => {
   const [selected, setSelected] = useState("");
-  const nodeMap = {};
-  const [standardNodes, setStandardNodes] = useState(<TreeView></TreeView>);
   const [bookNodes, setBookNodes] = useState(<TreeView></TreeView>);
-  const [conceptNodes, setConceptNodes] = useState(<TreeView></TreeView>);
+  const [contentTree2, setContentTree2] = useState<ContentTree>();
+  const [isLoading, setIsLoading] = useState(false);
 
   const getContentTreeMutation = trpc.useMutation("getContentTree.contentTree");
 
   const handleContentTree = async () => {
-    const created: ContentTree = await getContentTreeMutation.mutateAsync({
-      description: "test",
-    });
-    return created
-    console.log(created.data.domains[0]?.name);
-  };
-
-  // Creating a frequency dictionary
-  const visitedDictionary = {};
-  const labelNodes = {};
-
-  nodes.forEach((node) => {
-    visitedDictionary[node["id"]] = 0;
-    nodeMap[node["id"]] = node;
-    if (!(node.data.kind in labelNodes)) {
-      labelNodes[node.data.kind] = [];
-    }
-    labelNodes[node.data.kind].push(node);
-  });
-
-  const setTreeView = (nds: Domain[]) => {
-    const conceptNodes = (
-      <div style={{ display: "flex", flexDirection: "row" }}>
-        <LocalActivityIcon />
-        <TreeItem nodeId={"main_concept"} label={"Concepts"}>
-          {listSpecificNodes(
-            nds,
-            ["contains", "implements"],
-            ["Domain", "Cluster", "Concept"],
-            ["Concept"]
-          )}
-        </TreeItem>
-      </div>
-    );
-
-    const revisit_these = ["Domain", "Cluster", "Standard"];
-
-    nodes.forEach((node) => {
-      if (revisit_these.includes(node.data.kind)) {
-        visitedDictionary[node.id] = 0;
-      }
-    });
-
-    const standardNodes = (
-      <div style={{ display: "flex", flexDirection: "row" }}>
-        <AccountBalanceIcon />
-        <TreeItem nodeId={"main_standard"} label={"Coherence Map"}>
-          {listSpecificNodes(
-            nds,
-            ["contains"],
-            ["Domain", "Cluster", "Standard"],
-            ["Standard"]
-          )}
-        </TreeItem>
-      </div>
-    );
-
-    const bookNodes = (
-      <div style={{ display: "flex", flexDirection: "row" }}>
-        <MenuBookIcon />
-        <TreeItem nodeId={"main_book"} label={"Books"}>
-          {listSpecificNodes(
-            nds,
-            ["*"],
-            [
-              "Book",
-              "Chapter",
-              "Section",
-              "SubSection",
-              "Prerequisite",
-              "LearningResources",
-              "Link",
-              "Exercise",
-              "Introduction",
-              "Problem",
-              "Example",
-              "KeyTerm",
-              "Note",
-              "HowTo",
-              "EveryDayMaths",
-              "TryIt",
-              "PracticeTest",
-              "WritingExersises",
-              "ReviewExercises",
-            ],
-            ["*"]
-          )}
-        </TreeItem>
-      </div>
-    );
-
-    setBookNodes(bookNodes);
-    setConceptNodes(conceptNodes);
-    setStandardNodes(standardNodes);
-  };
-  
-  const handleInput = async (e) =>  {
-    let searchedNodes: Domain[] = [];
-    const content = await handleContentTree();
-    content.data.domains.forEach((domain: Domain) => {
-      let searched = e.target.value.toLowerCase();
-      // This will be edited upon change in nomenclature
-      if (domain.name) {
-        let node_name = domain.name;
-        if (node_name.includes(searched)) {
-          searchedNodes.push(domain);
+    const created: ContentTree | undefined =
+      await getContentTreeMutation.mutateAsync(
+        {
+          description: "test",
+        },
+        {
+          onSuccess: (data) => {
+            setContentTree2(data);
+            setIsLoading(false);
+          },
+          onError: (error) => {
+            console.log("error", error);
+          },
         }
-      }
-    });
-
-    setTreeView(searchedNodes);
+      );
   };
-
+  /*
   const listSpecificNodes = (
     specifiedNodes: Domain[],
     edgeKinds: string[],
@@ -201,10 +177,10 @@ export function Navigation({
       }
     });
     return returnedChildren;
-  };
+  };*/
 
   // Recursive function to display all nodes of type nodeKinds that are linked only through these specified edgeKinds and contains one of these leafNodes.
-  const listChildren = (
+  /*const listChildren = (
     nodeId: string,
     edgeKinds,
     nodeKinds: string[],
@@ -250,50 +226,76 @@ export function Navigation({
         }
       });
     return [returnedChildren, isLeafNodePresent];
-  };
-
-  useEffect(() => {
-    setTreeView(nodes);
-  }, []);
+  };*/
+  //setBookNodes(await handleBookNodes());
 
   return (
     <Dialog open={open} onClose={onClose}>
       <DialogTitle sx={{ borderBottom: 1 }}>Navigation</DialogTitle>
 
       <DialogContent>
-        <TextField
+        {/* <TextField
           fullWidth
           size="small"
           sx={{ my: 2 }}
           label="Search"
           onChange={handleInput}
-        />
-
-        <TreeView
-          aria-label="Knowledge Graph Hierarchical view"
-          defaultCollapseIcon={<ExpandMoreIcon />}
-          defaultExpandIcon={<ChevronRightIcon />}
-          selected={selected}
-          onNodeSelect={(e, nodeId) => setSelected(nodeId)}
-          sx={{
-            height: 240,
-            width: 400,
-            overflowY: "auto",
-            overflowX: "hidden",
+        /> */}
+        <Button
+          className="disabled:text-gray-400 disabled:bg-gray-200`"
+          onClick={async () => {
+            setIsLoading(true)
+            await handleContentTree();
+            setIsLoading(false)
+          }}
+          variant="outlined"
+          color="error"
+          style={{
+            bottom: 0,
+            float: "right",
+            margin: 5,
           }}
         >
-          {bookNodes}
-          {conceptNodes}
-          {standardNodes}
-        </TreeView>
+          {" "}
+          <RefreshIcon />
+        </Button>
+        <div className="App">
+          <div className="flex justify-center items-center grid-cols-2">
+            {isLoading && (
+              <span className="w-10 h-10 border-2 border-gray-500 border-t-transparent rounded-full animate-spin"></span>
+            )}
+          </div>
+          {!isLoading && contentTree2?.data && (
+            <DataTreeView treeItems={contentTree2?.data.domains} />
+          )}
+
+          <br />
+        </div>
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose} variant="contained">
           Cancel
         </Button>
         <Button
-          onClick={() => {
-            handleContentTree();
+          className="disabled:text-gray-400 disabled:bg-gray-200`"
+          /* disabled={!acronymGenerated || isLoadingAcronym[index]} */
+          variant="outlined"
+          color="success"
+          style={{
+            bottom: 0,
+            float: "left",
+            margin: 5,
+          }}
+          /* onClick={async () => {
+            setSelectedMnemonicType(acronym[index]);
+            setSelectedMnemonic(true);
+          }} */
+        >
+          Accept
+        </Button>
+        <Button
+          onClick={async () => {
+            await handleContentTree();
           }}
           variant="contained"
         >
@@ -302,4 +304,7 @@ export function Navigation({
       </DialogActions>
     </Dialog>
   );
-}
+};
+// module.exports.Navigation = Navigation;
+
+export default Navigation;

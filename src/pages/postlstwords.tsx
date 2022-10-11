@@ -32,7 +32,8 @@ import Button from "@mui/material/Button";
 
 import RefreshIcon from "@mui/icons-material/Refresh";
 
-import { Navigation } from "../components/navigation/navigation";
+// import { Navigation } from "../components/navigation/navigation";
+import Navigation from "../components/navigation/navigation";
 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#fff",
@@ -102,6 +103,8 @@ const CreateListOfWords: NextPage = () => {
   const [acronymGenerated, setAcronymGenerated] = useState(false);
   const [selectedMnemonic, setSelectedMnemonic] = useState(false);
   const [selectedMnemonicType, setSelectedMnemonicType] = useState("");
+
+  const [open, setOpen] = useState(false);
 
   const handleChange = (event: React.SyntheticEvent, newValue: string) => {
     setValue(newValue);
@@ -358,18 +361,23 @@ const CreateListOfWords: NextPage = () => {
                   <h1 className="text-2xl font-bold">
                     Memorize a list of words{" "}
                     <Navigation
-                      open={true}
-                      onClose={function (): void {
-                        throw new Error("Function not implemented.");
-                      }}
+                      open={open}
+                      onClose={() => setOpen(false)}
                       addNodeToWorkspace={function (nodeId: string): void {
                         throw new Error("Function not implemented.");
                       }}
                     />
-                    
                   </h1>
 
                   <div className="grid gap-1" style={{ marginBottom: 10 }}>
+                    {/* Button that sets open to true */}
+                    <button
+                      className={`flex justify-center items-center gap-2 py-3 min-w-[20px] hover:brightness-90 transition text-white bg-red-1 disabled:text-gray-400 disabled:bg-gray-200`}
+                      style={{ borderRadius: 5, padding: 5, width: 200 }}
+                      onClick={() => setOpen(true)}
+                    >
+                      Select content
+                    </button>
                     <Textarea
                       label="Enter your question"
                       placeholder="e.g., world leaders during WW2"
@@ -464,7 +472,6 @@ const CreateListOfWords: NextPage = () => {
                                   !acronymGenerated || isLoadingAcronym[index]
                                 }
                                 onClick={async () => {
-                                  console.log(index);
                                   await handleRecommeddedAcronym(index);
                                 }}
                                 variant="outlined"
@@ -561,7 +568,6 @@ const CreateListOfWords: NextPage = () => {
                               </Button>
                               <Button
                                 onClick={async () => {
-                                  console.log(index);
                                   await handleRecommeddedImage(index);
                                 }}
                                 variant="outlined"
@@ -623,7 +629,6 @@ const CreateListOfWords: NextPage = () => {
                                   !storyGenerated || isLoadingStory[index]
                                 }
                                 onClick={async () => {
-                                  console.log(index);
                                   await handleRecommeddedStory(index);
                                 }}
                                 variant="outlined"
