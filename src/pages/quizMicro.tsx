@@ -31,6 +31,7 @@ const QuizMicro: FC<QuizMicroProps> = ({ refetch }) => {
   const [quizContentVisibility, setQuizContentVisibility] = useState(true);
   const [MCQVisibility, setMCQVisibility] = useState(false);
   const [checkboxVisibility, setCheckboxVisibility] = useState(false);
+  const [sequenceVisibility, setSequenceVisibility] = useState(false);
 
   var allPresentCorrectCheckboxesList = useRef(["", ""]);
 
@@ -59,20 +60,26 @@ const QuizMicro: FC<QuizMicroProps> = ({ refetch }) => {
       "that",
       "cringe"
     ]
+
   ];
 
-  let arrayType = ["MCQ", "list"];
+  let arrayType = ["MCQ", "list", "sequence"];
 
   //TODO: connect to DB for questions and answers
   const arrayOfArrayCorrectAnswers = [
     ["Bipedalism"],
-    ["shrek", "fiona", "donkey"]
+    ["shrek", "fiona", "donkey"],
+    ["1",
+      "2",
+      "3",
+      "4"]
 
   ]
 
   let arrayQuestion = [
     "first Q",
-    "second Q"
+    "second Q",
+    "third Q"
   ]
 
 
@@ -120,11 +127,23 @@ const QuizMicro: FC<QuizMicroProps> = ({ refetch }) => {
           type="checkbox"
           value={item}
           onChange={(e) => onChange(e)}
+          key={item}
         />
-        <label htmlFor={item}>
+        <label htmlFor={item} key={index}>
           {item}
         </label>
       </div>
+
+    })
+  }
+
+  const displaySequence = () => {
+    let sequencePresented = shuffle(arrayOfArrayCorrectAnswers[questionNumber.current - 1] as string[]);
+    return sequencePresented.map((item) => {
+
+      return <li className="border rounded flex items-center gap-2 h-9 px-3 border-black bg-white hover:bg-gray-100 transition cursor-pointer" key={item}>
+        {item}
+      </li>
 
     })
   }
@@ -293,15 +312,8 @@ const QuizMicro: FC<QuizMicroProps> = ({ refetch }) => {
     quizQuestion.current = arrayQuestion[questionNumber.current - 1] as string;
     console.log(arrayQuestion[questionNumber.current - 1] as string);
     if (arrayType[questionNumber.current - 1] == "sequence") {
-      let elem = document.getElementById("sequence");
       quizHintText.current = "Sort in the correct order";
-      let shuffleOptions = shuffle(arrayOfArrayCorrectAnswers[questionNumber.current - 1] as unknown as Array<string>);
-      for (var i = 0; i < arrayOfArrayCorrectAnswers[questionNumber.current - 1]!?.length; i++) {
-        let option = document.createElement('li');
-        option.className = "border rounded flex items-center gap-2 h-9 px-3 border-black bg-white hover:bg-gray-100 transition cursor-pointer"
-        option.innerHTML = shuffleOptions[i] as string;
-        elem!.appendChild(option);
-      }
+      setSequenceVisibility(true);
     } else if (arrayType[questionNumber.current - 1] == "list") {
       quizHintText.current = "Choose all that apply";
       allPresentCorrectCheckboxesList.current = arrayOfArrayCorrectAnswers[questionNumber.current - 1] as string[];
@@ -348,6 +360,7 @@ const QuizMicro: FC<QuizMicroProps> = ({ refetch }) => {
                   title='video' className="hidden"
                 />
                 <ul id="sequence">
+                  {sequenceVisibility && displaySequence()}
                 </ul>
                 {checkboxVisibility && <div>
                   {displayCheckboxes()}
