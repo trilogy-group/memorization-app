@@ -189,6 +189,8 @@ model Concept {
     users     User[]
     skillId   String
     skill     Skill     @relation(fields: [skillId], references: [id])
+
+    @@fulltext([name])
 }
 
 model Quiz {
