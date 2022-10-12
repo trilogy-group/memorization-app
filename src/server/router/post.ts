@@ -4,6 +4,13 @@ import { z } from "zod";
 
 import { createRouter } from "./context";
 
+enum contentType {
+    image = 1,
+    video = 2,
+    text = 3,
+    unknown = 4,
+}
+
 export const postRouter = createRouter()
   .query("for-you", {
     input: z.object({
@@ -157,7 +164,7 @@ export const postRouter = createRouter()
           videoWidth: input.videoWidth,
           videoHeight: input.videoHeight,
           mnemonic_text: "",
-          contentType: 2,
+          contentType: contentType.video,
           userId: session?.user?.id!,
           quizId: quizFound.id,
         },
@@ -202,7 +209,7 @@ export const postRouter = createRouter()
           videoHeight: 0,
           mnemonic_text: "",
           userId: session?.user?.id!,
-          contentType: 1,
+          contentType: contentType.image,
           quizId: quizFound.id
         },
       });
@@ -245,7 +252,7 @@ export const postRouter = createRouter()
           videoHeight: 0,
           mnemonic_text: input.mnemonic_text,
           userId: session?.user?.id!,
-          contentType: 3,
+          contentType: contentType.text,
           quizId: quizFound.id,
         },
       });

@@ -30,7 +30,7 @@ export const progressRouter = createRouter()
         },
         orderBy: {
           // quizzes from the most recent ones
-          nextEvaluate: "desc"
+          nextEvaluate: "asc"
         }
       });
       if (existingProgress == null) {

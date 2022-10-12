@@ -115,9 +115,6 @@ export const notificationRouter = createRouter()
               lt: new Date(),
             }
           },
-          orderBy: {
-            nextEvaluate: "desc",
-          },
         });
         if (progressDetails == null) {
           // quiz notification is not needed

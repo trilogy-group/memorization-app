@@ -109,7 +109,10 @@ model Post {
     @@fulltext([caption])
 }
 
-// one user has many masteries
+// One user has many masteries
+// A check on all quizzes of one concept is conducted once a 60-day-interval quiz is completed
+// If all quizzes of one concept have reached the 60-day-interval threshold, we deem the concept mastered.
+// The mastered concepts are inserted into the Mastery table, the relating questions are removed from the progress table
 model Mastery {
     id        Int     @id @default(autoincrement())
     user      User[]
@@ -189,6 +192,8 @@ model Concept {
     users     User[]
     skillId   String
     skill     Skill     @relation(fields: [skillId], references: [id])
+
+    @@fulltext([name])
 }
 
 model Quiz {
