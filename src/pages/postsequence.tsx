@@ -23,7 +23,7 @@ const CreateSequence: NextPage = () => {
   // TODO: connect mnemonic image with recommendation system in the backend
   const [mnemonicImage, setMnemonicImage] = useState<string | undefined>(undefined);
 
-  const recommendationMutation = trpc.useMutation("recommend.stabledif");
+  const recommendationMutation = trpc.useMutation("recommendImg.stabledif");
 
   const [inputValue, setInputValue] = useState("");
   const [inputPromptValue, setInputPromptValue] = useState("");

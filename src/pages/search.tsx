@@ -150,15 +150,7 @@ export const getServerSideProps = async ({
   query,
 }: GetServerSidePropsContext) => {
   var q = query.q as string;
-  const tags = q.match(/(#[a-z\d-]+)/gi);
-  // remove hashtags from caption searching
-  if (tags != null) {
-    for (const t_ of tags) {
-      q = q.replace(t_, "");
-    }
-  }
-
-  if (typeof q !== "string" || (!q && !tags)) {
+  if (typeof q != "string") {
     return {
       redirect: {
         destination: "/",
@@ -171,105 +163,66 @@ export const getServerSideProps = async ({
   const session = await getServerSession(req, res, authOptions);
 
   let accounts, posts;
-  if (tags != null) {
-    [accounts, posts] = await Promise.all([
-      prisma.user.findMany({
-        where: {
-          OR: {
-            email: {
-              search: q,
-            },
-            name: {
-              search: q,
-            },
+  [accounts, posts] = await Promise.all([
+    prisma.user.findMany({
+      where: {
+        OR: {
+          email: {
+            search: q,
           },
-        },
-        take: 20,
-        select: {
-          _count: {
-            select: {
-              followers: true,
-            },
-          },
-          id: true,
-          image: true,
-
-          name: true,
-        },
-      }),
-      prisma.post.findMany({
-        where: {
-          hashtags: {
-            some: {
-              tag: {in: tags},
-            }
-          }
-        },
-        take: 20,
-        select: {
-          id: true,
-          coverURL: true,
-          caption: true,
-          user: {
-            select: {
-              id: true,
-              image: true,
-              name: true,
-            },
-          },
-        },
-      }),
-    ]);
-
-  }
-  else {
-    [accounts, posts] = await Promise.all([
-      prisma.user.findMany({
-        where: {
-          OR: {
-            email: {
-              search: q,
-            },
-            name: {
-              search: q,
-            },
-          },
-        },
-        take: 20,
-        select: {
-          _count: {
-            select: {
-              followers: true,
-            },
-          },
-          id: true,
-          image: true,
-
-          name: true,
-        },
-      }),
-      prisma.post.findMany({
-        where: {
-          caption: {
+          name: {
             search: q,
           },
         },
-        take: 20,
-        select: {
-          id: true,
-          coverURL: true,
-          caption: true,
-          user: {
-            select: {
-              id: true,
-              image: true,
-              name: true,
-            },
+      },
+      take: 20,
+      select: {
+        _count: {
+          select: {
+            followers: true,
           },
         },
-      }),
-    ]);
-  }
+        id: true,
+        image: true,
+
+        name: true,
+      },
+    }),
+    prisma.post.findMany({
+      where: {
+        OR: [
+          {
+            quizzes: {
+              concepts: {
+                name: {
+                  search: q,
+                }
+              }
+            }
+          },
+          {
+            caption: {
+              search: q,
+            },
+          }
+        ]
+      },
+      take: 20,
+      select: {
+        id: true,
+        coverURL: true,
+        caption: true,
+        user: {
+          select: {
+            id: true,
+            image: true,
+            name: true,
+          },
+        },
+      },
+    }),
+  ]);
+
 
   return {
     props: {

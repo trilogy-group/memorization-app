@@ -4,6 +4,13 @@ import { z } from "zod";
 
 import { createRouter } from "./context";
 
+enum contentType {
+    image = 1,
+    video = 2,
+    text = 3,
+    unknown = 4,
+}
+
 export const postRouter = createRouter()
   .query("for-you", {
     input: z.object({
@@ -133,17 +140,22 @@ export const postRouter = createRouter()
       coverURL: z.string().url(),
       videoWidth: z.number().gt(0),
       videoHeight: z.number().gt(0),
-      concept: z.string(),
+      conceptId: z.string(),
+      quizId: z.string(),
     }),
     async resolve({ ctx: { prisma, session }, input }) {
-      const conceptFound = await prisma.concept.findFirst({
+      const quizFound = await prisma.quiz.findFirst({
         where: {
-          name: input.concept
+          concepts: {
+            id: input.conceptId,
+          }
         }
       });
-      if (conceptFound == null) {
-        throw new Error("Concept table not populated in the DB.");
+
+      if (quizFound == null) {
+        throw new Error("Concept or quiz not found in the DB.");
       }
+
       const postCreated = await prisma.post.create({
         data: {
           caption: input.caption,
@@ -151,10 +163,10 @@ export const postRouter = createRouter()
           coverURL: input.coverURL,
           videoWidth: input.videoWidth,
           videoHeight: input.videoHeight,
-          userId: session?.user?.id!,
-          contentType: 2,
-          conceptId: conceptFound?.id,
           mnemonic_text: "",
+          contentType: contentType.video,
+          userId: session?.user?.id!,
+          quizId: quizFound.id,
         },
       });
 
@@ -172,17 +184,22 @@ export const postRouter = createRouter()
     input: z.object({
       caption: z.string(),
       coverURL: z.string().url(),
-      concept: z.string(),
+      conceptId: z.string(),
+      quizId: z.string(),
     }),
     async resolve({ ctx: { prisma, session }, input }) {
-      const conceptFound = await prisma.concept.findFirst({
+      const quizFound = await prisma.quiz.findFirst({
         where: {
-          name: input.concept
+          concepts: {
+            id: input.conceptId,
+          }
         }
       });
-      if (conceptFound == null) {
-        throw new Error("Concept table not populated in the DB.");
+
+      if (quizFound == null) {
+        throw new Error("Concept or quiz not found in the DB.");
       }
+
       const created = await prisma.post.create({
         data: {
           caption: input.caption,
@@ -190,10 +207,53 @@ export const postRouter = createRouter()
           coverURL: input.coverURL,
           videoWidth: 0,
           videoHeight: 0,
-          userId: session?.user?.id!,
-          contentType: 1,
-          conceptId: conceptFound?.id,
           mnemonic_text: "",
+          userId: session?.user?.id!,
+          contentType: contentType.image,
+          quizId: quizFound.id
+        },
+      });
+      await prisma.user.update({
+        where: { id: session?.user?.id as string },
+        data: {
+          points: { increment: 1 },
+        },
+      });
+      return created;
+    },
+  })
+  .mutation("createText", {
+    input: z.object({
+      caption: z.string(),
+      concept: z.string(),
+      mnemonic_text: z.string(),
+      conceptId: z.string(),
+      quizId: z.string(),
+    }),
+    async resolve({ ctx: { prisma, session }, input }) {
+      const quizFound = await prisma.quiz.findFirst({
+        where: {
+          concepts: {
+            id: input.conceptId,
+          }
+        }
+      });
+
+      if (quizFound == null) {
+        throw new Error("Concept or quiz not found in the DB.");
+      }
+
+      const created = await prisma.post.create({
+        data: {
+          caption: input.caption,
+          videoURL: "",
+          coverURL: "",
+          videoWidth: 0,
+          videoHeight: 0,
+          mnemonic_text: input.mnemonic_text,
+          userId: session?.user?.id!,
+          contentType: contentType.text,
+          quizId: quizFound.id,
         },
       });
       await prisma.user.update({
