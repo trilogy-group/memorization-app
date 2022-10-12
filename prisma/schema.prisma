@@ -57,23 +57,23 @@ model User {
     notifications Notification[]
     masteryId     Int?
     mastery       Mastery?       @relation(fields: [masteryId], references: [id])
+    concepts      Concept[]
 
     @@fulltext([name, email])
 }
 
 model Progress {
-    lastEvaluated DateTime @updatedAt
+    nextEvaluate DateTime
     interval      Float    @default(0)
     repetition    Float    @default(0)
     efactor       Float    @default(2.5)
     userId        String
     user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-    // TODO: change post to quiz
-    postId        String
-    posts         Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+    quizId        Int
+    quizzes       Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
 
-    @@id([userId, postId], name: "progress_identifier")
-    @@unique([userId, postId])
+    @@id([userId, quizId], name: "progress_identifier")
+    @@unique([userId, quizId])
 }
 
 model VerificationToken {
@@ -99,15 +99,12 @@ model Post {
     updatedAt     DateTime       @updatedAt
     likes         Like[]
     comments      Comment[]
-    progress      Progress[]
     notifications Notification[]
     userId        String
     user          User           @relation(fields: [userId], references: [id])
 
-    quizId    Int?
-    quizzes   Quiz?    @relation(fields: [quizId], references: [id])
-    conceptId String
-    concepts  Concept? @relation(fields: [conceptId], references: [id])
+    quizId  Int
+    quizzes Quiz   @relation(fields: [quizId], references: [id])
 
     @@fulltext([caption])
 }
@@ -186,19 +183,20 @@ model Concept {
     id        String    @id
     name      String
     masteries Mastery[]
-    posts     Post[]
     quizzes   Quiz[]
+    users     User[]
     skillId   String
     skill     Skill     @relation(fields: [skillId], references: [id])
 }
 
 model Quiz {
-    id        Int     @id @default(autoincrement())
-    desc      String  @db.Text
+    id        Int       @id @default(autoincrement())
+    name      String     @db.Text
     type      String
-    option    String  @db.Text
-    answer    String  @db.Text
+    options    String     @db.Text
+    answer    String?     @db.Text // optional due to MCQ has answer true/false in the options string
     Post      Post[]
+    progress  Progress[]
     conceptId String
-    concepts  Concept @relation(fields: [conceptId], references: [id])
+    concepts  Concept    @relation(fields: [conceptId], references: [id])
 }

@@ -151,11 +151,16 @@ export const getServerSideProps = async ({
 }: GetServerSidePropsContext) => {
   var q = query.q as string;
   const tags = q.match(/(#[a-z\d-]+)/gi);
+  let conceptName: string;
+  // TODO: now assume only one tag aka. concept
   // remove hashtags from caption searching
   if (tags != null) {
+    conceptName = tags[0] as string;
     for (const t_ of tags) {
       q = q.replace(t_, "");
     }
+  } else {
+    conceptName = "";
   }
 
   if (typeof q !== "string" || (!q && !tags)) {
@@ -197,23 +202,17 @@ export const getServerSideProps = async ({
           name: true,
         },
       }),
-      prisma.post.findMany({
+     prisma.concept.findMany({
         where: {
-          conceptId: {in: tags},
-        },
-        take: 20,
-        select: {
-          id: true,
-          coverURL: true,
-          caption: true,
-          user: {
-            select: {
-              id: true,
-              image: true,
-              name: true,
-            },
-          },
-        },
+          name: conceptName,
+       },
+       select: {
+          quizzes: {
+            include: {
+              Post: posts
+            }
+          }
+       },
       }),
     ]);
 
@@ -275,3 +274,12 @@ export const getServerSideProps = async ({
     },
   };
 };
+
+/*
+SELECT * FROM POST
+INNER JOIN QUIZ 
+ON QUIZ.ID = POST.QUIZID
+INNER JOIN CONCEPT
+ON Concept.Id=quiz.conceptID
+where concept.name={}
+*/

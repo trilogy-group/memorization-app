@@ -35,17 +35,25 @@ def get_cg_tree():
     logging.info(cmd)
 
     p = subprocess.run(cmd, capture_output=True)
-    logging.DEBUG(p.stdout)
     cg_tree = json.loads(p.stdout)
 
     domains_lst = cg_tree['data']['domains']
     return domains_lst
 
 
+def insert_question(conceptId, question, db, c):
+    # Only for MCQ
+    # Ignore question id due to duplications in data source
+    cmd = "INSERT IGNORE INTO Quiz (name, type, options, conceptId) VALUES ('" + question['desc'].replace('\'', '\\\'').replace('\"', '\\\"') + "', '" + question['type'] + "', '" + str(question['options']).replace('\'', '\\\'').replace('\"', '\\\"') + "', '"+ conceptId +"');"
+    logging.debug(cmd)
+    c.execute(cmd)
+
 def insert_concept(skillId, concept, db, c):
     cmd = "INSERT IGNORE INTO Concept (id, name, skillId) VALUES ('" + concept['id'] + "', '" + concept['name'].replace('\'', '\\\'').replace('\"', '\\\"') + "', '" + skillId + "');"
     logging.debug(cmd)
     c.execute(cmd)
+    for question in concept['questions']:
+        insert_question(concept['id'], question, db, c)
 
 
 def insert_skill(domainId, skill, db, c):
