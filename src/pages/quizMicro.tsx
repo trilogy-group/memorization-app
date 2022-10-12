@@ -39,7 +39,7 @@ display the score to the user       DONE
 const QuizMicro: FC<QuizMicroProps> = ({ refetch }) => {
   const session = useSession();
   const quizGradeMutation = trpc.useMutation("progress.post-one-quiz-result");
-  const deleteThisMutation = trpc.useMutation("progress.get-one-quiz-question")
+  //const deleteThisMutation = trpc.useMutation("progress.get-one-quiz-question");
   const quizQuestionAnswersEtc = trpc.useMutation("progress.get-one-quiz");
   const [optionMCQ, setOptionMCQ] = useState();
   const [optionsList, setOptionsList] = useState<string[]>([]);
@@ -116,39 +116,41 @@ const QuizMicro: FC<QuizMicroProps> = ({ refetch }) => {
   useEffect(() => {
 
     quizQuestionAnswersEtc.mutateAsync().then(quizVariables => {
-      console.log(quizVariables);
+      console.log("info that I will use to render the quiz ", quizVariables);
+      /*
       if (quizVariables != null) {
         setQuizVariables(quizVariables);
         quizInformationToRender.current = quizVariables;
       }
-      console.log(quizSetOfVariables);
+*/
       if (quizSetOfVariables == null) {
         quizInformationToRender.current.id = "not found";
         quizInformationToRender.current.caption = "not found";
         quizInformationToRender.current.videoURL = "not found";
         quizInformationToRender.current.coverURL = "not found";
       }
-      console.log("quizInformationToRender current ", quizInformationToRender.current);
+      //console.log("quizInformationToRender current ", quizInformationToRender.current);
       //quizMakerUltimateHelper();
     });
 
-    // deleteThisMutation
-    deleteThisMutation.mutateAsync().then(quizVariables => {
-      console.log("info to render the quiz ", quizVariables);
-      // deleteThisQuizInfoToRender
-      if (quizVariables != null) {
-        deleteThisQuizInfoToRender.current = quizVariables;
-      }
-      arrayOfArrayCorrectAnswers[0] = [deleteThisQuizInfoToRender.current.option];
-      arrayIncorrectAnswer[0] = [deleteThisQuizInfoToRender.current.option + "wrong", deleteThisQuizInfoToRender.current.option + "wrong", deleteThisQuizInfoToRender.current.option + "wrong"];
-      arrayType.current[0] = deleteThisQuizInfoToRender.current.type;
-      arrayQuestion[0] = deleteThisQuizInfoToRender.current.question;
-      let splitted = deleteThisQuizInfoToRender.current.option.split(";", 4);
-      console.log("splitted options are ", splitted);
-      quizMakerUltimateHelper();
-    }
-    );
-
+    /*
+        // deleteThisMutation
+        deleteThisMutation.mutateAsync().then(quizVariables => {
+          console.log("info to render the quiz ", quizVariables);
+          // deleteThisQuizInfoToRender
+          if (quizVariables != null) {
+            deleteThisQuizInfoToRender.current = quizVariables;
+          }
+          arrayOfArrayCorrectAnswers[0] = [deleteThisQuizInfoToRender.current.option];
+          arrayIncorrectAnswer[0] = [deleteThisQuizInfoToRender.current.option + "wrong", deleteThisQuizInfoToRender.current.option + "wrong", deleteThisQuizInfoToRender.current.option + "wrong"];
+          arrayType.current[0] = deleteThisQuizInfoToRender.current.type;
+          arrayQuestion[0] = deleteThisQuizInfoToRender.current.question;
+          let splitted = deleteThisQuizInfoToRender.current.option.split(";", 4);
+          console.log("splitted options are ", splitted);
+          quizMakerUltimateHelper();
+        }
+        );
+    */
 
     // adding script that makes elements of the list able to be dragged
     setTimeout(() => {
