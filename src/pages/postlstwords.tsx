@@ -106,6 +106,8 @@ const CreateListOfWords: NextPage = () => {
 
   const [open, setOpen] = useState(false);
 
+  const [nodeId, setNodeId] = useState("");
+
   const handleChange = (event: React.SyntheticEvent, newValue: string) => {
     setValue(newValue);
     if (newValue === "3" && !storyGenerated && wordList.length > 0) {
@@ -364,13 +366,13 @@ const CreateListOfWords: NextPage = () => {
                       open={open}
                       onClose={() => setOpen(false)}
                       addNodeToWorkspace={function (nodeId: string): void {
-                        throw new Error("Function not implemented.");
+                        console.log("selected2" + nodeId);
+                        setNodeId(nodeId);
                       }}
                     />
                   </h1>
 
                   <div className="grid gap-1" style={{ marginBottom: 10 }}>
-                    {/* Button that sets open to true */}
                     <button
                       className={`flex justify-center items-center gap-2 py-3 min-w-[20px] hover:brightness-90 transition text-white bg-red-1 disabled:text-gray-400 disabled:bg-gray-200`}
                       style={{ borderRadius: 5, padding: 5, width: 200 }}
@@ -378,6 +380,9 @@ const CreateListOfWords: NextPage = () => {
                     >
                       Select content
                     </button>
+                    <div className="flex flex-col gap-1">
+                      <h3>{nodeId}</h3>
+                    </div>
                     <Textarea
                       label="Enter your question"
                       placeholder="e.g., world leaders during WW2"
@@ -411,7 +416,32 @@ const CreateListOfWords: NextPage = () => {
                         Add entry
                       </button>
                     </div>
-                    <ul id="answer"></ul>
+                    <div style={{ margin: 10, height: 390 }}>
+                      <ul id="answer"></ul>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap gap-3">
+                    <p className="text-2xl font-bold">
+                      I want to upload my own
+                    </p>
+                    <Link href={"/upload"}>
+                      <a className="border rounded flex items-center gap-2 h-9 px-3 border-gray-200 bg-white hover:bg-gray-100 transition">
+                        <span>Videos</span>
+                      </a>
+                    </Link>
+                  </div>
+                  <div>
+                    <button
+                      onClick={async () => await handleUpload()}
+                      disabled={!inputValue.trim() || isLoading}
+                      className={`flex justify-center items-center gap-2 py-3 min-w-[170px] hover:brightness-90 transition text-white bg-red-1 disabled:text-gray-400 disabled:bg-gray-200`}
+                      style={{ borderRadius: 5, padding: 5 }}
+                    >
+                      {isLoading && (
+                        <span className="w-4 h-4 border-2 border-gray-500 border-t-transparent rounded-full animate-spin"></span>
+                      )}
+                      Post
+                    </button>
                   </div>
                 </div>
 
@@ -812,27 +842,6 @@ const CreateListOfWords: NextPage = () => {
             </div>
           </div>
         </div>
-      </div>
-      <div className="flex flex-wrap gap-3">
-        <p className="text-2xl font-bold">I want to upload my own</p>
-        <Link href={"/upload"}>
-          <a className="border rounded flex items-center gap-2 h-9 px-3 border-gray-200 bg-white hover:bg-gray-100 transition">
-            <span>Videos</span>
-          </a>
-        </Link>
-      </div>
-      <div>
-        <button
-          onClick={async () => await handleUpload()}
-          disabled={!inputValue.trim() || isLoading}
-          className={`flex justify-center items-center gap-2 py-3 min-w-[170px] hover:brightness-90 transition text-white bg-red-1 disabled:text-gray-400 disabled:bg-gray-200`}
-          style={{ borderRadius: 5, padding: 5 }}
-        >
-          {isLoading && (
-            <span className="w-4 h-4 border-2 border-gray-500 border-t-transparent rounded-full animate-spin"></span>
-          )}
-          Post
-        </button>
       </div>
     </>
   );

@@ -28,6 +28,27 @@ import {
   Concept,
 } from "../../server/router/contentTreeInterface";
 
+import create from "zustand";
+import { devtools, persist } from "zustand/middleware";
+
+interface ConceptState {
+  id: string;
+  name: string;
+}
+
+const useConceptStore = create<ConceptState>()(
+  devtools(
+    persist(
+      (set) => ({
+        id: "",
+        name: "",
+      }),
+      {
+        name: "concept-storage",
+      }
+    )
+  )
+);
 const TreeElement = styled("div")`
   display: flex;
   flex-direction: column;
@@ -45,6 +66,8 @@ interface DataTreeViewProps {
 }
 
 function DataTreeView({ treeItems }: DataTreeViewProps) {
+  const conceptId = useConceptStore((state) => state.id);
+  const conceptName = useConceptStore((state) => state.name);
   const getTreeConceptsFromData = (treeItems: Concept[]) => {
     return treeItems.map((treeItemData) => {
       return (
@@ -52,6 +75,12 @@ function DataTreeView({ treeItems }: DataTreeViewProps) {
           key={treeItemData.id}
           nodeId={treeItemData.id}
           label={treeItemData.name}
+          onClick={() => {
+            useConceptStore.setState({
+              id: treeItemData.id,
+              name: treeItemData.name,
+            });
+          }}
         />
       );
     });
@@ -93,14 +122,26 @@ function DataTreeView({ treeItems }: DataTreeViewProps) {
 
     return null;
   };
-
+  const [selected, setSelected] = useState("");
+  const concept = useConceptStore((state) => state.id);
   return (
-    <TreeView
-      defaultCollapseIcon={<ExpandMoreIcon />}
-      defaultExpandIcon={<ChevronRightIcon />}
-    >
-      {getTreeItemsFromData(treeItems)}
-    </TreeView>
+    <div>
+      <TreeView
+        defaultCollapseIcon={<ExpandMoreIcon />}
+        defaultExpandIcon={<ChevronRightIcon />}
+        selected={selected}
+        onNodeSelect={(e: any, nodeId: React.SetStateAction<string>) => {
+          // if nodeid is a string
+          if (Array.from(nodeId)[0] === "C") {
+            useConceptStore.setState({ id: nodeId?.toString() });
+          } else {
+            useConceptStore.setState({ id: null });
+          }
+        }}
+      >
+        {getTreeItemsFromData(treeItems)}
+      </TreeView>
+    </div>
   );
 }
 
@@ -110,7 +151,6 @@ const Navigation = ({
   onClose,
   addNodeToWorkspace,
 }: NavigationProps) => {
-  const [selected, setSelected] = useState("");
   const [bookNodes, setBookNodes] = useState(<TreeView></TreeView>);
   const [contentTree2, setContentTree2] = useState<ContentTree>();
   const [isLoading, setIsLoading] = useState(false);
@@ -134,131 +174,28 @@ const Navigation = ({
         }
       );
   };
-  /*
-  const listSpecificNodes = (
-    specifiedNodes: Domain[],
-    edgeKinds: string[],
-    nodeOrder: string[],
-    leafNodes: string[]
-  ) => {
-    const returnedChildren: JSX.Element[] = [];
+  const id = useConceptStore((state) => state.id);
+  const name = useConceptStore((state) => state.name);
+  console.log(id);
 
-    nodeOrder.forEach((order) => {
-      if (labelNodes[order]) {
-        labelNodes[order].forEach((node) => {
-          if (
-            specifiedNodes.includes(node) &&
-            visitedDictionary[node.id] === 0
-          ) {
-            visitedDictionary[node.id]++;
-            const [children, leafNodePresent] = listChildren(
-              node.id,
-              edgeKinds,
-              nodeOrder,
-              leafNodes
-            );
-            const isALeafNode =
-              leafNodes.includes(node.data.kind) || leafNodes.includes("*");
-            if (leafNodePresent || isALeafNode) {
-              var name = node.data.label;
-              name +=
-                node.data.kind === "Domain" ? ` [${node.data.grade}]` : "";
-              name = name.replace(/<[^>]*>?/gm, "");
-              returnedChildren.push(
-                <TreeElement>
-                  <TreeItem nodeId={node.id} label={name}>
-                    {children}
-                  </TreeItem>
-                </TreeElement>
-              );
-            }
-          }
-        });
-      }
-    });
-    return returnedChildren;
-  };*/
+  const handleOpen = async () => {
+    if (open) {
+      setIsLoading(true);
+      await handleContentTree();
+      setIsLoading(false);
+    }
+  }
 
-  // Recursive function to display all nodes of type nodeKinds that are linked only through these specified edgeKinds and contains one of these leafNodes.
-  /*const listChildren = (
-    nodeId: string,
-    edgeKinds,
-    nodeKinds: string[],
-    leafNodes: string[]
-  ): [JSX.Element[], number] => {
-    const returnedChildren: JSX.Element[] = [];
-    let isLeafNodePresent: number = leafNodes.includes("*") ? 1 : 0;
+  useEffect(() => {
+  handleOpen();
+  }, [open]);
 
-    edges
-      .filter((edge) => edge.source === nodeId)
-      .filter(
-        (edge) => edgeKinds.includes(edge.label) || edgeKinds.includes("*")
-      )
-      .forEach((edge) => {
-        if (visitedDictionary[edge.target] === 0) {
-          visitedDictionary[edge.target]++;
-          const [children, leafNodePresent] = listChildren(
-            edge.target,
-            edgeKinds,
-            nodeKinds,
-            leafNodes
-          );
-          const isALeafNode =
-            leafNodes.includes(nodeMap[edge.target].data.kind) ||
-            leafNodes.includes("*");
-          if (leafNodePresent || isALeafNode) {
-            isLeafNodePresent = 1;
-            if (nodeKinds.includes(nodeMap[edge.target].data.kind)) {
-              returnedChildren.push(
-                <TreeElement>
-                  <TreeItem
-                    nodeId={edge.target}
-                    label={nodeMap[edge.target].data.label}
-                  >
-                    {children}
-                  </TreeItem>
-                </TreeElement>
-              );
-            } else {
-              returnedChildren.push(<TreeElement>{children}</TreeElement>);
-            }
-          }
-        }
-      });
-    return [returnedChildren, isLeafNodePresent];
-  };*/
-  //setBookNodes(await handleBookNodes());
 
   return (
     <Dialog open={open} onClose={onClose}>
       <DialogTitle sx={{ borderBottom: 1 }}>Navigation</DialogTitle>
 
       <DialogContent>
-        {/* <TextField
-          fullWidth
-          size="small"
-          sx={{ my: 2 }}
-          label="Search"
-          onChange={handleInput}
-        /> */}
-        <Button
-          className="disabled:text-gray-400 disabled:bg-gray-200`"
-          onClick={async () => {
-            setIsLoading(true)
-            await handleContentTree();
-            setIsLoading(false)
-          }}
-          variant="outlined"
-          color="error"
-          style={{
-            bottom: 0,
-            float: "right",
-            margin: 5,
-          }}
-        >
-          {" "}
-          <RefreshIcon />
-        </Button>
         <div className="App">
           <div className="flex justify-center items-center grid-cols-2">
             {isLoading && (
@@ -273,7 +210,7 @@ const Navigation = ({
         </div>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose} variant="contained">
+        <Button onClick={onClose} variant="outlined" color="error">
           Cancel
         </Button>
         <Button
@@ -286,20 +223,12 @@ const Navigation = ({
             float: "left",
             margin: 5,
           }}
-          /* onClick={async () => {
-            setSelectedMnemonicType(acronym[index]);
-            setSelectedMnemonic(true);
-          }} */
+          onClick={() => {
+            addNodeToWorkspace(name);
+            onClose();
+          }}
         >
           Accept
-        </Button>
-        <Button
-          onClick={async () => {
-            await handleContentTree();
-          }}
-          variant="contained"
-        >
-          Add
         </Button>
       </DialogActions>
     </Dialog>
