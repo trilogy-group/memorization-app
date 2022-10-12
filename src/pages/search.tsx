@@ -150,20 +150,20 @@ export const getServerSideProps = async ({
   query,
 }: GetServerSidePropsContext) => {
   var q = query.q as string;
-  const tags = q.match(/(#[a-z\d-]+)/gi);
-  let conceptName: string;
+  const conceptIdArr = q.match(/(#[a-z\d-]+)/gi);
+  let conceptId: string;
   // TODO: now assume only one tag aka. concept
   // remove hashtags from caption searching
-  if (tags != null) {
-    conceptName = tags[0] as string;
-    for (const t_ of tags) {
+  if (conceptIdArr != null) {
+    conceptId = (conceptIdArr[0] as string).replace("#", '');
+    for (const t_ of conceptIdArr) {
       q = q.replace(t_, "");
     }
   } else {
-    conceptName = "";
+    conceptId = "";
   }
 
-  if (typeof q !== "string" || (!q && !tags)) {
+  if (typeof q !== "string" || (!q && !conceptIdArr)) {
     return {
       redirect: {
         destination: "/",
@@ -176,7 +176,7 @@ export const getServerSideProps = async ({
   const session = await getServerSession(req, res, authOptions);
 
   let accounts, posts;
-  if (tags != null) {
+  if (conceptIdArr != null) {
     [accounts, posts] = await Promise.all([
      prisma.user.findMany({
         where: {
@@ -206,7 +206,7 @@ export const getServerSideProps = async ({
       where: {
         quizzes: {
           concepts: {
-            name: conceptName
+            id: conceptId
           }
         }
       },
@@ -277,12 +277,3 @@ export const getServerSideProps = async ({
     },
   };
 };
-
-/*
-SELECT * FROM POST
-INNER JOIN QUIZ 
-ON QUIZ.ID = POST.QUIZID
-INNER JOIN CONCEPT
-ON Concept.Id=quiz.conceptID
-where concept.name={}
-*/
