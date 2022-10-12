@@ -120,7 +120,7 @@ const QuizMicro: FC<QuizMicroProps> = ({ refetch }) => {
   }, []);
 
   const displayCheckboxes = () => {
-    let optionsPresented = allPresentCorrectCheckboxesList.current.concat(arrayIncorrectAnswer[questionNumber.current - 1] as string[]);
+    let optionsPresented = shuffle(allPresentCorrectCheckboxesList.current.concat(arrayIncorrectAnswer[questionNumber.current - 1] as string[]));
     return optionsPresented.map((item, index) => {
 
       return <div key={index}>
