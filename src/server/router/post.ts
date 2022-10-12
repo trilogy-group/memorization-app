@@ -27,7 +27,9 @@ export const postRouter = createRouter()
           _count: { select: { likes: true, comments: true } },
         },
         orderBy: {
-          createdAt: "desc",
+          likes: {
+            _count: "desc"
+          }
         },
       });
       let likes: Like[] = [];
