@@ -55,23 +55,25 @@ model User {
     points        Int            @default(0)
     progress      Progress[]
     notifications Notification[]
-    mastery       Mastery?
+    masteryId     Int?
+    mastery       Mastery?       @relation(fields: [masteryId], references: [id])
+    concepts      Concept[]
 
     @@fulltext([name, email])
 }
 
 model Progress {
-    lastEvaluated DateTime @updatedAt
-    interval      Float    @default(0)
-    repetition    Float    @default(0)
-    efactor       Float    @default(2.5)
-    userId        String
-    user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-    postId        String
-    posts         Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+    nextEvaluate DateTime
+    interval     Float    @default(0)
+    repetition   Int      @default(0)
+    efactor      Float    @default(2.5)
+    userId       String
+    user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    quizId       Int
+    quizzes      Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
 
-    @@id([userId, postId], name: "progress_identifier")
-    @@unique([userId, postId])
+    @@id([userId, quizId], name: "progress_identifier")
+    @@unique([userId, quizId])
 }
 
 model VerificationToken {
@@ -87,7 +89,7 @@ model Post {
     id            String @id @default(cuid())
     caption       String @db.Text
     videoURL      String @db.Text
-    coverURL      String @db.Text // video cover or mnemonic image
+    coverURL      String @db.Text // video cover or mnemonic image or ""
     videoWidth    Int    @default(0)
     videoHeight   Int    @default(0)
     mnemonic_text String @db.Text
@@ -97,25 +99,22 @@ model Post {
     updatedAt     DateTime       @updatedAt
     likes         Like[]
     comments      Comment[]
-    progress      Progress[]
     notifications Notification[]
     userId        String
     user          User           @relation(fields: [userId], references: [id])
 
-    quizId    Int?
-    quizzes   Quiz?    @relation(fields: [quizId], references: [id])
-    conceptId Int
-    concepts  Concept? @relation(fields: [conceptId], references: [id])
+    quizId  Int
+    quizzes Quiz @relation(fields: [quizId], references: [id])
 
     @@fulltext([caption])
 }
 
-// one-to-one relationship with user
+// one user has many masteries
 model Mastery {
-    id       Int       @id @default(autoincrement())
-    userId   String    @unique
-    user     User      @relation(fields: [userId], references: [id])
-    concepts Concept[]
+    id        Int     @id @default(autoincrement())
+    user      User[]
+    conceptId String
+    concepts  Concept @relation(fields: [conceptId], references: [id])
 }
 
 model Like {
@@ -135,6 +134,8 @@ model Notification {
     status      Int      @default(0) // 1: checked, 0: unchecked
     postId      String   @default("")
     posts       Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+    quizId      Int   @default(0)
+    quizzes     Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
     lastUpdated DateTime @updatedAt
 }
 
@@ -159,45 +160,46 @@ model Follow {
 }
 
 model Subject {
-    id      Int      @id @default(autoincrement())
+    id      String   @id
     name    String
     domains Domain[]
 }
 
 model Domain {
-    id          Int     @id @default(autoincrement())
-    description String
-    subjectId   Int
-    subject     Subject @relation(fields: [subjectId], references: [id])
-    skills      Skill[]
+    id        String  @id
+    name      String
+    subjectId String
+    subject   Subject @relation(fields: [subjectId], references: [id])
+    skills    Skill[]
 }
 
 model Skill {
-    id       Int       @id @default(autoincrement())
+    id       String    @id
     name     String
-    domainId Int
+    domainId String
     Domain   Domain    @relation(fields: [domainId], references: [id])
     concepts Concept[]
 }
 
 model Concept {
-    id        Int     @id @default(autoincrement())
+    id        String    @id
     name      String
-    masteryId Int?
-    mastery   Mastery? @relation(fields: [masteryId], references: [id])
-    posts     Post[]
+    masteries Mastery[]
     quizzes   Quiz[]
-    skillId   Int
-    Skill     Skill   @relation(fields: [skillId], references: [id])
+    users     User[]
+    skillId   String
+    skill     Skill     @relation(fields: [skillId], references: [id])
 }
 
 model Quiz {
-    id        Int     @id @default(autoincrement())
-    question  String  @db.Text
-    option    String  @db.Text
-    answer    String  @db.Text
-    type      String
-    Post      Post[]
-    conceptId Int
-    concepts  Concept @relation(fields: [conceptId], references: [id])
+    id           Int            @id @default(autoincrement())
+    name         String         @db.Text
+    type         String
+    options      String         @db.Text
+    answer       String?        @db.Text // optional due to MCQ has answer true/false in the options string
+    Post         Post[]
+    progress     Progress[]
+    conceptId    String
+    concepts     Concept        @relation(fields: [conceptId], references: [id])
+    Notification Notification[]
 }

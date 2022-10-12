@@ -150,15 +150,20 @@ export const getServerSideProps = async ({
   query,
 }: GetServerSidePropsContext) => {
   var q = query.q as string;
-  const tags = q.match(/(#[a-z\d-]+)/gi);
+  const conceptIdArr = q.match(/(#[a-z\d-]+)/gi);
+  let conceptId: string;
+  // TODO: now assume only one tag aka. concept
   // remove hashtags from caption searching
-  if (tags != null) {
-    for (const t_ of tags) {
+  if (conceptIdArr != null) {
+    conceptId = (conceptIdArr[0] as string).replace("#", '');
+    for (const t_ of conceptIdArr) {
       q = q.replace(t_, "");
     }
+  } else {
+    conceptId = "";
   }
 
-  if (typeof q !== "string" || (!q && !tags)) {
+  if (typeof q !== "string" || (!q && !conceptIdArr)) {
     return {
       redirect: {
         destination: "/",
@@ -171,9 +176,9 @@ export const getServerSideProps = async ({
   const session = await getServerSession(req, res, authOptions);
 
   let accounts, posts;
-  if (tags != null) {
+  if (conceptIdArr != null) {
     [accounts, posts] = await Promise.all([
-      prisma.user.findMany({
+     prisma.user.findMany({
         where: {
           OR: {
             email: {
@@ -196,31 +201,24 @@ export const getServerSideProps = async ({
 
           name: true,
         },
-      }),
-      prisma.post.findMany({
-        where: {
-          hashtags: {
-            some: {
-              tag: {in: tags},
-            }
+    }),
+    prisma.post.findMany({
+      where: {
+        quizzes: {
+          concepts: {
+            id: conceptId
           }
-        },
-        take: 20,
-        select: {
-          id: true,
-          coverURL: true,
-          caption: true,
-          user: {
-            select: {
-              id: true,
-              image: true,
-              name: true,
-            },
-          },
-        },
-      }),
-    ]);
-
+        }
+      },
+      select: {
+        user: true,
+        id: true, 
+        coverURL: true,
+        caption: true
+      }
+    })
+      //prisma.$queryRaw`SELECT id FROM Post INNER JOIN Quiz ON Quiz.id=Post.quizid INNER JOIN Concept ON Concept.id=Quiz.conceptId WHERE Concept.name=${conceptName}`
+    ])
   }
   else {
     [accounts, posts] = await Promise.all([

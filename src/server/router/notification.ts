@@ -101,6 +101,7 @@ export const notificationRouter = createRouter()
       return;
     },
   }).mutation("createQuiz", {
+    // create quiz notification
     input: z.object({
     }),
     async resolve({ ctx: { prisma, session }, input }) {
@@ -110,21 +111,26 @@ export const notificationRouter = createRouter()
           take: 1,
           where: {
             userId: session?.user?.id as string,
+            nextEvaluate: { 
+              lt: new Date(),
+            }
           },
           orderBy: {
-            lastEvaluated: "desc",
+            nextEvaluate: "desc",
           },
         });
+        if (progressDetails == null) {
+          // quiz notification is not needed
+          return ;
+        }
 
         for (const item of progressDetails) {
-          console.log(item.lastEvaluated);
-          // TODO: compare the last evaluation time with the interval
           var notifyString = "Take a quiz now";
           await prisma.notification.create({
             data: {
               content: notifyString,
               userId: session?.user?.id!,
-              postId: item.postId,
+              quizId: item.quizId,
               status: 0,
             },
           });

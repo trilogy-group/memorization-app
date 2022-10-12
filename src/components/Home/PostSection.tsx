@@ -1,4 +1,4 @@
-import { User, Video } from "@prisma/client";
+import { User, Post } from "@prisma/client";
 import Image from "next/future/image";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
@@ -18,7 +18,7 @@ import { trpc } from "@/utils/trpc";
 import VideoPlayer from "./VideoPlayer";
 
 interface PostSectionProps {
-  post: Video & {
+  post: Post & {
     user: User;
     _count: {
       likes: number;
