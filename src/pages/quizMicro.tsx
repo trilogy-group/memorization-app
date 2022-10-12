@@ -9,12 +9,36 @@ import { useSession } from "next-auth/react";
 
 interface QuizMicroProps {
   refetch: Function;
+  //arrayQuestion: string[];
+  //arrayOfArrayCorrectAnswers: string[];
+  //arrayType: string[];
+  //arrayIncorrectAnswer: string[];
+  //arraySrc: string[];
+  //arrayDifficulty: string[];
 }
+
+/*
+!!! hard coded DOM
+remove console log
+naming is bad
+sequence use npm i
+display the score to the user
+!!! get question data from mutation + hint
+!!! send score to backend
+*/
+
+// my question 1: get difficulty from progress using mutation or its passed as an argument along with other data?
+// my question 2: if option is a string, how should you mark the end of it; how to parse it into an array?
+// my question 3 :the mutation to get the quiz: how to find the specific entry in Quiz entry, return only the first entry?
+// my question 4 :where do I get source for the mnemonic?
+
+//  takes list of questions
 
 //: FC<QuizMicroProps> = ({ inputQuestions, inputAnswer, inputType, inputIncorrectAnswer, inputHint,inputDifficulty }) =>
 const QuizMicro: FC<QuizMicroProps> = ({ refetch }) => {
   const session = useSession();
   const quizGradeMutation = trpc.useMutation("progress.post-one-quiz-result");
+  const deleteThisMutation = trpc.useMutation("progress.get-one-quiz-question")
   const quizQuestionAnswersEtc = trpc.useMutation("progress.get-one-quiz");
   const [optionMCQ, setOptionMCQ] = useState();
   const [optionsList, setOptionsList] = useState<string[]>([]);
@@ -24,7 +48,7 @@ const QuizMicro: FC<QuizMicroProps> = ({ refetch }) => {
   const [optionD, setOptionD] = useState("");
   const [scoooreArray, setScoooreArray] = useState<number[]>([]);
 
-  const [hintImageVisibility, setHintImageVisibility] = useState(false);
+  const [hintImageVisibility, setHintImageVisibility] = useState(true);
   const [hintVideoVisibility, setHintVideoVisibility] = useState(false);
   const [hintTextVisibility, setHintTextVisibility] = useState(false);
 
@@ -43,7 +67,9 @@ const QuizMicro: FC<QuizMicroProps> = ({ refetch }) => {
   var optionDText = useRef("D");
 
   const [quizSetOfVariables, setQuizVariables] = useState<{ id: string, caption: string, videoURL: string, coverURL: string }>({ id: "", caption: "", videoURL: "", coverURL: "" });
-  var deleteThis = useRef<{ id: string, caption: string, videoURL: string, coverURL: string }>({ id: "", caption: "", videoURL: "", coverURL: "" });
+  var quizInformationToRender = useRef<{ id: string, caption: string, videoURL: string, coverURL: string }>({ id: "", caption: "", videoURL: "", coverURL: "" });
+
+  var deleteThisQuizInfoToRender = useRef<{ id: number, question: string, option: string, answer: string, type: string, conceptId: number }>({ id: 0, question: "", option: "", answer: "", type: "", conceptId: 0 });
 
   var questionNumber = useRef(1);
   var score = useRef(0);
@@ -52,54 +78,71 @@ const QuizMicro: FC<QuizMicroProps> = ({ refetch }) => {
   var quizEnd: number;
 
   let arrayIncorrectAnswer = [
-    ["Atavism",
-      "Unipedalism",
-      "Locomotion"
+    ["",
+      "",
+      ""
     ],
-    ["wow",
-      "that",
-      "cringe"
+    ["",
+      "",
+      ""
     ]
 
   ];
 
-  let arrayType = ["MCQ", "list", "sequence"];
+  let arrayType = ["", "", ""];
 
   //TODO: connect to DB for questions and answers
   const arrayOfArrayCorrectAnswers = [
-    ["Bipedalism"],
-    ["shrek", "fiona", "donkey"],
-    ["1",
-      "2",
-      "3",
-      "4"]
+    [""],
+    ["", "", ""],
+    ["",
+      "",
+      "",
+      ""]
 
   ]
 
   let arrayQuestion = [
-    "first Q",
-    "second Q",
-    "third Q"
+    "",
+    "",
+    ""
   ]
 
 
   useEffect(() => {
+
     quizQuestionAnswersEtc.mutateAsync().then(quizVariables => {
       console.log(quizVariables);
       if (quizVariables != null) {
         setQuizVariables(quizVariables);
-        deleteThis.current = quizVariables;
+        quizInformationToRender.current = quizVariables;
       }
       console.log(quizSetOfVariables);
       if (quizSetOfVariables == null) {
-        deleteThis.current.id = "not found";
-        deleteThis.current.caption = "not found";
-        deleteThis.current.videoURL = "not found";
-        deleteThis.current.coverURL = "not found";
+        quizInformationToRender.current.id = "not found";
+        quizInformationToRender.current.caption = "not found";
+        quizInformationToRender.current.videoURL = "not found";
+        quizInformationToRender.current.coverURL = "not found";
       }
-      console.log("deletethis current ", deleteThis.current);
-      quizMakerUltimateHelper()
+      console.log("quizInformationToRender current ", quizInformationToRender.current);
+      //quizMakerUltimateHelper();
     });
+
+    // deleteThisMutation
+    deleteThisMutation.mutateAsync().then(quizVariables => {
+      console.log("info to render the quiz ", quizVariables);
+      // deleteThisQuizInfoToRender
+      if (quizVariables != null) {
+        deleteThisQuizInfoToRender.current = quizVariables;
+      }
+      arrayOfArrayCorrectAnswers![questionNumber.current - 1]![0] = deleteThisQuizInfoToRender.current.option;
+      arrayIncorrectAnswer[0] = [deleteThisQuizInfoToRender.current.option + "wrong", deleteThisQuizInfoToRender.current.option + "wrong", deleteThisQuizInfoToRender.current.option + "wrong"];
+      arrayType[0] = deleteThisQuizInfoToRender.current.type;
+      let splitted = deleteThisQuizInfoToRender.current.option.split(";", 4);
+      console.log("splitted options are ", splitted);
+      quizMakerUltimateHelper();
+    }
+    );
 
     // adding script that makes elements of the list able to be dragged PART 1
     const script = document.createElement('script');
@@ -214,9 +257,9 @@ const QuizMicro: FC<QuizMicroProps> = ({ refetch }) => {
         return 3;
       }
     } else {
-      if (timeTaken < 7000) {
+      if (timeTaken < 5000) {
         return 2;
-      } else if (timeTaken < 5000) {
+      } else if (timeTaken < 7000) {
         return 1;
       } else {
         return 0;
@@ -292,7 +335,7 @@ const QuizMicro: FC<QuizMicroProps> = ({ refetch }) => {
       } else {
         quizGradeMutation
           .mutateAsync({
-            postId: deleteThis.current.id,
+            postId: quizInformationToRender.current.id,
             grade: String(score.current)
           })
           .then(() => {
@@ -311,8 +354,9 @@ const QuizMicro: FC<QuizMicroProps> = ({ refetch }) => {
 
 
   function quizMakerUltimateHelper() {
-    // quizQuestion.current = deleteThis.current.caption as string;
-    quizQuestion.current = arrayQuestion[questionNumber.current - 1] as string;
+    console.log("first question is ", quizInformationToRender.current.caption as string);
+    console.log("first question actually should be ", deleteThisQuizInfoToRender.current.question as string);
+    quizQuestion.current = deleteThisQuizInfoToRender.current.question as string;
     console.log(arrayQuestion[questionNumber.current - 1] as string);
     if (arrayType[questionNumber.current - 1] == "sequence") {
       quizHintText.current = "Sort in the correct order";
@@ -336,8 +380,8 @@ const QuizMicro: FC<QuizMicroProps> = ({ refetch }) => {
       setOptionMCQ(undefined);
       setMCQVisibility(true);
     }
-    console.log("this is the cover url", deleteThis.current.coverURL);
-    console.log("this is the caption", deleteThis.current.caption);
+    console.log("this is the cover url", quizInformationToRender.current.coverURL);
+    console.log("this is the caption", quizInformationToRender.current.caption);
 
   }
 
@@ -355,7 +399,7 @@ const QuizMicro: FC<QuizMicroProps> = ({ refetch }) => {
               <div>
                 <h1 className="text-2xl font-bold" id="question">{quizQuestion.current}</h1>
                 <h1 id="hintText" className="text-1xl font-bold" >{quizHintText.current}</h1>
-                <img id="hintImage" style={{ width: "200", height: "200" }} src={(deleteThis.current.coverURL == null) ? deleteThis.current.coverURL as string : ""} />
+                {hintImageVisibility && <img id="hintImage" style={{ width: "200", height: "200" }} src={(quizInformationToRender.current.coverURL == null) ? "" : quizInformationToRender.current.coverURL as string} />}
                 <iframe id="hintVideo"
                   frameBorder='0'
                   allow='autoplay; encrypted-media'

@@ -231,4 +231,16 @@ export const progressRouter = createRouter()
       }
       return null;
     },
+  }).mutation("get-one-quiz-question", {
+    // get quizzes based on progress
+    async resolve({ ctx: { prisma, session } }) {
+      const quiz = await prisma.quiz.findFirst({
+        where: {
+          id: 1
+        }
+      });
+
+      // create progress entry if not existing
+      return quiz;
+    },
   });
