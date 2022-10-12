@@ -123,7 +123,7 @@ const QuizMicro: FC<QuizMicroProps> = ({ refetch }) => {
     let optionsPresented = allPresentCorrectCheckboxesList.current.concat(arrayIncorrectAnswer[questionNumber.current - 1] as string[]);
     return optionsPresented.map((item, index) => {
 
-      return <div>
+      return <div key={index}>
         <input
           style={{ fontStyle: "normal" }}
           type="checkbox"
@@ -369,13 +369,13 @@ const QuizMicro: FC<QuizMicroProps> = ({ refetch }) => {
                   {displayCheckboxes()}
                 </div>}
                 {MCQVisibility && <div onChange={e => { setOptionMCQ((e.target as any).value); }} id="MCQOptions">
-                  <input type="radio" value={optionA} name="gender" checked={optionA === optionMCQ} onChange={e => { console.log(e.target.value); }} /> <label id="optionA">{optionAText.current}</label>
+                  <input type="radio" value={optionA} name="gender" checked={optionA === optionMCQ} onChange={e => { console.log(e.target.value); }} key="option a" /> <label id="optionA" key="option aa">{optionAText.current}</label>
                   <br />
-                  <input type="radio" value={optionB} name="gender" checked={optionB === optionMCQ} onChange={e => { console.log(e.target.value); }} /> <label id="optionB">{optionBText.current}</label>
+                  <input type="radio" value={optionB} name="gender" checked={optionB === optionMCQ} onChange={e => { console.log(e.target.value); }} key="option b" /> <label id="optionB" key="option bb">{optionBText.current}</label>
                   <br />
-                  <input type="radio" value={optionC} name="gender" checked={optionC === optionMCQ} onChange={e => { console.log(e.target.value); }} /> <label id="optionC">{optionCText.current}</label>
+                  <input type="radio" value={optionC} name="gender" checked={optionC === optionMCQ} onChange={e => { console.log(e.target.value); }} key="option c" /> <label id="optionC" key="option cc">{optionCText.current}</label>
                   <br />
-                  <input type="radio" value={optionD} name="gender" checked={optionD === optionMCQ} onChange={e => { console.log(e.target.value); }} /> <label id="optionD">{optionDText.current}</label>
+                  <input type="radio" value={optionD} name="gender" checked={optionD === optionMCQ} onChange={e => { console.log(e.target.value); }} key="option d" /> <label id="optionD" key="option dd">{optionDText.current}</label>
                 </div>}
                 <div className="flex flex-col items-center justify-center">
                   <a href="#_" className="relative inline-flex items-center justify-start py-3 pl-4 pr-12 overflow-hidden font-semibold text-indigo-600 transition-all duration-150 ease-in-out rounded hover:pl-10 hover:pr-6 bg-gray-50 group" onClick={() => checkAnswerUltimate()}
