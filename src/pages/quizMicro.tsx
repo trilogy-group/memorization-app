@@ -7,6 +7,7 @@ import { authOptions } from "./api/auth/[...nextauth]";
 import React from "react";
 import { useSession } from "next-auth/react";
 import { renderToString } from 'react-dom/server'
+import { BiLeftTopArrowCircle } from "react-icons/bi";
 
 interface QuizMicroProps {
   refetch: Function;
@@ -30,8 +31,10 @@ const QuizMicro: FC<QuizMicroProps> = ({ refetch }) => {
   const [hintTextVisibility, setHintTextVisibility] = useState(false);
 
   const [quizContentVisibility, setQuizContentVisibility] = useState(true);
+  const [MCQVisibility, setMCQVisibility] = useState(false);
+  const [checkboxVisibility, setCheckboxVisibility] = useState(false);
 
-  var MCQVisibility = useRef(false);
+  var allPresentCorrectCheckboxesList = useRef(["", ""]);
 
   var quizQuestion = useRef("no question in the beginning");
   var quizHintText = useRef("no instruction in the beginning");
@@ -68,23 +71,35 @@ const QuizMicro: FC<QuizMicroProps> = ({ refetch }) => {
     ["Atavism",
       "Unipedalism",
       "Locomotion"
+    ],
+    ["wow",
+      "that",
+      "cringe"
     ]
   ];
 
-  let arrayType = ["MCQ"];
+  let arrayType = ["MCQ", "list"];
 
   //TODO: connect to DB for questions and answers
   const arrayOfArrayCorrectAnswers = [
-    ["Bipedalism"]
+    ["Bipedalism"],
+    ["shrek", "fiona", "donkey"]
 
+  ]
+
+  let arrayQuestion = [
+    "first Q",
+    "second Q"
   ]
 
 
   useEffect(() => {
     quizQuestionAnswersEtc.mutateAsync().then(quizVariables => {
       console.log(quizVariables);
-      setQuizVariables(quizVariables);
-      deleteThis.current = quizVariables;
+      if (quizVariables != null) {
+        setQuizVariables(quizVariables);
+        deleteThis.current = quizVariables;
+      }
       console.log(quizSetOfVariables);
       if (quizSetOfVariables == null) {
         deleteThis.current.id = "not found";
@@ -111,6 +126,25 @@ const QuizMicro: FC<QuizMicroProps> = ({ refetch }) => {
     }
 
   }, []);
+
+  const displayCheckboxes = () => {
+    let optionsPresented = allPresentCorrectCheckboxesList.current.concat(arrayIncorrectAnswer[questionNumber.current - 1] as string[]);
+    return optionsPresented.map((item, index) => {
+
+      return <div>
+        <input
+          style={{ fontStyle: "normal" }}
+          type="checkbox"
+          value={item}
+          onChange={(e) => onChange(e)}
+        />
+        <label htmlFor={item}>
+          {item}
+        </label>
+      </div>
+
+    })
+  }
 
 
   function shuffle(arr: string[]): string[] {
@@ -226,12 +260,8 @@ const QuizMicro: FC<QuizMicroProps> = ({ refetch }) => {
         newScoooreArray.push(0);
       }
       setScoooreArray(newScoooreArray);
+      setCheckboxVisibility(false);
       optionsList.length = 0;
-      let possibleOptions = document.getElementById("checkBoxOptions");
-      // clearing the elments in the possible options
-      while (possibleOptions!.lastElementChild) {
-        possibleOptions!.removeChild(possibleOptions!.lastElementChild);
-      }
     }
     else if (arrayType[questionNumber.current - 1] == "MCQ") {
       if (optionMCQ == arrayOfArrayCorrectAnswers[questionNumber.current - 1]) {
@@ -242,7 +272,7 @@ const QuizMicro: FC<QuizMicroProps> = ({ refetch }) => {
         newScoooreArray.push(0);
       }
       setScoooreArray(newScoooreArray);
-      MCQVisibility.current = false;
+      setMCQVisibility(false);
     }
 
     questionNumber.current = questionNumber.current + 1;
@@ -257,7 +287,7 @@ const QuizMicro: FC<QuizMicroProps> = ({ refetch }) => {
       } else {
         quizGradeMutation
           .mutateAsync({
-            questionId: deleteThis.current.id,
+            postId: deleteThis.current.id,
             grade: String(score.current)
           })
           .then(() => {
@@ -276,7 +306,9 @@ const QuizMicro: FC<QuizMicroProps> = ({ refetch }) => {
 
 
   function quizMakerUltimateHelper() {
-    quizQuestion.current = deleteThis.current.caption as string;
+    // quizQuestion.current = deleteThis.current.caption as string;
+    quizQuestion.current = arrayQuestion[questionNumber.current - 1] as string;
+    console.log(arrayQuestion[questionNumber.current - 1] as string);
     if (arrayType[questionNumber.current - 1] == "sequence") {
       let elem = document.getElementById("sequence");
       quizHintText.current = "Sort in the correct order";
@@ -289,41 +321,22 @@ const QuizMicro: FC<QuizMicroProps> = ({ refetch }) => {
       }
     } else if (arrayType[questionNumber.current - 1] == "list") {
       quizHintText.current = "Choose all that apply";
-      let possibleOptions = document.getElementById("checkBoxOptions");
-      for (var i = 0; i < arrayOfArrayCorrectAnswers[questionNumber.current - 1]!?.length; i++) {
-        let divOption = document.createElement('div');
-        divOption.className = "input-group";
-        let divOptionInput = document.createElement('input');
-        divOptionInput.type = "checkbox";
-
-        // divOptionInput.value = arrayIncorrectAnswer[questionNumber.current - 1]![i] as string;
-        divOptionInput.value = arrayOfArrayCorrectAnswers[questionNumber.current - 1]![i] as string;
-        divOptionInput.onchange = onChange.bind(this);
-
-        let divOptionLabel = document.createElement('label');
-
-        divOptionLabel.innerHTML = arrayOfArrayCorrectAnswers[questionNumber.current - 1]![i] as string;
-        // divOptionLabel.innerHTML = arrayIncorrectAnswer[questionNumber.current - 1]![i] as string;
-        divOption.appendChild(divOptionInput);
-        divOption.appendChild(divOptionLabel);
-        possibleOptions!.appendChild(divOption);
-      }
+      allPresentCorrectCheckboxesList.current = arrayOfArrayCorrectAnswers[questionNumber.current - 1] as string[];
+      setCheckboxVisibility(true);
 
     } else if (arrayType[questionNumber.current - 1] == "MCQ") {
       // create MCQ options
       quizHintText.current = "Choose one";
       optionAText.current = arrayOfArrayCorrectAnswers[questionNumber.current - 1]![0] as string;
       setOptionA(arrayOfArrayCorrectAnswers[questionNumber.current - 1]![0] as string);
-
       optionBText.current = arrayIncorrectAnswer[questionNumber.current - 1]![0] as string;
       setOptionB(arrayIncorrectAnswer[questionNumber.current - 1]![0] as string);
       optionCText.current = arrayIncorrectAnswer[questionNumber.current - 1]![1] as string;
       setOptionC(arrayIncorrectAnswer[questionNumber.current - 1]![1] as string);
       optionDText.current = arrayIncorrectAnswer[questionNumber.current - 1]![2] as string;
       setOptionD(arrayIncorrectAnswer[questionNumber.current - 1]![2] as string);
-
       setOptionMCQ(undefined);
-      MCQVisibility.current = true;
+      setMCQVisibility(true);
     }
     console.log("this is the cover url", deleteThis.current.coverURL);
     console.log("this is the caption", deleteThis.current.caption);
@@ -344,7 +357,7 @@ const QuizMicro: FC<QuizMicroProps> = ({ refetch }) => {
               <div>
                 <h1 className="text-2xl font-bold" id="question">{quizQuestion.current}</h1>
                 <h1 id="hintText" className="text-1xl font-bold" >{quizHintText.current}</h1>
-                <img id="hintImage" style={{ width: "200", height: "200" }} src={deleteThis.current.coverURL as string} />
+                <img id="hintImage" style={{ width: "200", height: "200" }} src={(deleteThis.current.coverURL == null) ? deleteThis.current.coverURL as string : ""} />
                 <iframe id="hintVideo" ref={hintVideoRef}
                   frameBorder='0'
                   allow='autoplay; encrypted-media'
@@ -353,9 +366,10 @@ const QuizMicro: FC<QuizMicroProps> = ({ refetch }) => {
                 />
                 <ul id="sequence" ref={sequenceRef}>
                 </ul>
-                <form id="checkBoxOptions" ref={checkBoxOptionsRef}>
-                </form>
-                {MCQVisibility.current && <div onChange={e => { setOptionMCQ((e.target as any).value); }} id="MCQOptions" ref={MCQOptionsRef}>
+                {checkboxVisibility && <div>
+                  {displayCheckboxes()}
+                </div>}
+                {MCQVisibility && <div onChange={e => { setOptionMCQ((e.target as any).value); }} id="MCQOptions" ref={MCQOptionsRef}>
                   <input type="radio" value={optionA} name="gender" checked={optionA === optionMCQ} onChange={e => { console.log(e.target.value); }} ref={optionARef} /> <label id="optionA">{optionAText.current}</label>
                   <br />
                   <input type="radio" value={optionB} name="gender" checked={optionB === optionMCQ} onChange={e => { console.log(e.target.value); }} ref={optionBRef} /> <label id="optionB">{optionBText.current}</label>

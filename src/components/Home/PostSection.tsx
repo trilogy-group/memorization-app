@@ -114,7 +114,7 @@ const PostSection: FC<PostSectionProps> = ({ post, refetch, origin }) => {
     } else {
       gotItMutation
         .mutateAsync({
-          questionId: question.id,
+          postId: post.id,
         })
         .then(() => {
           refetch();

@@ -48,10 +48,11 @@ const Navbar: FC = () => {
       : ""
   );
 
-  useEffect(()=>{
+  useEffect(() => {
     notificationMutation.mutateAsync().then(notifs => {
       console.log(notifs);
-      setNotifications(notifs)});
+      setNotifications(notifs)
+    });
   }, []);
 
   const handleFormSubmit = (e: FormEvent) => {

@@ -42,7 +42,6 @@ export const progressRouter = createRouter()
           id: postId
         }
       });
-      console.log("the question", question);
 
       // create progress entry if not existing
       return post;

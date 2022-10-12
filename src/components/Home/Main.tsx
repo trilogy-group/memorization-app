@@ -80,7 +80,10 @@ const Main: FC<MainProps> = ({ origin }) => {
         if (mostVisible && mostVisible.paused) mostVisible.play();
 
         if (mostVisibleQuiz) {
-          mostVisibleQuiz.querySelector("#startTimer")!.click();
+          const startButton = mostVisibleQuiz.querySelector("#startTimer") as HTMLElement | null
+          if (startButton != null) {
+            startButton.click();
+          }
           console.log("starting quiz");
         }
 
