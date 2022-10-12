@@ -40,23 +40,23 @@ export const notificationRouter = createRouter()
   .mutation("createLike", {
     input: z.object({
       content: z.string(),
-      questionId: z.string(),
+      postId: z.string(),
       userId: z.string(),
     }),
     async resolve({ ctx: { prisma, session }, input }) {
       try {
-        const questionDetails = await prisma.question.findFirst({
+        const postDetails = await prisma.post.findFirst({
           where: {
-            id: input.questionId as string,
+            id: input.postId as string,
           }
         });
 
         let notifyString = "";
-        if (questionDetails?.caption != undefined) {
-          if (questionDetails?.caption.length > 16) {
-            notifyString = input.content + "\"" + questionDetails?.caption.slice(0, 16) + ".." + "\"";
+        if (postDetails?.caption != undefined) {
+          if (postDetails?.caption.length > 16) {
+            notifyString = input.content + "\"" + postDetails?.caption.slice(0, 16) + ".." + "\"";
           } else {
-            notifyString = input.content + "\"" + questionDetails?.caption + "\"";
+            notifyString = input.content + "\"" + postDetails?.caption + "\"";
           }
         } else {
           notifyString = input.content;
@@ -66,7 +66,7 @@ export const notificationRouter = createRouter()
           data: {
             content: notifyString,
             userId: input.userId,
-            questionId: input.questionId,
+            postId: input.postId,
             status: 0,
           },
         });
@@ -76,14 +76,14 @@ export const notificationRouter = createRouter()
   }).mutation("createComment", {
     input: z.object({
       content: z.string(),
-      questionId: z.string(),
+      postId: z.string(),
       userId: z.string(),
     }),
     async resolve({ ctx: { prisma, session }, input }) {
       try {
-        const questionDetails = await prisma.question.findFirst({
+        const postDetails = await prisma.post.findFirst({
           where: {
-            id: input.questionId as string,
+            id: input.postId as string,
           }
         });
 
@@ -93,7 +93,7 @@ export const notificationRouter = createRouter()
           data: {
             content: notifyString,
             userId: input.userId,
-            questionId: input.questionId,
+            postId: input.postId,
             status: 0,
           },
         });
@@ -101,6 +101,7 @@ export const notificationRouter = createRouter()
       return;
     },
   }).mutation("createQuiz", {
+    // create quiz notification
     input: z.object({
     }),
     async resolve({ ctx: { prisma, session }, input }) {
@@ -110,21 +111,23 @@ export const notificationRouter = createRouter()
           take: 1,
           where: {
             userId: session?.user?.id as string,
-          },
-          orderBy: {
-            lastEvaluated: "desc",
+            nextEvaluate: { 
+              lt: new Date(),
+            }
           },
         });
+        if (progressDetails == null) {
+          // quiz notification is not needed
+          return ;
+        }
 
         for (const item of progressDetails) {
-          console.log(item.lastEvaluated);
-          // TODO: compare the last evaluation time with the interval
           var notifyString = "Take a quiz now";
           await prisma.notification.create({
             data: {
               content: notifyString,
               userId: session?.user?.id!,
-              questionId: item.questionId,
+              quizId: item.quizId,
               status: 0,
             },
           });

@@ -56,20 +56,6 @@ const Sidebar: FC<SidebarProps> = ({
             <span className="hidden lg:inline">Following</span>
           </a>
         </Link>
-
-        <Link href={"/quizUltimate"}>
-          <a
-            className={`flex items-center gap-2  "fill-black text-black" `}
-
-          >
-
-
-            <span className="hidden lg:inline">Take a quiz</span>
-          </a>
-        </Link>
-
-
-
       </div>
 
       {leaderboardAccounts.length > 0 && (

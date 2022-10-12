@@ -112,24 +112,24 @@ const UserProfile: NextPage<UserProfileProps> = ({ user }) => {
             </div>
           </div>
 
-          {user?.questions.length === 0 ? (
+          {user?.posts.length === 0 ? (
             <p className="text-center">There is no video here</p>
           ) : (
             <div className="grid gap-4 grid-cols-[repeat(auto-fill,_minmax(120px,_1fr))] lg:grid-cols-[repeat(auto-fill,_minmax(200px,_1fr))]">
-              {user?.questions.map((question) => (
-                <div key={question.id}>
-                  <Link href={`/question/${question.id}`}>
+              {user?.posts.map((post) => (
+                <div key={post.id}>
+                  <Link href={`/post/${post.id}`}>
                     <a className="block h-0 relative pb-[131%]">
                       <img
                         className="absolute inset-0 h-full w-full object-cover rounded"
-                        src={question.coverURL}
+                        src={post.coverURL}
                         alt=""
                       />
                       <BsPlay className="absolute left-3 bottom-3 fill-white w-7 h-7" />
                     </a>
                   </Link>
                   <p className="whitespace-nowrap overflow-hidden text-ellipsis">
-                    {question.caption}
+                    {post.caption}
                   </p>
                 </div>
               ))}
@@ -163,7 +163,7 @@ export const getServerSideProps = async ({
           name: true,
           image: true,
           _count: { select: { followers: true, followings: true } },
-          questions: {
+          posts: {
             select: { id: true, coverURL: true, caption: true },
             orderBy: { createdAt: "desc" },
           },

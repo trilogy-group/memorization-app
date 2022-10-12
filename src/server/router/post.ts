@@ -4,18 +4,26 @@ import { z } from "zod";
 
 import { createRouter } from "./context";
 
-export const questionRouter = createRouter()
+enum contentType {
+    image = 1,
+    video = 2,
+    text = 3,
+    unknown = 4,
+}
+
+export const postRouter = createRouter()
   .query("for-you", {
     input: z.object({
       cursor: z.number().nullish(),
     }),
     resolve: async ({ ctx: { prisma, session }, input }) => {
       const skip = input.cursor || 0;
-      const items = await prisma.question.findMany({
+      const items = await prisma.post.findMany({
         take: 10,
         skip,
         include: {
           user: true,
+          quizzes: true,
           _count: { select: { likes: true, comments: true } },
         },
         orderBy: {
@@ -30,7 +38,7 @@ export const questionRouter = createRouter()
           prisma.like.findMany({
             where: {
               userId: session.user.id,
-              questionId: { in: items.map((item) => item.id) },
+              postId: { in: items.map((item) => item.id) },
             },
           }),
           prisma.follow.findMany({
@@ -47,7 +55,7 @@ export const questionRouter = createRouter()
       return {
         items: items.map((item) => ({
           ...item,
-          likedByMe: likes.some((like) => like.questionId === item.id),
+          likedByMe: likes.some((like) => like.postId === item.id),
           followedByMe: followings.some(
             (following) => following.followingId === item.userId
           ),
@@ -79,7 +87,7 @@ export const questionRouter = createRouter()
       ).map((item) => item.followingId);
 
       const skip = input.cursor || 0;
-      const items = await prisma.question.findMany({
+      const items = await prisma.post.findMany({
         take: 10,
         skip,
         where: {
@@ -100,7 +108,7 @@ export const questionRouter = createRouter()
         prisma.like.findMany({
           where: {
             userId: session?.user?.id!,
-            questionId: { in: items.map((item) => item.id) },
+            postId: { in: items.map((item) => item.id) },
           },
         }),
         prisma.follow.findMany({
@@ -116,7 +124,7 @@ export const questionRouter = createRouter()
       return {
         items: items.map((item) => ({
           ...item,
-          likedByMe: likes.some((like) => like.questionId === item.id),
+          likedByMe: likes.some((like) => like.postId === item.id),
           followedByMe: followings.some(
             (following) => following.followingId === item.userId
           ),
@@ -132,48 +140,77 @@ export const questionRouter = createRouter()
       coverURL: z.string().url(),
       videoWidth: z.number().gt(0),
       videoHeight: z.number().gt(0),
-      tagStr: z.string(),
+      conceptId: z.string(),
+      quizId: z.string(),
     }),
     async resolve({ ctx: { prisma, session }, input }) {
-      let alltags = input.tagStr.match(/(#[a-z\d-]+)/gi);
-      let alltagid = [];
-      /*
-       * Tags hardcoded in the frontend src/upload.tsx are created in the DB, therefore "tagcreated"
-       * TODO: provided subject/chapter tags in the DB
-       */
-      if (alltags == null) {
-        throw new TRPCError({ code: "BAD_REQUEST" });
-      }
-      for (const t_ of alltags) {
-        const tagcreated = await prisma.hashtag.findUnique({
-          where: {
-            tag: t_,
+      const quizFound = await prisma.quiz.findFirst({
+        where: {
+          concepts: {
+            id: input.conceptId,
           }
-        });
-
-        if (tagcreated == null) {
-          const tagcreated = await prisma.hashtag.create({
-            data: {
-              tag: t_,
-            },
-          });
-          alltagid.push({ id: tagcreated.id });
-        } else {
-          alltagid.push({ id: tagcreated.id });
         }
+      });
+
+      if (quizFound == null) {
+        throw new Error("Concept or quiz not found in the DB.");
       }
-      const created = await prisma.question.create({
+
+      const postCreated = await prisma.post.create({
         data: {
           caption: input.caption,
           videoURL: input.videoURL,
           coverURL: input.coverURL,
           videoWidth: input.videoWidth,
           videoHeight: input.videoHeight,
+          mnemonic_text: "",
+          contentType: contentType.video,
           userId: session?.user?.id!,
-          contentType: 2,
-          hashtags: {
-            connect: alltagid,
-          }, // connect to all hashtags
+          quizId: quizFound.id,
+        },
+      });
+
+      await prisma.user.update({
+        where: { id: session?.user?.id as string },
+        data: {
+          points: { increment: 1 },
+        },
+      });
+
+      return postCreated;
+    },
+  })
+  .mutation("createImg", {
+    input: z.object({
+      caption: z.string(),
+      coverURL: z.string().url(),
+      conceptId: z.string(),
+      quizId: z.string(),
+    }),
+    async resolve({ ctx: { prisma, session }, input }) {
+      const quizFound = await prisma.quiz.findFirst({
+        where: {
+          concepts: {
+            id: input.conceptId,
+          }
+        }
+      });
+
+      if (quizFound == null) {
+        throw new Error("Concept or quiz not found in the DB.");
+      }
+
+      const created = await prisma.post.create({
+        data: {
+          caption: input.caption,
+          videoURL: "",
+          coverURL: input.coverURL,
+          videoWidth: 0,
+          videoHeight: 0,
+          mnemonic_text: "",
+          userId: session?.user?.id!,
+          contentType: contentType.image,
+          quizId: quizFound.id
         },
       });
       await prisma.user.update({
@@ -185,52 +222,38 @@ export const questionRouter = createRouter()
       return created;
     },
   })
-  .mutation("createImg", {
+  .mutation("createText", {
     input: z.object({
       caption: z.string(),
-      coverURL: z.string().url(),
-      tagStr: z.string(),
+      concept: z.string(),
+      mnemonic_text: z.string(),
+      conceptId: z.string(),
+      quizId: z.string(),
     }),
     async resolve({ ctx: { prisma, session }, input }) {
-      let alltags = input.tagStr.match(/(#[a-z\d-]+)/gi);
-      let alltagid = [];
-      /*
-       * Tags hardcoded in the frontend src/upload.tsx are created in the DB, therefore "tagcreated"
-       * TODO: provided subject/chapter tags in the DB
-       */
-      if (alltags == null) {
-        throw new TRPCError({ code: "BAD_REQUEST" });
-      }
-      for (const t_ of alltags) {
-        const tagcreated = await prisma.hashtag.findUnique({
-          where: {
-            tag: t_,
+      const quizFound = await prisma.quiz.findFirst({
+        where: {
+          concepts: {
+            id: input.conceptId,
           }
-        });
-
-        if (tagcreated == null) {
-          const tagcreated = await prisma.hashtag.create({
-            data: {
-              tag: t_,
-            },
-          });
-          alltagid.push({ id: tagcreated.id });
-        } else {
-          alltagid.push({ id: tagcreated.id });
         }
+      });
+
+      if (quizFound == null) {
+        throw new Error("Concept or quiz not found in the DB.");
       }
-      const created = await prisma.question.create({
+
+      const created = await prisma.post.create({
         data: {
           caption: input.caption,
           videoURL: "",
-          coverURL: input.coverURL,
+          coverURL: "",
           videoWidth: 0,
           videoHeight: 0,
+          mnemonic_text: input.mnemonic_text,
           userId: session?.user?.id!,
-          contentType: 1,
-          hashtags: {
-            connect: alltagid,
-          }, // connect to all hashtags
+          contentType: contentType.text,
+          quizId: quizFound.id,
         },
       });
       await prisma.user.update({

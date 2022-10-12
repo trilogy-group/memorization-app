@@ -1,0 +1,4 @@
+curl --location --request POST 'https://gshnf2p56bbinmx4na3lme4oce.appsync-api.us-west-2.amazonaws.com/graphql' \
+--header 'x-api-key: da2-dlp6tok3uvhxrlow4jypfthabq' \
+--header 'Content-Type: application/json' \
+--data-raw '{"query":"query domains($subjectId: String, $domainId: String) {\r\n  domains(subjectId: $subjectId, domainId: $domainId) {\r\n    id\r\n    name\r\n    skills {\r\n        id\r\n        name\r\n        concepts {\r\n            id\r\n            name\r\n            questions {\r\n                id\r\n                desc\r\n                type\r\n                options {\r\n                    id\r\n                    desc\r\n                    ordinal\r\n                    is_correct\r\n                }\r\n            }\r\n        }\r\n    }\r\n  }\r\n}","variables":{"subjectId":"SUB2"}}'

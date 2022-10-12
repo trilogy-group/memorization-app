@@ -24,28 +24,28 @@ import { trpc } from "@/utils/trpc";
 
 import { authOptions } from "../api/auth/[...nextauth]";
 
-const Question: NextPage<QuestionProps> = ({ question, href, title }) => {
+const Post: NextPage<PostProps> = ({ post, href, title }) => {
   const session = useSession();
   const router = useRouter();
 
   const [isBackButtonVisible, setIsBackButtonVisible] = useState(false);
 
   const likeCountQuery = trpc.useQuery(
-    ["like.count", { questionId: question?.id! }],
-    { initialData: { count: question?._count.likes! } }
+    ["like.count", { postId: post?.id! }],
+    { initialData: { count: post?._count.likes! } }
   );
   const commentsQuery = trpc.useQuery(
-    ["comment.by-question", { questionID: question?.id! }],
-    { initialData: question?.comments! }
+    ["comment.by-post", { postID: post?.id! }],
+    { initialData: post?.comments! }
   );
   const likeMutation = trpc.useMutation("like.toggle");
   const followMutation = trpc.useMutation("follow.toggle");
   const postCommentMutation = trpc.useMutation("comment.post");
   const notificationMutation = trpc.useMutation("notification.createComment");
 
-  const [isCurrentlyLiked, setIsCurrentlyLiked] = useState(question?.likedByMe);
+  const [isCurrentlyLiked, setIsCurrentlyLiked] = useState(post?.likedByMe);
   const [isCurrentlyFollowed, setIsCurrentlyFollowed] = useState(
-    question?.followedByMe
+    post?.followedByMe
   );
   const [inputValue, setInputValue] = useState("");
   const { isMuted, setIsMuted } = useContext(VolumeContext);
@@ -61,7 +61,7 @@ const Question: NextPage<QuestionProps> = ({ question, href, title }) => {
       likeMutation
         .mutateAsync({
           isLiked: !isCurrentlyLiked,
-          questionId: question?.id!,
+          postId: post?.id!,
         })
         .then(() => {
           likeCountQuery.refetch();
@@ -79,7 +79,7 @@ const Question: NextPage<QuestionProps> = ({ question, href, title }) => {
       return;
     }
     followMutation.mutateAsync({
-      followingId: question?.user.id!,
+      followingId: post?.user.id!,
       isFollowed: !isCurrentlyFollowed,
     });
     setIsCurrentlyFollowed(!isCurrentlyFollowed);
@@ -95,7 +95,7 @@ const Question: NextPage<QuestionProps> = ({ question, href, title }) => {
     postCommentMutation
       .mutateAsync({
         content: inputValue.trim(),
-        questionId: question?.id!,
+        postId: post?.id!,
       })
       .then(() => {
         commentsQuery.refetch();
@@ -107,8 +107,8 @@ const Question: NextPage<QuestionProps> = ({ question, href, title }) => {
     try {
       notificationMutation.mutateAsync({
         content: session.data?.user?.name + " commented your post " + "\"" + inputValue.trim() + "\"",
-        questionId: question?.id as string,
-        userId: question?.user.id as string,
+        postId: post?.id as string,
+        userId: post?.user.id as string,
       });
     } catch {
       throw new Error("Cannot update notifications");
@@ -117,26 +117,26 @@ const Question: NextPage<QuestionProps> = ({ question, href, title }) => {
 
   };
 
-  if (!question) return <></>;
+  if (!post) return <></>;
 
   return (
     <>
       <Meta
-        title={`${question.user.name} on EdTok`}
+        title={`${post.user.name} on EdTok`}
         description="Video | EdTok"
-        image={question.coverURL}
+        image={post.coverURL}
       />
 
       <div className="flex flex-col lg:flex-row lg:h-screen items-stretch">
         <div className="lg:flex-grow flex justify-center items-center relative bg-[#1E1619]">
           <video
             className="w-auto h-auto max-w-full max-h-[600px] lg:max-h-full"
-            src={question.videoURL}
+            src={post.videoURL}
             muted={isMuted}
             onVolumeChange={(e: any) => setIsMuted(e.target.muted)}
             autoPlay
             loop
-            poster={question.coverURL}
+            poster={post.coverURL}
             controls
             playsInline
           ></video>
@@ -163,10 +163,10 @@ const Question: NextPage<QuestionProps> = ({ question, href, title }) => {
         <div className="w-full lg:w-[500px] flex-shrink-0 flex flex-col items-stretch h-screen">
           <div className="px-4 pt-6 pb-4 flex-shrink-0 border-b">
             <div className="flex">
-              <Link href={`/user/${question.user.id}`}>
+              <Link href={`/user/${post.user.id}`}>
                 <a className="mr-3 flex-shrink-0 rounded-full">
                   <Image
-                    src={question.user.image!}
+                    src={post.user.image!}
                     alt=""
                     height={40}
                     width={40}
@@ -175,28 +175,28 @@ const Question: NextPage<QuestionProps> = ({ question, href, title }) => {
                 </a>
               </Link>
               <div className="flex-grow">
-                <Link href={`/user/${question.user.id}`}>
+                <Link href={`/user/${post.user.id}`}>
                   <a className="font-bold block hover:underline">
-                    {formatAccountName(question.user.name!)}
+                    {formatAccountName(post.user.name!)}
                   </a>
                 </Link>
-                <Link href={`/user/${question.user.id}`}>
+                <Link href={`/user/${post.user.id}`}>
                   <a className="text-sm block hover:underline">
-                    {question.user.name}
+                    {post.user.name}
                   </a>
                 </Link>
               </div>
               {/* @ts-ignore */}
-              {question.user.id !== session.data?.user?.id && (
+              {post.user.id !== session.data?.user?.id && (
                 <div className="flex-shrink-0">
                   <button
                     onClick={() => toggleFollow()}
-                    className={`py-1 px-3 rounded text-sm mt-2 ${isCurrentlyFollowed ?? question.followedByMe
+                    className={`py-1 px-3 rounded text-sm mt-2 ${isCurrentlyFollowed ?? post.followedByMe
                         ? "border hover:bg-[#F8F8F8] transition"
                         : "border border-pink text-pink hover:bg-[#FFF4F5] transition"
                       }`}
                   >
-                    {isCurrentlyFollowed ?? question.followedByMe
+                    {isCurrentlyFollowed ?? post.followedByMe
                       ? "Following"
                       : "Follow"}
                   </button>
@@ -207,7 +207,7 @@ const Question: NextPage<QuestionProps> = ({ question, href, title }) => {
               className="my-3"
               style={{ wordWrap: "break-word", overflowWrap: "break-word" }}
             >
-              {question.caption}
+              {post.caption}
             </p>
 
             <div className="flex justify-between items-center">
@@ -350,9 +350,9 @@ const Question: NextPage<QuestionProps> = ({ question, href, title }) => {
   );
 };
 
-export default Question;
+export default Post;
 
-type QuestionProps = InferGetServerSidePropsType<typeof getServerSideProps>;
+type PostProps = InferGetServerSidePropsType<typeof getServerSideProps>;
 
 export const getServerSideProps = async ({
   params,
@@ -365,7 +365,7 @@ export const getServerSideProps = async ({
 
     if (!id) throw new Error();
 
-    const question = await prisma.question.findFirstOrThrow({
+    const post = await prisma.post.findFirstOrThrow({
       where: { id },
       select: {
         id: true,
@@ -394,13 +394,13 @@ export const getServerSideProps = async ({
         prisma.like.findFirst({
           where: {
             userId: session?.user?.id,
-            questionId: question.id,
+            postId: post.id,
           },
         }),
         prisma.follow.findFirst({
           where: {
             followerId: session.user.id,
-            followingId: question.user.id,
+            followingId: post.user.id,
           },
         }),
       ]);
@@ -410,15 +410,15 @@ export const getServerSideProps = async ({
 
     return {
       props: {
-        question: {
-          ...question,
+        post: {
+          ...post,
           likedByMe,
           followedByMe,
         },
         session,
         href: `${req.headers.host?.includes("localhost") ? "http" : "https"
-          }://${req.headers.host}/question/${id}`,
-        title: `${question.user.name} on EdTok`,
+          }://${req.headers.host}/post/${id}`,
+        title: `${post.user.name} on EdTok`,
       },
     };
   } catch (error) {

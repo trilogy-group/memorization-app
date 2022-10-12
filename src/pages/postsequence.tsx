@@ -17,17 +17,17 @@ import { borderRadius } from "@mui/system";
 
 const CreateSequence: NextPage = () => {
 
-  const uploadMutation = trpc.useMutation("question.create");
+  const uploadMutation = trpc.useMutation("post.createVideo");
 
 
   // TODO: connect mnemonic image with recommendation system in the backend
   const [mnemonicImage, setMnemonicImage] = useState<string | undefined>(undefined);
 
-  const recommendationMutation = trpc.useMutation("recommend.stabledif");
+  const recommendationMutation = trpc.useMutation("recommendImg.stabledif");
 
   const [inputValue, setInputValue] = useState("");
   const [inputPromptValue, setInputPromptValue] = useState("");
-  const [inputQuestionValue, setInputQuestionValue] = useState("");
+  const [inputPostValue, setInputPostValue] = useState("");
 
   const [tableEntryValue, setTableEntryValue] = useState("");
 
@@ -96,9 +96,9 @@ const CreateSequence: NextPage = () => {
                     <Textarea
                       label="Enter your question"
                       placeholder="e.g., world leaders during WW2"
-                      value={inputQuestionValue}
+                      value={inputPostValue}
                       onChange={(e) => {
-                        setInputQuestionValue(e.target.value);
+                        setInputPostValue(e.target.value);
                       }}
                     />
                     <Textarea
