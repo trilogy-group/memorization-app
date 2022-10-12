@@ -178,7 +178,7 @@ export const getServerSideProps = async ({
   let accounts, posts;
   if (tags != null) {
     [accounts, posts] = await Promise.all([
-      prisma.user.findMany({
+     prisma.user.findMany({
         where: {
           OR: {
             email: {
@@ -201,21 +201,24 @@ export const getServerSideProps = async ({
 
           name: true,
         },
-      }),
-     prisma.concept.findMany({
-        where: {
-          name: conceptName,
-       },
-       select: {
-          quizzes: {
-            include: {
-              Post: posts
-            }
+    }),
+    prisma.post.findMany({
+      where: {
+        quizzes: {
+          concepts: {
+            name: conceptName
           }
-       },
-      }),
-    ]);
-
+        }
+      },
+      select: {
+        user: true,
+        id: true, 
+        coverURL: true,
+        caption: true
+      }
+    })
+      //prisma.$queryRaw`SELECT id FROM Post INNER JOIN Quiz ON Quiz.id=Post.quizid INNER JOIN Concept ON Concept.id=Quiz.conceptId WHERE Concept.name=${conceptName}`
+    ])
   }
   else {
     [accounts, posts] = await Promise.all([

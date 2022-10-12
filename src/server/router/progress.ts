@@ -121,7 +121,7 @@ export const progressRouter = createRouter()
       const existingProgress = await prisma.progress.findFirst({
         where: {
           userId: session?.user?.id!,
-          quizId: id as string,
+          quizId: id,
         }
       });
 
@@ -134,7 +134,7 @@ export const progressRouter = createRouter()
             efactor: 2.5,
             interval: 1,
             userId: session?.user?.id!,
-            quizId: id as string,
+            quizId: id,
           }
         });
       }
@@ -150,7 +150,7 @@ export const progressRouter = createRouter()
           where: {
             progress_identifier: {
               userId: session?.user?.id!,
-              quizId: id as string,
+              quizId: id,
             }
           },
           data: {
