@@ -31,6 +31,7 @@ import TextareaAutosize from "@mui/material/TextareaAutosize";
 import Button from "@mui/material/Button";
 
 import RefreshIcon from "@mui/icons-material/Refresh";
+import BackIcon from "@mui/icons-material/ArrowBackIosNew";
 
 // import { Navigation } from "../components/navigation/navigation";
 import Navigation from "../components/navigation/navigation";
@@ -128,7 +129,7 @@ const CreateListOfWords: NextPage = () => {
   }, [uploadMutation.error]);
 
   const handleRecommeddedImage = async (index: Number) => {
-    let prevLoading = isLoadingImage;
+    let prevLoading = isLoadingAcronym;
     prevLoading[Number(index)] = true;
     setIsLoadingImage(prevLoading);
 
@@ -138,7 +139,6 @@ const CreateListOfWords: NextPage = () => {
     let prevMnemonicImage = mnemonicImage;
     prevMnemonicImage[Number(index)] = created?.filename;
     setMnemonicImage(prevMnemonicImage);
-    setIsLoadingMnemonic(false);
 
     prevLoading = isLoadingImage;
     prevLoading[Number(index)] = false;
@@ -152,7 +152,6 @@ const CreateListOfWords: NextPage = () => {
       setIsLoadingImage(prevLoading);
     }
 
-    setIsLoadingMnemonic(true);
     for (let i = 0; i < 4; i++) {
       prevLoading = isLoadingImage;
       prevLoading[Number(i)] = true;
@@ -170,7 +169,6 @@ const CreateListOfWords: NextPage = () => {
       prevLoading[Number(i)] = false;
       setIsLoadingImage(prevLoading);
     }
-    setIsLoadingMnemonic(false);
   };
 
   const handleRecommeddedAcronym = async (index: Number) => {
@@ -536,9 +534,7 @@ const CreateListOfWords: NextPage = () => {
                               await handleRecommeddedImageList();
                               setIsLoadingMnemonic(false);
                             }}
-                            disabled={
-                              !inputPromptValue.trim() || isLoadingMnemonic
-                            }
+                            disabled={!inputPromptValue.trim()}
                             className={`flex justify-center items-center gap-2 py-3 hover:brightness-90 transition text-white bg-red-1 disabled:text-gray-400 disabled:bg-gray-200`}
                             style={{
                               borderRadius: 10,
@@ -582,6 +578,7 @@ const CreateListOfWords: NextPage = () => {
                                 )}
                               </Item>
                               <Button
+                                disabled={isLoadingImage[index]}
                                 variant="outlined"
                                 color="success"
                                 style={{
@@ -597,6 +594,7 @@ const CreateListOfWords: NextPage = () => {
                                 Accept
                               </Button>
                               <Button
+                                disabled={isLoadingImage[index]}
                                 onClick={async () => {
                                   await handleRecommeddedImage(index);
                                 }}
@@ -732,7 +730,7 @@ const CreateListOfWords: NextPage = () => {
                               }}
                             >
                               {" "}
-                              <RefreshIcon />
+                              <BackIcon />
                             </Button>
                           </Grid>
                         </Grid>
@@ -755,7 +753,7 @@ const CreateListOfWords: NextPage = () => {
                             </Item2>
                             <Button
                               className="disabled:text-gray-400 disabled:bg-gray-200`"
-                              disabled={!acronymGenerated || isLoadingMnemonic}
+                              disabled={isLoadingMnemonic}
                               variant="outlined"
                               color="success"
                               style={{
@@ -772,7 +770,6 @@ const CreateListOfWords: NextPage = () => {
                             </Button>
                             <Button
                               className="disabled:text-gray-400 disabled:bg-gray-200`"
-                              disabled={!acronymGenerated || isLoadingMnemonic}
                               onClick={async () => {
                                 setSelectedMnemonic(false);
                               }}
@@ -785,7 +782,7 @@ const CreateListOfWords: NextPage = () => {
                               }}
                             >
                               {" "}
-                              <RefreshIcon />
+                              <BackIcon />
                             </Button>
                           </Grid>
                         </Grid>
@@ -800,7 +797,7 @@ const CreateListOfWords: NextPage = () => {
                             <Item2>{selectedMnemonicType}</Item2>
                             <Button
                               className="disabled:text-gray-400 disabled:bg-gray-200`"
-                              disabled={!acronymGenerated || isLoadingMnemonic}
+                              disabled={!storyGenerated || isLoadingMnemonic}
                               variant="outlined"
                               color="success"
                               style={{
@@ -817,7 +814,7 @@ const CreateListOfWords: NextPage = () => {
                             </Button>
                             <Button
                               className="disabled:text-gray-400 disabled:bg-gray-200`"
-                              disabled={!acronymGenerated || isLoadingMnemonic}
+                              disabled={!storyGenerated || isLoadingMnemonic}
                               onClick={async () => {
                                 setSelectedMnemonic(false);
                               }}
@@ -830,7 +827,7 @@ const CreateListOfWords: NextPage = () => {
                               }}
                             >
                               {" "}
-                              <RefreshIcon />
+                              <BackIcon />
                             </Button>
                           </Grid>
                         </Grid>
