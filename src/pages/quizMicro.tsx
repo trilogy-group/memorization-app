@@ -110,7 +110,9 @@ const QuizMicro: FC<QuizMicroProps> = ({ refetch }) => {
     setTimeout(() => {
       let quizScript = document.createElement('script');
       quizScript.innerHTML = "new Sortable(sequence);"
-      document.body.appendChild(quizScript);
+      if (document.getElementById("sequence")) {
+        document.body.appendChild(quizScript);
+      }
     }, 600);
     return () => {
     }
@@ -284,6 +286,7 @@ const QuizMicro: FC<QuizMicroProps> = ({ refetch }) => {
       setQuizContentVisibility(false);
       console.log("it took ", quizTime, "milliseconds");
       console.log(score.current);
+      console.log(newScoooreArray);
       if (!session.data?.user) {
         toast("You need to login");
       } else {
