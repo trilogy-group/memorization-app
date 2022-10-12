@@ -6,6 +6,7 @@ import { trpc } from "../utils/trpc";
 import { authOptions } from "./api/auth/[...nextauth]";
 import React from "react";
 import { useSession } from "next-auth/react";
+import Sortable from 'sortablejs';
 
 interface QuizMicroProps {
   refetch: Function;
@@ -18,17 +19,17 @@ interface QuizMicroProps {
 }
 
 /*
-!!! hard coded DOM
-remove console log
+!!! hard coded DOM             DONE
+remove console log 
 naming is bad
-sequence use npm i
-display the score to the user
+sequence use npm i             DONE
+display the score to the user       DONE
 !!! get question data from mutation + hint
-!!! send score to backend
+!!! send score to backend            DONE
 */
 
 // my question 1: get difficulty from progress using mutation or its passed as an argument along with other data?
-// my question 2: if option is a string, how should you mark the end of it; how to parse it into an array?
+// my question 2: if option is a string, how should you mark the end of it; how to parse it into an array? |
 // my question 3 :the mutation to get the quiz: how to find the specific entry in Quiz entry, return only the first entry?
 // my question 4 :where do I get source for the mnemonic?
 
@@ -46,7 +47,7 @@ const QuizMicro: FC<QuizMicroProps> = ({ refetch }) => {
   const [optionB, setOptionB] = useState("");
   const [optionC, setOptionC] = useState("");
   const [optionD, setOptionD] = useState("");
-  const [scoooreArray, setScoooreArray] = useState<number[]>([]);
+  const [scoreArray, setScoreArray] = useState<number[]>([]);
 
   const [hintImageVisibility, setHintImageVisibility] = useState(true);
   const [hintVideoVisibility, setHintVideoVisibility] = useState(false);
@@ -56,11 +57,14 @@ const QuizMicro: FC<QuizMicroProps> = ({ refetch }) => {
   const [MCQVisibility, setMCQVisibility] = useState(false);
   const [checkboxVisibility, setCheckboxVisibility] = useState(false);
   const [sequenceVisibility, setSequenceVisibility] = useState(false);
+  const [scoreVisibility, setScoreVisibility] = useState(false);
+
 
   var allPresentCorrectCheckboxesList = useRef(["", ""]);
 
   var quizQuestion = useRef("no question in the beginning");
   var quizHintText = useRef("no instruction in the beginning");
+
   var optionAText = useRef("A");
   var optionBText = useRef("B");
   var optionCText = useRef("C");
@@ -77,35 +81,35 @@ const QuizMicro: FC<QuizMicroProps> = ({ refetch }) => {
   var quizStart = useRef(0);
   var quizEnd: number;
 
+  const sequenceRef = useRef<HTMLUListElement>(null);
+
   let arrayIncorrectAnswer = [
     ["",
       "",
       ""
     ],
-    ["",
-      "",
-      ""
+    ["wow",
+      "that",
+      "cringe"
     ]
-
   ];
 
-  let arrayType = ["", "", ""];
+  let arrayType = useRef(["", "list", "sequence"]);
 
   //TODO: connect to DB for questions and answers
   const arrayOfArrayCorrectAnswers = [
     [""],
-    ["", "", ""],
-    ["",
-      "",
-      "",
-      ""]
-
+    ["shrek", "fiona", "donkey"],
+    ["1",
+      "2",
+      "3",
+      "4"]
   ]
 
   let arrayQuestion = [
     "",
-    "",
-    ""
+    "second Q",
+    "third Q"
   ]
 
 
@@ -135,27 +139,20 @@ const QuizMicro: FC<QuizMicroProps> = ({ refetch }) => {
       if (quizVariables != null) {
         deleteThisQuizInfoToRender.current = quizVariables;
       }
-      arrayOfArrayCorrectAnswers![questionNumber.current - 1]![0] = deleteThisQuizInfoToRender.current.option;
+      arrayOfArrayCorrectAnswers[0] = [deleteThisQuizInfoToRender.current.option];
       arrayIncorrectAnswer[0] = [deleteThisQuizInfoToRender.current.option + "wrong", deleteThisQuizInfoToRender.current.option + "wrong", deleteThisQuizInfoToRender.current.option + "wrong"];
-      arrayType[0] = deleteThisQuizInfoToRender.current.type;
+      arrayType.current[0] = deleteThisQuizInfoToRender.current.type;
+      arrayQuestion[0] = deleteThisQuizInfoToRender.current.question;
       let splitted = deleteThisQuizInfoToRender.current.option.split(";", 4);
       console.log("splitted options are ", splitted);
       quizMakerUltimateHelper();
     }
     );
 
-    // adding script that makes elements of the list able to be dragged PART 1
-    const script = document.createElement('script');
-    script.src = "https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js";
-    script.async = true;
-    document.body.appendChild(script);
-    // adding script that makes elements of the list able to be dragged PART 2
+
+    // adding script that makes elements of the list able to be dragged
     setTimeout(() => {
-      let quizScript = document.createElement('script');
-      quizScript.innerHTML = "new Sortable(sequence);"
-      if (document.getElementById("sequence")) {
-        document.body.appendChild(quizScript);
-      }
+      var sortable = Sortable.create(sequenceRef.current as HTMLElement);
     }, 600);
     return () => {
     }
@@ -270,56 +267,51 @@ const QuizMicro: FC<QuizMicroProps> = ({ refetch }) => {
 
   function checkAnswerUltimate() {
     // check answer AND clear existing q/a and answer AND push score array
-    let newScoooreArray = scoooreArray;
+    let newScoreArray = scoreArray;
     quizEnd = performance.now()
-
     console.log("quiz start is ", quizStart.current);
     console.log("quiz end is ", quizEnd);
     let quizTime = quizEnd - quizStart.current;
-    if (arrayType[questionNumber.current - 1] == "sequence") {
-      let elem = document.getElementById("sequence");
-      //elem=sequenceRef.current;
+    if (arrayType.current[questionNumber.current - 1] == "sequence") {
+      console.log("correct sequence ", arrayOfArrayCorrectAnswers![questionNumber.current - 1]);
       let answers = new Array();
       let li = document.querySelectorAll("#sequence li");
       li.forEach(function (text) {
-        //answers.push(renderToString(text));
-        answers.push(text.innerHTML);
+        answers.push(text.textContent);
       });
       if (JSON.stringify(arrayOfArrayCorrectAnswers[questionNumber.current - 1]) === JSON.stringify(answers)) {
         score.current = getScoreBasedOnTimeTaken(true, quizTime);
-        newScoooreArray.push(1);
+        newScoreArray.push(1);
       } else {
         score.current = getScoreBasedOnTimeTaken(false, quizTime)
-        newScoooreArray.push(0);
+        newScoreArray.push(0);
       }
-      setScoooreArray(newScoooreArray);
-      // clearing the elments in the unordered list
-      while (elem!.lastElementChild) {
-        elem!.removeChild(elem!.lastElementChild);
-      }
+      setScoreArray(newScoreArray);
 
-    } else if (arrayType[questionNumber.current - 1] == "list") {
+    } else if (arrayType.current[questionNumber.current - 1] == "list") {
+      console.log("correct list ", arrayOfArrayCorrectAnswers![questionNumber.current - 1]);
       if (JSON.stringify(optionsList) == JSON.stringify(arrayOfArrayCorrectAnswers[questionNumber.current - 1]?.sort())) {
         score.current = getScoreBasedOnTimeTaken(true, quizTime);
-        newScoooreArray.push(1);
+        newScoreArray.push(1);
       } else {
         score.current = getScoreBasedOnTimeTaken(false, quizTime);
-        newScoooreArray.push(0);
+        newScoreArray.push(0);
       }
-      setScoooreArray(newScoooreArray);
+      setScoreArray(newScoreArray);
       setCheckboxVisibility(false);
       optionsList.length = 0;
-    }
-    else if (arrayType[questionNumber.current - 1] == "MCQ") {
+    } else if (arrayType.current[questionNumber.current - 1] == "MCQ") {
+      console.log("correct MCQ ", arrayOfArrayCorrectAnswers![questionNumber.current - 1]);
       if (optionMCQ == arrayOfArrayCorrectAnswers[questionNumber.current - 1]) {
         score.current = getScoreBasedOnTimeTaken(true, quizTime);
-        newScoooreArray.push(1);
+        newScoreArray.push(1);
       } else {
         score.current = getScoreBasedOnTimeTaken(false, quizTime);
-        newScoooreArray.push(0);
+        newScoreArray.push(0);
       }
-      setScoooreArray(newScoooreArray);
+      setScoreArray(newScoreArray);
       setMCQVisibility(false);
+      console.log("mcq visibility", MCQVisibility);
     }
 
     questionNumber.current = questionNumber.current + 1;
@@ -327,9 +319,10 @@ const QuizMicro: FC<QuizMicroProps> = ({ refetch }) => {
     // check if by any chance we have finished all the questions
     if (questionNumber.current - 1 == arrayOfArrayCorrectAnswers.length) {
       setQuizContentVisibility(false);
+      setScoreVisibility(true);
       console.log("it took ", quizTime, "milliseconds");
       console.log(score.current);
-      console.log(newScoooreArray);
+      console.log(newScoreArray);
       if (!session.data?.user) {
         toast("You need to login");
       } else {
@@ -354,19 +347,17 @@ const QuizMicro: FC<QuizMicroProps> = ({ refetch }) => {
 
 
   function quizMakerUltimateHelper() {
-    console.log("first question is ", quizInformationToRender.current.caption as string);
-    console.log("first question actually should be ", deleteThisQuizInfoToRender.current.question as string);
-    quizQuestion.current = deleteThisQuizInfoToRender.current.question as string;
+    quizQuestion.current = arrayQuestion[questionNumber.current - 1] as string;
     console.log(arrayQuestion[questionNumber.current - 1] as string);
-    if (arrayType[questionNumber.current - 1] == "sequence") {
+    if (arrayType.current[questionNumber.current - 1] == "sequence") {
       quizHintText.current = "Sort in the correct order";
       setSequenceVisibility(true);
-    } else if (arrayType[questionNumber.current - 1] == "list") {
+    } else if (arrayType.current[questionNumber.current - 1] == "list") {
       quizHintText.current = "Choose all that apply";
       allPresentCorrectCheckboxesList.current = arrayOfArrayCorrectAnswers[questionNumber.current - 1] as string[];
       setCheckboxVisibility(true);
 
-    } else if (arrayType[questionNumber.current - 1] == "MCQ") {
+    } else if (arrayType.current[questionNumber.current - 1] == "MCQ") {
       // create MCQ options
       quizHintText.current = "Choose one";
       optionAText.current = arrayOfArrayCorrectAnswers[questionNumber.current - 1]![0] as string;
@@ -395,18 +386,19 @@ const QuizMicro: FC<QuizMicroProps> = ({ refetch }) => {
             </div>
             <button id="startTimer" className="hidden" onClick={async () => (quizStart.current == 0) ?
               quizStart.current = performance.now() : 0}></button>
+            {scoreVisibility && <h1 id="scoreShownToUser" className="text-5xl font-bold" >Your score: {score.current}</h1>}
             {quizContentVisibility &&
               <div>
                 <h1 className="text-2xl font-bold" id="question">{quizQuestion.current}</h1>
                 <h1 id="hintText" className="text-1xl font-bold" >{quizHintText.current}</h1>
                 {hintImageVisibility && <img id="hintImage" style={{ width: "200", height: "200" }} src={(quizInformationToRender.current.coverURL == null) ? "" : quizInformationToRender.current.coverURL as string} />}
-                <iframe id="hintVideo"
+                {hintVideoVisibility && <iframe id="hintVideo"
                   frameBorder='0'
                   allow='autoplay; encrypted-media'
                   allowFullScreen
-                  title='video' className="hidden"
-                />
-                <ul id="sequence">
+                  title='video'
+                />}
+                <ul id="sequence" ref={sequenceRef}>
                   {sequenceVisibility && displaySequence()}
                 </ul>
                 {checkboxVisibility && <div>

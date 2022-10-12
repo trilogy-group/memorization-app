@@ -133,6 +133,11 @@ const Main: FC<MainProps> = ({ origin }) => {
       <div>{
         <QuizMicro
           refetch={refetch}
+        //arrayQuestion={arrayQuestion}
+        //arrayOfArrayCorrectAnswers={arrayOfArrayCorrectAnswers}
+        //arrayType={arrayType}
+        //arrayIncorrectAnswer={arrayIncorrectAnswer}
+        //arraySrc={arraySrc}
         />
 
       }</div>
