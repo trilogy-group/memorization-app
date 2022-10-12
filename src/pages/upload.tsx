@@ -196,12 +196,14 @@ const Upload: NextPage = () => {
 
       toast.loading("Uploading metadata...", { id: toastID });
 
-      const concept = "CH8";
+      const conceptId = "CO1";
+      const quizId = "Q1";
 
       const created = await uploadImgMutation.mutateAsync({
         caption: inputValue.trim(),
         coverURL: uploadedCover,
-        concept,
+        conceptId: conceptId,
+        quizId: quizId,
       });
       toast.loading("Mnemonics Created! Points +1", { id: toastID });
       await new Promise(r => setTimeout(r, 800));
@@ -210,7 +212,7 @@ const Upload: NextPage = () => {
 
       setIsLoading(false);
 
-      router.push(`/video/${created.id}`);
+      router.push(`/post/${created.id}`);
     } catch (error) {
       console.log(error);
       toast.dismiss(toastID);
@@ -280,7 +282,9 @@ const Upload: NextPage = () => {
 
       toast.loading("Uploading metadata...", { id: toastID });
 
-      const concept = "CH8";
+      // Replace with concept from user input
+      const conceptId = "CO1";
+      const quizId = "Q1"
 
       const created = await uploadMutation.mutateAsync({
         caption: inputValue.trim(),
@@ -288,7 +292,8 @@ const Upload: NextPage = () => {
         videoURL: uploadedVideo,
         videoHeight,
         videoWidth,
-        concept,
+        conceptId,
+        quizId,
       });
       toast.loading("Mnemonics Created! Points +1", { id: toastID });
       await new Promise(r => setTimeout(r, 800));

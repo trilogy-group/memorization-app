@@ -18,7 +18,7 @@ const wordList: string[] = [];
 
 const CreateDefinition: NextPage = () => {
 
-  const uploadMutation = trpc.useMutation("video.create");
+  const uploadMutation = trpc.useMutation("post.createVideo");
 
 
   // TODO: connect mnemonic image with recommendation system in the backend
