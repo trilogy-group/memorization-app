@@ -7,29 +7,29 @@ import PostSection from "./PostSection";
 import { useMutation } from "react-query";
 
 import QuizMicro from "@/pages/quizMicro";
-
+import { Post, Progress, Quiz } from "@prisma/client";
 
 interface MainProps {
   origin: string;
 }
 
 const Main: FC<MainProps> = ({ origin }) => {
+
+  var minNumberOfPostBeforeNextQuiz = useRef(3);
+  var maxNumberOfPostBeforeNextQuiz = useRef(5);
+  var numberOfPostBeforeNextQuiz = 5;
   const router = useRouter();
 
   const { data, fetchNextPage, isFetchingNextPage, hasNextPage, refetch } =
     trpc.useInfiniteQuery(
       [
-        Boolean(Number(router.query.following))
-          ? "post.following"
-          : "post.for-you",
+        "post.for-you-with-quizzes",
         {},
       ],
       {
         getNextPageParam: (lastPage) => lastPage.nextSkip,
       }
     );
-  const quizMutation = useMutation("progress.get-one-quiz");
-  // null check
 
   const observer = useRef<IntersectionObserver | null>(null);
 
@@ -88,15 +88,16 @@ const Main: FC<MainProps> = ({ origin }) => {
 
         videoElements.forEach((item) => {
           if (item !== mostVisible && !item.paused) item.pause();
+
         });
 
         quizElements.forEach((item) => {
           if (item !== mostVisibleQuiz) {
           }
         });
-        // My code for post timer begins
 
-        // My code for post timer ends
+
+
       },
       {
         threshold: [0, 0.2, 0.4, 0.6, 0.8, 1],
@@ -111,34 +112,66 @@ const Main: FC<MainProps> = ({ origin }) => {
 
   if (data?.pages.length === 0 || data?.pages[0]?.items.length === 0)
     return (
-      <div className="flex-grow text-center my-4">There is no post yet</div>
+      <div className="flex-grow text-center my-4">There is no post or quiz yet</div>
     );
+
+
+  function showQuiz(refetch: Function, quizzes: Quiz[], posts: Post[], progresses: Progress[], post: any, key: string, origin: string) {
+    //minNumberOfPostBeforeNextQuiz.current = 3;
+    //maxNumberOfPostBeforeNextQuiz.current = 5;
+    numberOfPostBeforeNextQuiz = numberOfPostBeforeNextQuiz + 3;
+    return <div>
+      <h1 className="text-3xl font-bold">It's time to solve a quiz</h1>
+      < QuizMicro
+        refetch={refetch}
+        quizzes={quizzes}
+        posts={posts}
+        progresses={progresses}
+      />
+      <PostSection
+        post={post}
+        key={key}
+        refetch={refetch}
+        origin={origin}
+      />
+
+    </div>
+
+  }
+
+  function showPost(post: any, key: string, refetch: any, origin: string) {
+    //maxNumberOfPostBeforeNextQuiz.current--;
+    //minNumberOfPostBeforeNextQuiz.current--;
+    numberOfPostBeforeNextQuiz--;
+    return <div>
+      <PostSection
+        post={post}
+        key={key}
+        refetch={refetch}
+        origin={origin}
+      /></div>
+  }
+
+
+
+  // if minNumberOfPostBeforeNextQuiz.current==0 and post is familiar show Quiz
+  // if maxNumberOfPostBeforeNextQuiz.current==0 show Quiz, show the post right after that
+  // have parameter worthShowingQuizBeforeThePost
 
   return (
     <div className="flex-grow">
       {data?.pages.map((page) =>
-        page.items.map((post) => (
-          <PostSection
-            post={post}
-            key={post.id}
-            refetch={refetch}
-            origin={origin}
-          />
-        ))
-      )}
+        page.items.map(
+          (post) => ((numberOfPostBeforeNextQuiz <= 0 && post.worthShowingQuizBeforeThePost)
+            //|| (minNumberOfPostBeforeNextQuiz.current == 0 && post.worthShowingQuizBeforeThePost)
+          ) ?
+            showQuiz(refetch, page.quizzes, page.posts, page.progresses, post, post.id, origin)
+            :
+            showPost(post, post.id, refetch, origin)
 
-      <div>{
-        <QuizMicro
-          refetch={refetch}
-        //arrayQuestion={arrayQuestion}
-        //arrayOfArrayCorrectAnswers={arrayOfArrayCorrectAnswers}
-        //arrayType={arrayType}
-        //arrayIncorrectAnswer={arrayIncorrectAnswer}
-        //arraySrc={arraySrc}
-        />
-
-      }</div>
-
+        )
+      )
+      }
 
       {/* At the bottom to detect infinite scroll */}
       <InView

@@ -6,20 +6,18 @@ import { trpc } from "../utils/trpc";
 import { authOptions } from "./api/auth/[...nextauth]";
 import React from "react";
 import { useSession } from "next-auth/react";
-import Sortable from 'sortablejs';
+//import Sortable from 'sortablejs';
+import { Post, Progress, Quiz } from "@prisma/client";
 
 interface QuizMicroProps {
   refetch: Function;
-  //arrayQuestion: string[];
-  //arrayOfArrayCorrectAnswers: string[];
-  //arrayType: string[];
-  //arrayIncorrectAnswer: string[];
-  //arraySrc: string[];
-  //arrayDifficulty: string[];
+  quizzes: Quiz[];
+  progresses: Progress[];
+  posts: Post[];
 }
 
 //: FC<QuizMicroProps> = ({ inputQuestions, inputAnswer, inputType, inputIncorrectAnswer, inputHint,inputDifficulty }) =>
-const QuizMicro: FC<QuizMicroProps> = ({ refetch }) => {
+const QuizMicro: FC<QuizMicroProps> = ({ refetch, quizzes, progresses, posts }) => {
   const session = useSession();
   const quizGradeMutation = trpc.useMutation("progress.post-one-quiz-result");
   //const quizQuestionAnswersEtc = trpc.useMutation("progress.get-one-quiz");
@@ -52,8 +50,6 @@ const QuizMicro: FC<QuizMicroProps> = ({ refetch }) => {
   var optionBText = useRef("B");
   var optionCText = useRef("C");
   var optionDText = useRef("D");
-
-  var quizInformationToRender = useRef<{ id: number, name: string, options: string, answer: string | null, type: string, conceptId: string }>({ id: 0, name: "", options: "", answer: "", type: "", conceptId: "" });
 
   var questionNumber = useRef(1);
   var score = useRef(0);
@@ -103,21 +99,21 @@ const QuizMicro: FC<QuizMicroProps> = ({ refetch }) => {
 
         for (let i = 0; i < quizVariables.quizzes.length; i++) {
           if (arrayType.current[i] == "MCQ") {
-            let optionsString = quizVariables.quizzes[i]?.options;
+            let optionsString = quizVariables.quizzes[i]?.options!;
             let regexp = /desc': '([^']*)'/gm;
-            let match = regexp.exec(optionsString as string);
+            let match = regexp.exec(optionsString);
             let arrayOfAnswersForThisInstance = new Array<string>;
             while (match != null) {
               arrayOfAnswersForThisInstance.push(match[1] as string);
               optionsThatIGetFromMassiveMCQDatabase.current.push(arrayOfAnswersForThisInstance);
-              match = regexp.exec(optionsString as string);
+              match = regexp.exec(optionsString);
             }
 
             regexp = /'is_correct': ([^}]*)}/gm;
-            match = regexp.exec(optionsString as string);
+            match = regexp.exec(optionsString);
             while (match != null) {
               correctnessOfOptionsThatIGetFromMassiveMCQDatabase.push(match[1] == "True" ? true : false);
-              match = regexp.exec(optionsString as string);
+              match = regexp.exec(optionsString);
             }
 
             let indexOfCorrectAnswerMCQ = correctnessOfOptionsThatIGetFromMassiveMCQDatabase.indexOf(true);
@@ -133,15 +129,9 @@ const QuizMicro: FC<QuizMicroProps> = ({ refetch }) => {
       quizMakerUltimateHelper();
     });
 
-
-
-
-
-
-
     // adding script that makes elements of the list able to be dragged
     setTimeout(() => {
-      var sortable = Sortable.create(sequenceRef.current as HTMLElement);
+      //var sortable = Sortable.create(sequenceRef.current as HTMLElement);
 
     }, 600);
     return () => {

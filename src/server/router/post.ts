@@ -1,14 +1,14 @@
-import { Follow, Like } from "@prisma/client";
+import { Follow, Like, Post, Quiz, Progress } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { createRouter } from "./context";
 
 enum contentType {
-    image = 1,
-    video = 2,
-    text = 3,
-    unknown = 4,
+  image = 1,
+  video = 2,
+  text = 3,
+  unknown = 4,
 }
 
 export const postRouter = createRouter()
@@ -132,8 +132,131 @@ export const postRouter = createRouter()
         nextSkip: items.length === 0 ? null : skip + 10,
       };
     },
-  })
-  .mutation("createVideo", {
+  }).query("for-you-with-quizzes", {
+    input: z.object({
+      cursor: z.number().nullish(),
+    }),
+    resolve: async ({ ctx: { prisma, session }, input }) => {
+      const skip = input.cursor || 0;
+      const items = await prisma.post.findMany({
+        take: 10,
+        skip,
+        include: {
+          user: true,
+          quizzes: true,
+          _count: { select: { likes: true, comments: true } },
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+      });
+      let likes: Like[] = [];
+      let followings: Follow[] = [];
+
+      let quizIds: number[] = [];
+      let quizzes: Quiz[] = [];
+      let progresses: Progress[] = [];
+      let posts: Post[] = [];
+      let worthShowingQuizBeforeThePost: boolean;
+
+      if (session?.user?.id) {
+        [likes, followings] = await Promise.all([
+          prisma.like.findMany({
+            where: {
+              userId: session.user.id,
+              postId: { in: items.map((item) => item.id) },
+            },
+          }),
+          prisma.follow.findMany({
+            where: {
+              followerId: session.user.id,
+              followingId: {
+                in: items.map((item) => item.userId),
+              },
+            },
+          }),
+        ]);
+
+        // GETTING QUIZZES BEGIN
+        const existingProgress = await prisma.progress.findMany({
+          take: 5,
+          skip,
+          where: {
+            userId: session?.user?.id!,
+            nextEvaluate: {
+              lt: new Date()
+            }
+          },
+          orderBy: {
+            // quizzes from the most recent ones
+            nextEvaluate: "asc"
+          }
+        });
+        if (existingProgress == null) {
+          console.log("no existing progress");
+        }
+
+
+        existingProgress?.forEach(progress => { quizIds.push(progress.quizId) });
+        console.log("quiz ids are", quizIds);
+
+        quizzes = await prisma.quiz.findMany({
+          where: {
+            id: { in: quizIds }
+          },
+        });
+
+
+        for (let i = 0; i < quizIds.length; i++) {
+          let post = await prisma.post.findFirst({
+            where: {
+              quizId: quizIds[i],
+            }
+          });
+          if (post != null) {
+            posts.push(post);
+          }
+
+          let progress = await prisma.progress.findFirst({
+            where: {
+              quizId: quizIds[i],
+              userId: session?.user?.id!
+            }
+          });
+          if (progress != null) {
+            progresses.push(progress);
+          }
+
+        }
+        // GETTING QUIZZES END
+
+
+      }
+
+      let itemsToBeReturned = items.map((item) => ({
+        ...item,
+        likedByMe: likes.some((like) => like.postId === item.id),
+        followedByMe: followings.some(
+          (following) => following.followingId === item.userId
+        ),
+        worthShowingQuizBeforeThePost: false
+      }));
+
+      if (session?.user?.id) {
+        itemsToBeReturned.forEach(item => item.worthShowingQuizBeforeThePost = true);
+      }
+
+
+      return {
+        items: itemsToBeReturned,
+        quizzes,
+        progresses,
+        posts,
+        nextSkip: items.length === 0 ? null : skip + 10,
+      }
+
+    },
+  }).mutation("createVideo", {
     input: z.object({
       caption: z.string(),
       videoURL: z.string().url(),

@@ -50,7 +50,6 @@ const Navbar: FC = () => {
 
   useEffect(() => {
     notificationMutation.mutateAsync().then(notifs => {
-      console.log(notifs);
       setNotifications(notifs)
     });
   }, []);
