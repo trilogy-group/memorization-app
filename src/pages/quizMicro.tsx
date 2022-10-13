@@ -124,8 +124,8 @@ const QuizMicro: FC<QuizMicroProps> = ({ refetch }) => {
                   match = regexp.exec(string as string);
                 }
 
-                //let indexOfCorrectAnswerMCQ = correctnessOfOptionsThatIGetFromMassiveMCQDatabase.indexOf(true);
-                //arrayOfArrayCorrectAnswers.current[i] = [optionsThatIGetFromMassiveMCQDatabase.current[i]![indexOfCorrectAnswerMCQ] as string];
+                let indexOfCorrectAnswerMCQ = correctnessOfOptionsThatIGetFromMassiveMCQDatabase.indexOf(true);
+                arrayOfArrayCorrectAnswers.current[i] = [optionsThatIGetFromMassiveMCQDatabase.current[i]![indexOfCorrectAnswerMCQ] as string];
               }
 
             }
