@@ -109,7 +109,7 @@ export const progressRouter = createRouter()
         }
       });
 
-      if (post == null || post.quizId) {
+      if (post == null || !post.quizId) {
         throw new Error("Post not found or post missing quizId!");
       }
 
@@ -166,5 +166,44 @@ export const progressRouter = createRouter()
         }
       }
       return;
+    },
+  }).mutation("get-data-about-post-using-quizId", {
+    input: z.object({
+      quizId: z.number(),
+    }),
+
+    async resolve({ ctx: { prisma, session }, input }) {
+      const post = await prisma.post.findFirst({
+        where: {
+          quizId: input.quizId,
+        }
+      });
+      console.log("quiz id that is used to search ", input.quizId);
+      console.log("here is the post ", post);
+
+      if (post == null || !post.quizId) {
+        throw new Error("Post not found or post missing quizId!");
+      }
+      return post;
+    },
+  }).mutation("get-data-about-quiz-difficulty-using-quizId", {
+    input: z.object({
+      quizId: z.number(),
+    }),
+
+    async resolve({ ctx: { prisma, session }, input }) {
+      const progress = await prisma.progress.findFirst({
+        where: {
+          quizId: input.quizId,
+          userId: session?.user?.id!
+        }
+      });
+      console.log("quiz id that is used to search progress ", input.quizId);
+      console.log("here is the progress ", progress);
+
+      if (progress == null || !progress.quizId) {
+        throw new Error("progress not found or progress missing quizId!");
+      }
+      return progress;
     },
   });
