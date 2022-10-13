@@ -84,7 +84,6 @@ const Main: FC<MainProps> = ({ origin }) => {
           if (startButton != null) {
             startButton.click();
           }
-          console.log("starting quiz");
         }
 
         videoElements.forEach((item) => {
@@ -93,8 +92,6 @@ const Main: FC<MainProps> = ({ origin }) => {
 
         quizElements.forEach((item) => {
           if (item !== mostVisibleQuiz) {
-
-            console.log("pausing quiz");
           }
         });
         // My code for post timer begins

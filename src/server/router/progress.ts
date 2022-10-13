@@ -1,3 +1,4 @@
+import { Post, Progress } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { getRepetition, newRepetition, SuperMemoItem, SuperMemoGrade } from "../../utils/spacedRepetition";
@@ -167,7 +168,7 @@ export const progressRouter = createRouter()
       }
       return;
     },
-  }).mutation("get-data-about-post-using-quizId", {
+  }).mutation("get-data-about-quiz-mnemonic-and-difficulty-using-quizId", {
     input: z.object({
       quizId: z.number(),
     }),
@@ -184,26 +185,75 @@ export const progressRouter = createRouter()
       if (post == null || !post.quizId) {
         throw new Error("Post not found or post missing quizId!");
       }
-      return post;
-    },
-  }).mutation("get-data-about-quiz-difficulty-using-quizId", {
-    input: z.object({
-      quizId: z.number(),
-    }),
 
-    async resolve({ ctx: { prisma, session }, input }) {
       const progress = await prisma.progress.findFirst({
         where: {
           quizId: input.quizId,
           userId: session?.user?.id!
         }
       });
-      console.log("quiz id that is used to search progress ", input.quizId);
+
       console.log("here is the progress ", progress);
 
       if (progress == null || !progress.quizId) {
         throw new Error("progress not found or progress missing quizId!");
       }
-      return progress;
+
+      return { post, progress };
+    },
+  }).mutation("get-many-quizzes", {
+    // get quizzes based on progress
+    async resolve({ ctx: { prisma, session } }) {
+      const existingProgress = await prisma.progress.findMany({
+        where: {
+          userId: session?.user?.id!,
+          nextEvaluate: {
+            lt: new Date()
+          }
+        },
+        orderBy: {
+          // quizzes from the most recent ones
+          nextEvaluate: "asc"
+        }
+      });
+      if (existingProgress == null) {
+        return null;
+      }
+
+      let quizIds: number[] = [];
+      existingProgress?.forEach(progress => { quizIds.push(progress.quizId) });
+      console.log("quiz ids are", quizIds);
+
+      const quizzes = await prisma.quiz.findMany({
+        where: {
+          id: { in: quizIds }
+        }
+      });
+
+      let progresses: Progress[] = []
+      let posts: Post[] = []
+      for (let i = 0; i < quizIds.length; i++) {
+        let post = await prisma.post.findFirst({
+          where: {
+            quizId: quizIds[i],
+          }
+        });
+        if (post != null) {
+          posts.push(post);
+        }
+
+        let progress = await prisma.progress.findFirst({
+          where: {
+            quizId: quizIds[i],
+          }
+        });
+        if (progress != null) {
+          progresses.push(progress);
+        }
+
+      }
+
+      // create progress entry if not existing
+      return { quizzes, progresses, posts };
     },
   });

@@ -28,20 +28,13 @@ display the score to the user       DONE
 !!! send score to backend            DONE
 */
 
-// my question 1: get difficulty from progress using mutation or its passed as an argument along with other data?
-// my question 2: if option is a string, how should you mark the end of it; how to parse it into an array? |
-// my question 3 :the mutation to get the quiz: how to find the specific entry in Quiz entry, return only the first entry?
-// my question 4 :where do I get source for the mnemonic?
-
-//  takes list of questions
-
 //: FC<QuizMicroProps> = ({ inputQuestions, inputAnswer, inputType, inputIncorrectAnswer, inputHint,inputDifficulty }) =>
 const QuizMicro: FC<QuizMicroProps> = ({ refetch }) => {
   const session = useSession();
   const quizGradeMutation = trpc.useMutation("progress.post-one-quiz-result");
   const quizQuestionAnswersEtc = trpc.useMutation("progress.get-one-quiz");
-  const mnemonicInfo = trpc.useMutation("progress.get-data-about-post-using-quizId");
-  const questionDifficultyInfo = trpc.useMutation("progress.get-data-about-quiz-difficulty-using-quizId");
+  const mnemonic_difficulty_Info = trpc.useMutation("progress.get-data-about-quiz-mnemonic-and-difficulty-using-quizId");
+  const manyQuizzesWithInfo = trpc.useMutation("progress.get-many-quizzes");
   const [optionMCQ, setOptionMCQ] = useState();
   const [optionsList, setOptionsList] = useState<string[]>([]);
   const [optionA, setOptionA] = useState("");
@@ -84,36 +77,25 @@ const QuizMicro: FC<QuizMicroProps> = ({ refetch }) => {
     ["",
       "",
       ""
-    ],
-    ["wow",
-      "that",
-      "cringe"
     ]
   ]);
 
-  let arrayType = useRef(["", "list", "sequence"]);
-
-  //TODO: connect to DB for questions and answers
-  let arrayOfArrayCorrectAnswers = useRef([
-    [""],
-    ["shrek", "fiona", "donkey"],
-    ["1",
-      "2",
-      "3",
-      "4"]
-  ])
+  let arrayType = useRef<string[]>([]);
 
 
-  let arrayQuestion = useRef([""]);
+  let arrayOfArrayCorrectAnswers = useRef<string[][]>([]);
 
-  let optionsThatIGetFromMassiveMCQDatabase = [] as string[];
+
+  let arrayQuestion = useRef<string[]>([]);
+
+  let optionsThatIGetFromMassiveMCQDatabase = useRef<string[][]>([]);
   let correctnessOfOptionsThatIGetFromMassiveMCQDatabase = [] as boolean[];
 
-  let arraySrc = useRef([""]);
+  let arraySrc = useRef<string[]>([]);
 
-  let postId = useRef("");
+  let postId = useRef<string[]>([]);
 
-  let questionDifficulty = useRef(-1);
+  let arrayQuestionDifficulty = useRef<number[]>([]);
 
 
   useEffect(() => {
@@ -122,65 +104,77 @@ const QuizMicro: FC<QuizMicroProps> = ({ refetch }) => {
       console.log("info that I will use to render the quiz ", quizVariables);
       if (quizVariables != null) {
         quizInformationToRender.current = quizVariables;
-        console.log("id passed to search post ", quizInformationToRender.current.id);
-        console.log("what I have ", quizInformationToRender.current);
-        console.log("what options I have ", quizInformationToRender.current.options);
-
-        let string = quizInformationToRender.current.options;
-        let regexp = /desc': '([^']*)'/gm;
-        let match = regexp.exec(string);
-        while (match != null) {
-          console.log(match[1])
-          optionsThatIGetFromMassiveMCQDatabase.push(match[1] as string);
-          match = regexp.exec(string);
-        }
-
-        regexp = /'is_correct': ([^}]*)}/gm;
-        match = regexp.exec(string);
-        while (match != null) {
-          console.log(match[1])
-          correctnessOfOptionsThatIGetFromMassiveMCQDatabase.push(match[1] == "True" ? true : false);
-          match = regexp.exec(string);
-        }
-
-        console.log(optionsThatIGetFromMassiveMCQDatabase);
-        console.log(correctnessOfOptionsThatIGetFromMassiveMCQDatabase);
-
-        let indexOfCorrectAnswerMCQ = correctnessOfOptionsThatIGetFromMassiveMCQDatabase.indexOf(true);
-        arrayQuestion.current[0] = quizInformationToRender.current.name;
-        arrayType.current[0] = quizInformationToRender.current.type;
-        arrayOfArrayCorrectAnswers.current[0] = [optionsThatIGetFromMassiveMCQDatabase[indexOfCorrectAnswerMCQ] as string];
 
 
-        mnemonicInfo.mutateAsync({
-          quizId: quizInformationToRender.current.id,
-        }).then(quizVariables => {
-          console.log("info that I will use to render the quiz ", quizVariables);
+        /*
+                mnemonic_difficulty_Info.mutateAsync({
+                  quizId: quizInformationToRender.current.id,
+                }).then(quizVariables => {
+                  console.log("info that I will use to get mnemonic and difficulty ", quizVariables);
+                  if (quizVariables != null) {
+                    arraySrc.current[0] = quizVariables.post.coverURL;
+                    postId.current = quizVariables.post.id;
+                    questionDifficulty.current = quizVariables.progress.efactor;
+                  }
+                  else {
+                    toast("problem with getting mnemonic/difficulty info from DB");
+                  }
+        
+                });
+                */
+
+        manyQuizzesWithInfo.mutateAsync().then(quizVariables => {
+          console.log("info that I will use to render many quizzes ", quizVariables);
           if (quizVariables != null) {
-            arraySrc.current[0] = quizVariables.coverURL;
-            postId.current = quizVariables.id;
+            if (quizVariables.posts.length != quizVariables.quizzes.length || quizVariables.posts.length != quizVariables.progresses.length || quizVariables.quizzes.length != quizVariables.progresses.length) {
+              toast("the returned arrays don't have the same length");
+            }
+
+            quizVariables.quizzes.forEach(quiz => arrayQuestion.current.push(quiz.name));
+            quizVariables.quizzes.forEach(quiz => arrayType.current.push(quiz.type));
+            quizVariables.progresses.forEach(progress => arrayQuestionDifficulty.current.push(progress.efactor));
+            quizVariables.posts.forEach(post => arraySrc.current.push(post.coverURL));
+            quizVariables.posts.forEach(post => postId.current.push(post.id));
+
+            for (let i = 0; i < quizVariables.quizzes.length; i++) {
+              if (arrayType.current[i] == "MCQ") {
+                let string = quizVariables.quizzes[i]?.options;
+                let regexp = /desc': '([^']*)'/gm;
+                let match = regexp.exec(string as string);
+                let arrayOfAnswersForThisInstance = new Array<string>;
+                while (match != null) {
+                  arrayOfAnswersForThisInstance.push(match[1] as string);
+                  optionsThatIGetFromMassiveMCQDatabase.current.push(arrayOfAnswersForThisInstance);
+                  console.log(match[1] as string);
+                  match = regexp.exec(string as string);
+                }
+
+                regexp = /'is_correct': ([^}]*)}/gm;
+                match = regexp.exec(string as string);
+                while (match != null) {
+                  correctnessOfOptionsThatIGetFromMassiveMCQDatabase.push(match[1] == "True" ? true : false);
+                  console.log(match[1] as string);
+                  match = regexp.exec(string as string);
+                }
+
+                //let indexOfCorrectAnswerMCQ = correctnessOfOptionsThatIGetFromMassiveMCQDatabase.indexOf(true);
+                //arrayOfArrayCorrectAnswers.current[i] = [optionsThatIGetFromMassiveMCQDatabase.current[i]![indexOfCorrectAnswerMCQ] as string];
+              }
+
+            }
+
+            console.log(arrayQuestion.current);
+            console.log(arrayType.current);
           }
           else {
-            console.log("problem with getting mnemonic info from DB");
+            toast("problem with getting many quizzes from DB");
           }
+          quizMakerUltimateHelper();
         });
-
-        questionDifficultyInfo.mutateAsync({
-          quizId: quizInformationToRender.current.id,
-        }).then(quizVariables => {
-          console.log("info that I will use to determine the difficulty ", quizVariables);
-          if (quizVariables != null) {
-            questionDifficulty.current = quizVariables.efactor;
-          }
-          else {
-            console.log("problem with getting difficulty info from DB");
-          }
-        });
-
 
       }
       else {
-        console.log("problem with getting quiz info from DB");
+        toast("problem with getting quiz info from DB");
       }
     });
 
@@ -191,7 +185,7 @@ const QuizMicro: FC<QuizMicroProps> = ({ refetch }) => {
     // adding script that makes elements of the list able to be dragged
     setTimeout(() => {
       var sortable = Sortable.create(sequenceRef.current as HTMLElement);
-      quizMakerUltimateHelper();
+
     }, 600);
     return () => {
     }
@@ -263,7 +257,6 @@ const QuizMicro: FC<QuizMicroProps> = ({ refetch }) => {
     }
     // sort the array
     Newoptions.sort()
-    console.log("the checked are ", Newoptions);
     // update the state with the new array of options
     setOptionsList(Newoptions);
   }
@@ -308,11 +301,8 @@ const QuizMicro: FC<QuizMicroProps> = ({ refetch }) => {
     // check answer AND clear existing q/a and answer AND push score array
     let newScoreArray = scoreArray;
     quizEnd = performance.now()
-    console.log("quiz start is ", quizStart.current);
-    console.log("quiz end is ", quizEnd);
     let quizTime = quizEnd - quizStart.current;
     if (arrayType.current[questionNumber.current - 1] == "sequence") {
-      console.log("correct sequence ", arrayOfArrayCorrectAnswers.current![questionNumber.current - 1]);
       let answers = new Array();
       let li = document.querySelectorAll("#sequence li");
       li.forEach(function (text) {
@@ -328,7 +318,6 @@ const QuizMicro: FC<QuizMicroProps> = ({ refetch }) => {
       setScoreArray(newScoreArray);
 
     } else if (arrayType.current[questionNumber.current - 1] == "list") {
-      console.log("correct list ", arrayOfArrayCorrectAnswers.current![questionNumber.current - 1]);
       if (JSON.stringify(optionsList) == JSON.stringify(arrayOfArrayCorrectAnswers.current![questionNumber.current - 1]?.sort())) {
         score.current = getScoreBasedOnTimeTaken(true, quizTime);
         newScoreArray.push(1);
@@ -340,7 +329,6 @@ const QuizMicro: FC<QuizMicroProps> = ({ refetch }) => {
       setCheckboxVisibility(false);
       optionsList.length = 0;
     } else if (arrayType.current[questionNumber.current - 1] == "MCQ") {
-      console.log("correct MCQ ", arrayOfArrayCorrectAnswers.current![questionNumber.current - 1]);
       if (optionMCQ == arrayOfArrayCorrectAnswers.current[questionNumber.current - 1]) {
         score.current = getScoreBasedOnTimeTaken(true, quizTime);
         newScoreArray.push(1);
@@ -350,33 +338,32 @@ const QuizMicro: FC<QuizMicroProps> = ({ refetch }) => {
       }
       setScoreArray(newScoreArray);
       setMCQVisibility(false);
-      console.log("mcq visibility", MCQVisibility);
     }
 
     questionNumber.current = questionNumber.current + 1;
 
     // check if by any chance we have finished all the questions
-    if (questionNumber.current - 1 == arrayOfArrayCorrectAnswers.current.length) {
+    if (questionNumber.current - 1 == arrayQuestion.current.length) {
+      console.log(questionNumber.current);
+      console.log("the id of the post ", postId.current[questionNumber.current - 2] as string);
       setQuizContentVisibility(false);
       setScoreVisibility(true);
-      console.log("it took ", quizTime, "milliseconds");
-      console.log(score.current);
-      console.log(newScoreArray);
       if (!session.data?.user) {
         toast("You need to login");
       } else {
 
         quizGradeMutation
           .mutateAsync({
-            postId: postId.current,
+            postId: postId.current[questionNumber.current - 2] as string,
             grade: String(score.current)
           })
           .then(() => {
             refetch();
           })
           .catch((err) => {
-            console.log(err);
+            toast(err);
           });
+
 
       }
 
@@ -389,21 +376,11 @@ const QuizMicro: FC<QuizMicroProps> = ({ refetch }) => {
 
   function quizMakerUltimateHelper() {
 
-    console.log("options that should be displayed from DB ", optionsThatIGetFromMassiveMCQDatabase);
-    console.log("current question from DB ", arrayQuestion.current);
-    console.log("current type from DB ", arrayType.current);
-    console.log("current array of correct answers from DB ", arrayOfArrayCorrectAnswers.current);
-
-    console.log("post id is ", postId.current);
-    console.log("difficulty factor is ", questionDifficulty.current);
-
-    if (questionDifficulty.current > 3) {
+    if (arrayQuestionDifficulty.current[questionNumber.current - 1]! > 3) {
       setHintImageVisibility(false);
     }
 
-
     quizQuestion.current = arrayQuestion.current[questionNumber.current - 1] as string;
-    console.log(arrayQuestion.current[questionNumber.current - 1] as string);
     if (arrayType.current[questionNumber.current - 1] == "sequence") {
       quizHintText.current = "Sort in the correct order";
       setSequenceVisibility(true);
@@ -415,19 +392,19 @@ const QuizMicro: FC<QuizMicroProps> = ({ refetch }) => {
     } else if (arrayType.current[questionNumber.current - 1] == "MCQ") {
       // create MCQ options
       quizHintText.current = "Choose one";
-      optionAText.current = optionsThatIGetFromMassiveMCQDatabase[0] as string;
-      setOptionA(optionsThatIGetFromMassiveMCQDatabase[0] as string);
-      optionBText.current = optionsThatIGetFromMassiveMCQDatabase[1] as string;
-      setOptionB(optionsThatIGetFromMassiveMCQDatabase[1] as string);
-      optionCText.current = optionsThatIGetFromMassiveMCQDatabase[2] as string;
-      setOptionC(optionsThatIGetFromMassiveMCQDatabase[2] as string);
-      optionDText.current = optionsThatIGetFromMassiveMCQDatabase[3] as string;
-      setOptionD(optionsThatIGetFromMassiveMCQDatabase[3] as string);
+
+      optionAText.current = optionsThatIGetFromMassiveMCQDatabase.current[questionNumber.current - 1]![0] as string;
+      setOptionA(optionsThatIGetFromMassiveMCQDatabase.current[questionNumber.current - 1]![0] as string);
+      optionBText.current = optionsThatIGetFromMassiveMCQDatabase.current[questionNumber.current - 1]![1] as string;
+      setOptionB(optionsThatIGetFromMassiveMCQDatabase.current[questionNumber.current - 1]![1] as string);
+      optionCText.current = optionsThatIGetFromMassiveMCQDatabase.current[questionNumber.current - 1]![2] as string;
+      setOptionC(optionsThatIGetFromMassiveMCQDatabase.current[questionNumber.current - 1]![2] as string);
+      optionDText.current = optionsThatIGetFromMassiveMCQDatabase.current[questionNumber.current - 1]![3] as string;
+      setOptionD(optionsThatIGetFromMassiveMCQDatabase.current[questionNumber.current - 1]![3] as string);
+
       setOptionMCQ(undefined);
       setMCQVisibility(true);
     }
-    //console.log("this is the cover url", quizInformationToRender.current.coverURL);
-    //console.log("this is the caption", quizInformationToRender.current.caption);
 
   }
 
@@ -446,7 +423,7 @@ const QuizMicro: FC<QuizMicroProps> = ({ refetch }) => {
               <div>
                 <h1 className="text-2xl font-bold" id="question">{quizQuestion.current}</h1>
                 <h1 id="hintText" className="text-1xl font-bold" >{quizHintText.current}</h1>
-                {hintImageVisibility && <img id="hintImage" style={{ width: "200", height: "200" }} src={(arraySrc.current[0] == null) ? "" : arraySrc.current[0] as string} />}
+                {hintImageVisibility && <img id="hintImage" style={{ width: "200", height: "200" }} src={(arraySrc.current[questionNumber.current - 1] == null) ? "" : arraySrc.current[questionNumber.current - 1] as string} />}
                 {hintVideoVisibility && <iframe id="hintVideo"
                   frameBorder='0'
                   allow='autoplay; encrypted-media'
@@ -460,13 +437,13 @@ const QuizMicro: FC<QuizMicroProps> = ({ refetch }) => {
                   {displayCheckboxes()}
                 </div>}
                 {MCQVisibility && <div onChange={e => { setOptionMCQ((e.target as any).value); }} id="MCQOptions">
-                  <input type="radio" value={optionA} name="gender" checked={optionA === optionMCQ} onChange={e => { console.log(e.target.value); }} key="option a" /> <label id="optionA" key="option aa">{optionAText.current}</label>
+                  <input type="radio" value={optionA} name="gender" checked={optionA === optionMCQ} onChange={e => { ; }} key="option a" /> <label id="optionA" key="option aa">{optionAText.current}</label>
                   <br />
-                  <input type="radio" value={optionB} name="gender" checked={optionB === optionMCQ} onChange={e => { console.log(e.target.value); }} key="option b" /> <label id="optionB" key="option bb">{optionBText.current}</label>
+                  <input type="radio" value={optionB} name="gender" checked={optionB === optionMCQ} onChange={e => { ; }} key="option b" /> <label id="optionB" key="option bb">{optionBText.current}</label>
                   <br />
-                  <input type="radio" value={optionC} name="gender" checked={optionC === optionMCQ} onChange={e => { console.log(e.target.value); }} key="option c" /> <label id="optionC" key="option cc">{optionCText.current}</label>
+                  <input type="radio" value={optionC} name="gender" checked={optionC === optionMCQ} onChange={e => { ; }} key="option c" /> <label id="optionC" key="option cc">{optionCText.current}</label>
                   <br />
-                  <input type="radio" value={optionD} name="gender" checked={optionD === optionMCQ} onChange={e => { console.log(e.target.value); }} key="option d" /> <label id="optionD" key="option dd">{optionDText.current}</label>
+                  <input type="radio" value={optionD} name="gender" checked={optionD === optionMCQ} onChange={e => { ; }} key="option d" /> <label id="optionD" key="option dd">{optionDText.current}</label>
                 </div>}
                 <div className="flex flex-col items-center justify-center">
                   <a href="#_" className="relative inline-flex items-center justify-start py-3 pl-4 pr-12 overflow-hidden font-semibold text-indigo-600 transition-all duration-150 ease-in-out rounded hover:pl-10 hover:pr-6 bg-gray-50 group" onClick={() => checkAnswerUltimate()}
