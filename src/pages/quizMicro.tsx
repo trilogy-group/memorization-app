@@ -18,16 +18,6 @@ interface QuizMicroProps {
   //arrayDifficulty: string[];
 }
 
-/*
-!!! hard coded DOM             DONE
-remove console log 
-naming is bad
-sequence use npm i             DONE
-display the score to the user       DONE
-!!! get question data from mutation + hint
-!!! send score to backend            DONE
-*/
-
 //: FC<QuizMicroProps> = ({ inputQuestions, inputAnswer, inputType, inputIncorrectAnswer, inputHint,inputDifficulty }) =>
 const QuizMicro: FC<QuizMicroProps> = ({ refetch }) => {
   const session = useSession();
@@ -101,30 +91,9 @@ const QuizMicro: FC<QuizMicroProps> = ({ refetch }) => {
   useEffect(() => {
 
     quizQuestionAnswersEtc.mutateAsync().then(quizVariables => {
-      console.log("info that I will use to render the quiz ", quizVariables);
       if (quizVariables != null) {
         quizInformationToRender.current = quizVariables;
-
-
-        /*
-                mnemonic_difficulty_Info.mutateAsync({
-                  quizId: quizInformationToRender.current.id,
-                }).then(quizVariables => {
-                  console.log("info that I will use to get mnemonic and difficulty ", quizVariables);
-                  if (quizVariables != null) {
-                    arraySrc.current[0] = quizVariables.post.coverURL;
-                    postId.current = quizVariables.post.id;
-                    questionDifficulty.current = quizVariables.progress.efactor;
-                  }
-                  else {
-                    toast("problem with getting mnemonic/difficulty info from DB");
-                  }
-        
-                });
-                */
-
         manyQuizzesWithInfo.mutateAsync().then(quizVariables => {
-          console.log("info that I will use to render many quizzes ", quizVariables);
           if (quizVariables != null) {
             if (quizVariables.posts.length != quizVariables.quizzes.length || quizVariables.posts.length != quizVariables.progresses.length || quizVariables.quizzes.length != quizVariables.progresses.length) {
               toast("the returned arrays don't have the same length");
@@ -145,7 +114,6 @@ const QuizMicro: FC<QuizMicroProps> = ({ refetch }) => {
                 while (match != null) {
                   arrayOfAnswersForThisInstance.push(match[1] as string);
                   optionsThatIGetFromMassiveMCQDatabase.current.push(arrayOfAnswersForThisInstance);
-                  console.log(match[1] as string);
                   match = regexp.exec(string as string);
                 }
 
@@ -153,7 +121,6 @@ const QuizMicro: FC<QuizMicroProps> = ({ refetch }) => {
                 match = regexp.exec(string as string);
                 while (match != null) {
                   correctnessOfOptionsThatIGetFromMassiveMCQDatabase.push(match[1] == "True" ? true : false);
-                  console.log(match[1] as string);
                   match = regexp.exec(string as string);
                 }
 
@@ -163,8 +130,6 @@ const QuizMicro: FC<QuizMicroProps> = ({ refetch }) => {
 
             }
 
-            console.log(arrayQuestion.current);
-            console.log(arrayType.current);
           }
           else {
             toast("problem with getting many quizzes from DB");
@@ -344,8 +309,6 @@ const QuizMicro: FC<QuizMicroProps> = ({ refetch }) => {
 
     // check if by any chance we have finished all the questions
     if (questionNumber.current - 1 == arrayQuestion.current.length) {
-      console.log(questionNumber.current);
-      console.log("the id of the post ", postId.current[questionNumber.current - 2] as string);
       setQuizContentVisibility(false);
       setScoreVisibility(true);
       if (!session.data?.user) {
