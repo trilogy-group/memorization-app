@@ -17,16 +17,19 @@ export const contentTreeRouter = createRouter()
     input: z.object({
       description: z.string(),
     }),
+    
     async resolve({ ctx: { session }, input }) {
+      const apiKey = process.env.CURRICULUM_GRAPH_API_KEY || "";
+      const apiUrl = process.env.CURRICULUM_GRAPH_API_URL || "";
       if (session?.user?.id) {
         try {
            
           const data = await fetch(
-            "https://gshnf2p56bbinmx4na3lme4oce.appsync-api.us-west-2.amazonaws.com/graphql",
+            apiUrl,
             {
               method: "POST",
               headers: {
-                "x-api-key": "da2-dlp6tok3uvhxrlow4jypfthabq",
+                "x-api-key": apiKey,
                 "Content-Type": "application/json",
               },
               body: JSON.stringify({

@@ -26,6 +26,7 @@ import {
   Domain,
   Skill,
   Concept,
+  Question,
 } from "../../server/router/contentTreeInterface";
 
 import create from "zustand";
@@ -68,19 +69,38 @@ interface DataTreeViewProps {
 function DataTreeView({ treeItems }: DataTreeViewProps) {
   const conceptId = useConceptStore((state) => state.id);
   const conceptName = useConceptStore((state) => state.name);
-  const getTreeConceptsFromData = (treeItems: Concept[]) => {
+
+  const getTreeQuestionsFromData = (treeItems: Question[]) => {
     return treeItems.map((treeItemData) => {
       return (
         <TreeItem
           key={treeItemData.id}
           nodeId={treeItemData.id}
-          label={treeItemData.name}
+          label={treeItemData.desc}
           onClick={() => {
             useConceptStore.setState({
               id: treeItemData.id,
-              name: treeItemData.name,
+              name: treeItemData.desc,
             });
           }}
+        />
+      );
+    });
+  };
+
+
+  const getTreeConceptsFromData = (treeItems: Concept[]) => {
+    return treeItems.map((treeItemData) => {
+      let children = undefined;
+      if (treeItemData.questions && treeItemData.questions.length > 0) {
+        children = getTreeQuestionsFromData(treeItemData.questions);
+      }
+      return (
+        <TreeItem
+          key={treeItemData.id}
+          nodeId={treeItemData.id}
+          label={treeItemData.name}
+          children={children}
         />
       );
     });
