@@ -22,8 +22,8 @@ interface QuizMicroProps {
 const QuizMicro: FC<QuizMicroProps> = ({ refetch }) => {
   const session = useSession();
   const quizGradeMutation = trpc.useMutation("progress.post-one-quiz-result");
-  const quizQuestionAnswersEtc = trpc.useMutation("progress.get-one-quiz");
-  const mnemonic_difficulty_Info = trpc.useMutation("progress.get-data-about-quiz-mnemonic-and-difficulty-using-quizId");
+  //const quizQuestionAnswersEtc = trpc.useMutation("progress.get-one-quiz");
+  //const mnemonic_difficulty_Info = trpc.useMutation("progress.get-data-about-quiz-mnemonic-and-difficulty-using-quizId");
   const manyQuizzesWithInfo = trpc.useMutation("progress.get-many-quizzes");
   const [optionMCQ, setOptionMCQ] = useState();
   const [optionsList, setOptionsList] = useState<string[]>([]);
@@ -89,59 +89,51 @@ const QuizMicro: FC<QuizMicroProps> = ({ refetch }) => {
 
 
   useEffect(() => {
-
-    quizQuestionAnswersEtc.mutateAsync().then(quizVariables => {
+    manyQuizzesWithInfo.mutateAsync().then(quizVariables => {
       if (quizVariables != null) {
-        quizInformationToRender.current = quizVariables;
-        manyQuizzesWithInfo.mutateAsync().then(quizVariables => {
-          if (quizVariables != null) {
-            if (quizVariables.posts.length != quizVariables.quizzes.length || quizVariables.posts.length != quizVariables.progresses.length || quizVariables.quizzes.length != quizVariables.progresses.length) {
-              toast("the returned arrays don't have the same length");
+        if (quizVariables.posts.length != quizVariables.quizzes.length || quizVariables.posts.length != quizVariables.progresses.length || quizVariables.quizzes.length != quizVariables.progresses.length) {
+          toast("the returned arrays don't have the same length");
+        }
+
+        quizVariables.quizzes.forEach(quiz => arrayQuestion.current.push(quiz.name));
+        quizVariables.quizzes.forEach(quiz => arrayType.current.push(quiz.type));
+        quizVariables.progresses.forEach(progress => arrayQuestionDifficulty.current.push(progress.efactor));
+        quizVariables.posts.forEach(post => arraySrc.current.push(post.coverURL));
+        quizVariables.posts.forEach(post => postId.current.push(post.id));
+
+        for (let i = 0; i < quizVariables.quizzes.length; i++) {
+          if (arrayType.current[i] == "MCQ") {
+            let optionsString = quizVariables.quizzes[i]?.options;
+            let regexp = /desc': '([^']*)'/gm;
+            let match = regexp.exec(optionsString as string);
+            let arrayOfAnswersForThisInstance = new Array<string>;
+            while (match != null) {
+              arrayOfAnswersForThisInstance.push(match[1] as string);
+              optionsThatIGetFromMassiveMCQDatabase.current.push(arrayOfAnswersForThisInstance);
+              match = regexp.exec(optionsString as string);
             }
 
-            quizVariables.quizzes.forEach(quiz => arrayQuestion.current.push(quiz.name));
-            quizVariables.quizzes.forEach(quiz => arrayType.current.push(quiz.type));
-            quizVariables.progresses.forEach(progress => arrayQuestionDifficulty.current.push(progress.efactor));
-            quizVariables.posts.forEach(post => arraySrc.current.push(post.coverURL));
-            quizVariables.posts.forEach(post => postId.current.push(post.id));
-
-            for (let i = 0; i < quizVariables.quizzes.length; i++) {
-              if (arrayType.current[i] == "MCQ") {
-                let string = quizVariables.quizzes[i]?.options;
-                let regexp = /desc': '([^']*)'/gm;
-                let match = regexp.exec(string as string);
-                let arrayOfAnswersForThisInstance = new Array<string>;
-                while (match != null) {
-                  arrayOfAnswersForThisInstance.push(match[1] as string);
-                  optionsThatIGetFromMassiveMCQDatabase.current.push(arrayOfAnswersForThisInstance);
-                  match = regexp.exec(string as string);
-                }
-
-                regexp = /'is_correct': ([^}]*)}/gm;
-                match = regexp.exec(string as string);
-                while (match != null) {
-                  correctnessOfOptionsThatIGetFromMassiveMCQDatabase.push(match[1] == "True" ? true : false);
-                  match = regexp.exec(string as string);
-                }
-
-                let indexOfCorrectAnswerMCQ = correctnessOfOptionsThatIGetFromMassiveMCQDatabase.indexOf(true);
-                arrayOfArrayCorrectAnswers.current[i] = [optionsThatIGetFromMassiveMCQDatabase.current[i]![indexOfCorrectAnswerMCQ] as string];
-              }
-
+            regexp = /'is_correct': ([^}]*)}/gm;
+            match = regexp.exec(optionsString as string);
+            while (match != null) {
+              correctnessOfOptionsThatIGetFromMassiveMCQDatabase.push(match[1] == "True" ? true : false);
+              match = regexp.exec(optionsString as string);
             }
 
+            let indexOfCorrectAnswerMCQ = correctnessOfOptionsThatIGetFromMassiveMCQDatabase.indexOf(true);
+            arrayOfArrayCorrectAnswers.current[i] = [optionsThatIGetFromMassiveMCQDatabase.current[i]![indexOfCorrectAnswerMCQ] as string];
           }
-          else {
-            toast("problem with getting many quizzes from DB");
-          }
-          quizMakerUltimateHelper();
-        });
+
+        }
 
       }
       else {
-        toast("problem with getting quiz info from DB");
+        toast("problem with getting many quizzes from DB");
       }
+      quizMakerUltimateHelper();
     });
+
+
 
 
 
