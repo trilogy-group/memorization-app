@@ -35,6 +35,8 @@ import { devtools, persist } from "zustand/middleware";
 interface ConceptState {
   id: string;
   name: string;
+  parentId: string;
+  parentName: string;
 }
 
 const useConceptStore = create<ConceptState>()(
@@ -43,6 +45,8 @@ const useConceptStore = create<ConceptState>()(
       (set) => ({
         id: "",
         name: "",
+        parentId: "",
+        parentName: "",
       }),
       {
         name: "concept-storage",
@@ -58,7 +62,7 @@ const TreeElement = styled("div")`
 export type NavigationProps = {
   open?: boolean;
   onClose: () => void;
-  addNodeToWorkspace: (nodeId: string) => void;
+  addNodeToWorkspace: (nodeId: string, nodeName: string, parentId: string, parentName: string) => void;
   nodes?: Domain[];
 };
 
@@ -67,11 +71,10 @@ interface DataTreeViewProps {
 }
 
 function DataTreeView({ treeItems }: DataTreeViewProps) {
-  const conceptId = useConceptStore((state) => state.id);
-  const conceptName = useConceptStore((state) => state.name);
 
-  const getTreeQuestionsFromData = (treeItems: Question[]) => {
+  const getTreeQuestionsFromData = (treeItems: Question[], concept: Concept) => {
     return treeItems.map((treeItemData) => {
+
       return (
         <TreeItem
           key={treeItemData.id}
@@ -81,6 +84,8 @@ function DataTreeView({ treeItems }: DataTreeViewProps) {
             useConceptStore.setState({
               id: treeItemData.id,
               name: treeItemData.desc,
+              parentId: concept.id,
+              parentName: concept.name,
             });
           }}
         />
@@ -93,7 +98,7 @@ function DataTreeView({ treeItems }: DataTreeViewProps) {
     return treeItems.map((treeItemData) => {
       let children = undefined;
       if (treeItemData.questions && treeItemData.questions.length > 0) {
-        children = getTreeQuestionsFromData(treeItemData.questions);
+        children = getTreeQuestionsFromData(treeItemData.questions, treeItemData);
       }
       return (
         <TreeItem
@@ -150,14 +155,6 @@ function DataTreeView({ treeItems }: DataTreeViewProps) {
         defaultCollapseIcon={<ExpandMoreIcon />}
         defaultExpandIcon={<ChevronRightIcon />}
         selected={selected}
-        onNodeSelect={(e: any, nodeId: React.SetStateAction<string>) => {
-          // if nodeid is a string
-          if (Array.from(nodeId)[0] === "C") {
-            useConceptStore.setState({ id: nodeId?.toString() });
-          } else {
-            useConceptStore.setState({ id: null });
-          }
-        }}
       >
         {getTreeItemsFromData(treeItems)}
       </TreeView>
@@ -196,11 +193,19 @@ const Navigation = ({
   };
   const id = useConceptStore((state) => state.id);
   const name = useConceptStore((state) => state.name);
+  const parentId = useConceptStore((state) => state.parentId);
+  const parentName = useConceptStore((state) => state.parentName);
   console.log(id);
 
   const handleOpen = async () => {
     if (open) {
       setIsLoading(true);
+      useConceptStore.setState({
+        id: "",
+        name: "",
+        parentId: "",
+        parentName: "",
+      });
       await handleContentTree();
       setIsLoading(false);
     }
@@ -234,6 +239,7 @@ const Navigation = ({
           Cancel
         </Button>
         <Button
+          disabled={id === ""}
           className="disabled:text-gray-400 disabled:bg-gray-200`"
           /* disabled={!acronymGenerated || isLoadingAcronym[index]} */
           variant="outlined"
@@ -244,7 +250,8 @@ const Navigation = ({
             margin: 5,
           }}
           onClick={() => {
-            addNodeToWorkspace(name);
+            console.log(id)
+            addNodeToWorkspace(id, name, parentId, parentName);
             onClose();
           }}
         >

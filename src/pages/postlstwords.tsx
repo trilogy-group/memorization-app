@@ -109,6 +109,9 @@ const CreateListOfWords: NextPage = () => {
   const [open, setOpen] = useState(false);
 
   const [nodeId, setNodeId] = useState("");
+  const [nodeName, setNodeName] = useState("");
+  const [parentId, setParentId] = useState("");
+  const [parentName, setParentName] = useState("");
 
   const handleChange = (event: React.SyntheticEvent, newValue: string) => {
     setValue(newValue);
@@ -364,9 +367,13 @@ const CreateListOfWords: NextPage = () => {
                     <Navigation
                       open={open}
                       onClose={() => setOpen(false)}
-                      addNodeToWorkspace={function (nodeId: string): void {
-                        console.log("selected2" + nodeId);
+                      addNodeToWorkspace={function (nodeId: string, nodeName: string, parentId: string, parentName: string): void {
+                        console.log("Id: " + nodeId + " Name: " + nodeName + " ParentId: " + parentId + " ParentName: " + parentName);
                         setNodeId(nodeId);
+                        setNodeName(nodeName);
+                        setParentId(parentId);
+                        setParentName(parentName);
+                        setInputPostValue(nodeName);
                       }}
                     />
                   </h1>
@@ -379,9 +386,11 @@ const CreateListOfWords: NextPage = () => {
                     >
                       Select content
                     </button>
-                    <div className="flex flex-col gap-1">
-                      <h3>{nodeId}</h3>
+                    {parentName != "" && (
+                    <div>
+                      <h3 className="text-lg font-bold">Selected content: {parentName}</h3>
                     </div>
+                    )}
                     <Textarea
                       label="Enter your question"
                       placeholder="e.g., world leaders during WW2"
