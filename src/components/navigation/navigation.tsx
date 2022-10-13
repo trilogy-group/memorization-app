@@ -101,6 +101,7 @@ function DataTreeView({ treeItems }: DataTreeViewProps) {
         children = getTreeQuestionsFromData(treeItemData.questions, treeItemData);
       }
       return (
+        /* eslint-disable react/no-children-prop */
         <TreeItem
           key={treeItemData.id}
           nodeId={treeItemData.id}
@@ -121,6 +122,7 @@ function DataTreeView({ treeItems }: DataTreeViewProps) {
           key={treeItemData.id}
           nodeId={treeItemData.id}
           label={treeItemData.name}
+        /* eslint-disable react/no-children-prop */
           children={children}
         />
       );
@@ -139,6 +141,7 @@ function DataTreeView({ treeItems }: DataTreeViewProps) {
             key={treeItemData.id}
             nodeId={treeItemData.id}
             label={treeItemData.name}
+            /* eslint-disable react/no-children-prop */
             children={children}
           />
         );

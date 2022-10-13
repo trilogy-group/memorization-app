@@ -498,7 +498,7 @@ const CreateListOfWords: NextPage = () => {
                                   margin: 5,
                                 }}
                                 onClick={async () => {
-                                  setSelectedMnemonicType(acronym[index]);
+                                  setSelectedMnemonicType(acronym[index] || "");
                                   setSelectedMnemonic(true);
                                 }}
                               >
@@ -597,7 +597,7 @@ const CreateListOfWords: NextPage = () => {
                                   margin: 5,
                                 }}
                                 onClick={async () => {
-                                  setSelectedMnemonicType(mnemonicImage[index]);
+                                  setSelectedMnemonicType(mnemonicImage[index] || "");
                                   setSelectedMnemonic(true);
                                 }}
                               >
@@ -655,7 +655,7 @@ const CreateListOfWords: NextPage = () => {
                                   margin: 5,
                                 }}
                                 onClick={async () => {
-                                  setSelectedMnemonicType(story[index]);
+                                  setSelectedMnemonicType(story[index] || "");
                                   setSelectedMnemonic(true);
                                 }}
                               >

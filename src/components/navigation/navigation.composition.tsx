@@ -1,5 +1,5 @@
 import React from 'react';
-import { Navigation } from './navigation';
+import Navigation from './navigation';
 
 export const BasicNavigation = () => {
   return <Navigation onClose={() => {}} addNodeToWorkspace={ (node: string): void => {
