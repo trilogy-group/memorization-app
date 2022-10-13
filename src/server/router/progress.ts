@@ -1,3 +1,4 @@
+import { User } from "@nextui-org/react";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { getRepetition, newRepetition, SuperMemoItem, SuperMemoGrade } from "../../utils/spacedRepetition";
@@ -107,7 +108,7 @@ export const progressRouter = createRouter()
     async resolve({ ctx: { prisma, session }, input }) {
       let grade: SuperMemoGrade = Number(input.grade || "") % 5 as SuperMemoGrade; // 0 ~ 5, type SuperMemoItems
 
-      // if this quiz has already been viewed
+      // if this quiz has already in progress
       const existingProgress = await prisma.progress.findFirst({
         where: {
           userId: session?.user?.id!,
@@ -160,13 +161,34 @@ export const progressRouter = createRouter()
       // populate the feeds with post if grade falls below 3
       if (grade < 3) {
         const postsSuggested = await prisma.post.findMany({
-          take: 9 - grade * 2,
+          take: 6 - grade * 2, // 2, 4, or 6
           where: {
             quizzes: {
               id: input.quizId
+            },
+            NOT: {
+              likes: {
+                every: {
+                  userId: session?.user?.id as string,
+                }
+              }
             }
           }
         });
+        const postsLiked = await prisma.post.findMany({
+          take: 2,
+          where: {
+            quizzes: {
+              id: input.quizId
+            },
+            likes: {
+              every: {
+                userId: session?.user?.id as string
+              }
+            }
+          }
+        });
+
         for (const post of postsSuggested) {
           const feedsCreated = await prisma.feed.create({
             data: {
@@ -179,6 +201,19 @@ export const progressRouter = createRouter()
           if (feedsCreated == null) {
             throw new Error("Cannot create Feeds in DB");
           }
+        }
+        for (const post of postsLiked) {
+          const feedsLikedUpdated = await prisma.feed.update({
+            where: {
+              feed_identifier: {
+                userId: session?.user?.id as string,
+                postId: post.id
+              }
+            },
+            data: {
+              viewed: false,
+            }
+          });
         }
       }
 
