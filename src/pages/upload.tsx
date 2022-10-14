@@ -283,7 +283,7 @@ const Upload: NextPage = () => {
       toast.loading("Uploading metadata...", { id: toastID });
 
       // Replace with concept from user input
-      const conceptId = "CO8";
+      const conceptId = "CO1";
       const quizId = "Q1"
 
       const created = await uploadMutation.mutateAsync({
