@@ -58,6 +58,7 @@ model User {
     masteryId     Int?
     mastery       Mastery?       @relation(fields: [masteryId], references: [id])
     concepts      Concept[]
+    Feed          Feed[]
 
     @@fulltext([name, email])
 }
@@ -104,7 +105,8 @@ model Post {
     user          User           @relation(fields: [userId], references: [id])
 
     quizId  Int
-    quizzes Quiz @relation(fields: [quizId], references: [id])
+    quizzes Quiz  @relation(fields: [quizId], references: [id])
+    Feed    Feed[]
 
     @@fulltext([caption])
 }
@@ -137,7 +139,7 @@ model Notification {
     status      Int      @default(0) // 1: checked, 0: unchecked
     postId      String   @default("")
     posts       Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
-    quizId      Int   @default(0)
+    quizId      Int      @default(0)
     quizzes     Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
     lastUpdated DateTime @updatedAt
 }
@@ -207,4 +209,18 @@ model Quiz {
     conceptId    String
     concepts     Concept        @relation(fields: [conceptId], references: [id])
     Notification Notification[]
+    Feed         Feed[]
+}
+
+model Feed {
+    postId String
+    post   Post    @relation(fields: [postId], references: [id])
+    userId String
+    user   User    @relation(fields: [userId], references: [id])
+    quizId Int
+    quiz   Quiz    @relation(fields: [quizId], references: [id])
+    viewed Boolean
+
+    @@id([postId, userId], name: "feed_identifier")
+    @@unique([postId, userId])
 }

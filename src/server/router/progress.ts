@@ -1,3 +1,4 @@
+import { User } from "@nextui-org/react";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { getRepetition, newRepetition, SuperMemoItem, SuperMemoGrade } from "../../utils/spacedRepetition";
@@ -48,7 +49,7 @@ export const progressRouter = createRouter()
     },
   })
   .mutation("post-got-it", {
-    // create or update interval, easy factor, repetition per post
+    // create quiz: with interval, easy factor, repetition
     input: z.object({
       postId: z.string(),
     }),
@@ -69,71 +70,62 @@ export const progressRouter = createRouter()
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
       }
 
-      // if this post has already been viewed
-      const existingProgress = await prisma.progress.findFirst({
-        where: {
+      // create progress entry if not existing
+      const repetitionItem = newRepetition(grade);
+      const progressCreated = await prisma.progress.create({
+        data: {
+          // TODO: do not add interval in nextEvaluate estimate for demo purposes
+          nextEvaluate: new Date(),
+          efactor: repetitionItem.efactor,
+          interval: repetitionItem.interval,
           userId: session?.user?.id!,
           quizId: id,
         }
       });
-
-      // create progress entry if not existing
-      if (!existingProgress) {
-        const repetitionItem = newRepetition(grade);
-        const created = await prisma.progress.create({
-          data: {
-            // TODO: do not add interval in nextEvaluate estimate for demo purposes
-            nextEvaluate: new Date(),
-            efactor: repetitionItem.efactor,
-            interval: repetitionItem.interval,
-            userId: session?.user?.id!,
-            quizId: id,
-          }
-        });
-      }
       // Do not update the spaced repetition item if it's an existing item
+      // Update the feeds to set viewed as true
+      await prisma.feed.update({
+        where: {
+          feed_identifier: {
+            postId: post.id,
+            userId: session?.user?.id as string,
+          }
+        },
+        data: {
+          viewed: true,
+        }
+      });
       return;
     },
   })
   .mutation("post-one-quiz-result", {
     // create or update interval, easy factor, repetition per post
     input: z.object({
-      postId: z.string(),
-      grade: z.string(),
+      quizId: z.number().gt(0),
+      grade: z.number().gt(0),
     }),
     async resolve({ ctx: { prisma, session }, input }) {
-      const post = await prisma.post.findFirst({
-        where: {
-          id: input.postId,
-        }
-      });
-
-      if (post == null || post.quizId) {
-        throw new Error("Post not found or post missing quizId!");
-      }
-
-      const id = post.quizId;
-
       let grade: SuperMemoGrade = Number(input.grade || "") % 5 as SuperMemoGrade; // 0 ~ 5, type SuperMemoItems
 
-      // if this post has already been viewed
+      // if this quiz has already in progress
       const existingProgress = await prisma.progress.findFirst({
         where: {
           userId: session?.user?.id!,
-          quizId: id,
+          quizId: input.quizId,
         }
       });
 
       // create progress entry if not existing
+      var progressCreated;
       if (!existingProgress) {
-        const created = await prisma.progress.create({
+        progressCreated = await prisma.progress.create({
           data: {
             // TODO: add interval to nextEvaluate. Now quizzes are always pending for demo
             nextEvaluate: new Date(),
             efactor: 2.5,
             interval: 1,
             userId: session?.user?.id!,
-            quizId: id,
+            quizId: input.quizId,
           }
         });
       }
@@ -145,11 +137,11 @@ export const progressRouter = createRouter()
           efactor: existingProgress.efactor,
         };
         const repetitionItem = await getRepetition(item, grade);
-        const created = await prisma.progress.update({
+        progressCreated = await prisma.progress.update({
           where: {
             progress_identifier: {
               userId: session?.user?.id!,
-              quizId: id,
+              quizId: input.quizId,
             }
           },
           data: {
@@ -160,10 +152,70 @@ export const progressRouter = createRouter()
             repetition: repetitionItem.repetition
           }
         });
-        if (created == null) {
-          throw new Error("Database update error, spaced repetition failed");
+      }
+      if (progressCreated == null) {
+        throw new Error("Database update error, spaced repetition failed");
+      }
+
+      // populate the feeds with post if grade falls below 3
+      if (grade < 3) {
+        const postsSuggested = await prisma.post.findMany({
+          take: 6 - grade * 2, // 2, 4, or 6
+          where: {
+            quizzes: {
+              id: input.quizId
+            },
+            NOT: {
+              likes: {
+                every: {
+                  userId: session?.user?.id as string,
+                }
+              }
+            }
+          }
+        });
+        const postsLiked = await prisma.post.findMany({
+          take: 2,
+          where: {
+            quizzes: {
+              id: input.quizId
+            },
+            likes: {
+              every: {
+                userId: session?.user?.id as string
+              }
+            }
+          }
+        });
+
+        for (const post of postsSuggested) {
+          const feedsCreated = await prisma.feed.create({
+            data: {
+              postId: post.id,
+              userId: session?.user?.id as string,
+              quizId: post.quizId,
+              viewed: false,
+            }
+          });
+          if (feedsCreated == null) {
+            throw new Error("Cannot create Feeds in DB");
+          }
+        }
+        for (const post of postsLiked) {
+          const feedsLikedUpdated = await prisma.feed.update({
+            where: {
+              feed_identifier: {
+                userId: session?.user?.id as string,
+                postId: post.id
+              }
+            },
+            data: {
+              viewed: false,
+            }
+          });
         }
       }
+
       return;
     },
   });

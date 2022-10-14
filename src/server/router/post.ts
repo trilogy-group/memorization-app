@@ -5,10 +5,10 @@ import { z } from "zod";
 import { createRouter } from "./context";
 
 enum contentType {
-    image = 1,
-    video = 2,
-    text = 3,
-    unknown = 4,
+  image = 1,
+  video = 2,
+  text = 3,
+  unknown = 4,
 }
 
 export const postRouter = createRouter()
@@ -18,16 +18,45 @@ export const postRouter = createRouter()
     }),
     resolve: async ({ ctx: { prisma, session }, input }) => {
       const skip = input.cursor || 0;
+      const concepts = await prisma.concept.findMany({
+          where: {
+            users: {
+              every: {
+                id: session?.user?.id as string,
+              }
+            }
+          },
+          select: {
+            id: true,
+          }
+      });
+      const conceptIds = concepts.map(concept=>concept.id);
       const items = await prisma.post.findMany({
         take: 10,
         skip,
+        where: {
+          Feed: {
+            // concept filter is not needed, because they are applied when we add posts to the feed
+            every: {
+              userId: session?.user?.id as string,
+              viewed: false,
+            },
+            some: {
+              quiz: {
+                conceptId: {in: conceptIds}
+              }
+            }
+          }
+        },
         include: {
           user: true,
           quizzes: true,
           _count: { select: { likes: true, comments: true } },
         },
         orderBy: {
-          createdAt: "desc",
+          likes: {
+            _count: "desc"
+          }
         },
       });
       let likes: Like[] = [];
