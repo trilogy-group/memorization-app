@@ -81,10 +81,15 @@ const Main: FC<MainProps> = ({ origin }) => {
       <div className="flex-grow text-center my-4">There is no post yet</div>
     );
 
-  let { ref, inView } = useInView({
-    /* Optional options */
-//    threshold: 0,
-  });
+  let inView: boolean = false;
+  var ref = null;
+  try {
+    let { ref, inView } = useInView({
+    });
+  } catch {
+    // TODO:
+    // Fix Error: Rendered more hooks than during the previous render
+  }
 
   useEffect(() => {
     if (inView && !isFetchingNextPage && hasNextPage) {
