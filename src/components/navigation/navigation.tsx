@@ -198,7 +198,6 @@ const Navigation = ({
   const name = useConceptStore((state) => state.name);
   const parentId = useConceptStore((state) => state.parentId);
   const parentName = useConceptStore((state) => state.parentName);
-  console.log(id);
 
   const handleOpen = async () => {
     if (open) {
@@ -253,7 +252,6 @@ const Navigation = ({
             margin: 5,
           }}
           onClick={() => {
-            console.log(id)
             addNodeToWorkspace(id, name, parentId, parentName);
             onClose();
           }}

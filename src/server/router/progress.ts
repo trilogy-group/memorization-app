@@ -37,7 +37,6 @@ export const progressRouter = createRouter()
         return null;
       }
       const quizId = existingProgress?.quizId;
-      console.log(existingProgress);
       const quiz = await prisma.quiz.findFirst({
         where: {
           id: quizId

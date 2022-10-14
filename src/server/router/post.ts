@@ -60,7 +60,7 @@ export const postRouter = createRouter()
             (following) => following.followingId === item.userId
           ),
         })),
-        nextSkip: items.length === 0 ? null : skip + 10,
+        nextSkip: items.length === 0 ? null : skip + items.length,
       };
     },
   })
@@ -129,7 +129,7 @@ export const postRouter = createRouter()
             (following) => following.followingId === item.userId
           ),
         })),
-        nextSkip: items.length === 0 ? null : skip + 10,
+        nextSkip: items.length === 0 ? skip : skip + items.length,
       };
     },
   })

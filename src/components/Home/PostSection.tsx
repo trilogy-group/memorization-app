@@ -105,7 +105,7 @@ const PostSection: FC<PostSectionProps> = ({ post, refetch, origin }) => {
   };
 
   return (
-    <div key={post.id} className="flex items-start p-2 lg:p-4 gap-3">
+    <div key={post.id} className="flex items-start p-2 lg:p-4 gap-3 full-screen">
       <Link href={`/user/${post.user.id}`}>
         <a className="flex-shrink-0 rounded-full">
           <Image
