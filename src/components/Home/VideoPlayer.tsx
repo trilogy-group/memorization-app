@@ -30,22 +30,7 @@ const Video: FC<HTMLProps<HTMLVideoElement>> = (props) => {
     }
   }, [isPaused]);
 
-  /*
-      <div className="h-full w-auto relative cursor-pointer">
-        <video
-          {...props}
-          ref={videoRef}
-          className="max-h-full w-auto"
-          onPauseCapture={() => setIsPaused(true)}
-          onPlayCapture={() => setIsPaused(false)}
-          muted={isMuted}
-          playsInline
-          loop
-          controls={false}
-        ></video>
-  
-         width="320" height="240"
-  */
+
   return (
     <div className="h-full w-auto relative cursor-pointer">
       <video width={standardPostWidth} height={standardPostHeight}
