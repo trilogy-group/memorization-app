@@ -1,6 +1,6 @@
 import { Follow, Like, Post, Quiz, Progress } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
-import { z } from "zod";
+import { TypeOf, z } from "zod";
 
 import { createRouter } from "./context";
 
@@ -243,8 +243,35 @@ export const postRouter = createRouter()
       }));
 
       if (session?.user?.id) {
-        itemsToBeReturned.forEach(item => item.worthShowingQuizBeforeThePost = true);
+        for (let i = 0; i < itemsToBeReturned.length; i++) {
+          let progressForThatPost = await prisma.progress.findFirst({
+            where: {
+              quizId: itemsToBeReturned[i]?.quizId,
+              userId: session?.user?.id!
+            }
+          });
+
+          if (progressForThatPost) {
+            let item_to_be_returned_i = itemsToBeReturned[i];
+            if (item_to_be_returned_i) {
+              item_to_be_returned_i.worthShowingQuizBeforeThePost = progressForThatPost.efactor < 4;
+            }
+          }
+        }
       }
+
+      let new_quiz = { quizzes, posts, progresses };
+      let new_post = itemsToBeReturned[0];
+
+      type quiz_type = typeof new_quiz;
+      type post_type = typeof new_post;
+
+      type quiz_or_post_type = quiz_type | post_type;
+
+      let all_quizzes_and_posts: quiz_or_post_type[] = [];
+
+      itemsToBeReturned.forEach(item => all_quizzes_and_posts.push(item));
+      all_quizzes_and_posts.push({ quizzes, posts, progresses });
 
 
       return {
@@ -252,6 +279,7 @@ export const postRouter = createRouter()
         quizzes,
         progresses,
         posts,
+        all_quizzes_and_posts,
         nextSkip: items.length === 0 ? null : skip + 10,
       }
 

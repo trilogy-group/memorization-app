@@ -8,6 +8,7 @@ import { useMutation } from "react-query";
 
 import QuizMicro from "@/pages/quizMicro";
 import { Post, Progress, Quiz } from "@prisma/client";
+import { IoTelescope } from "react-icons/io5";
 
 interface MainProps {
   origin: string;
@@ -15,9 +16,13 @@ interface MainProps {
 
 const Main: FC<MainProps> = ({ origin }) => {
 
-  var minNumberOfPostBeforeNextQuiz = useRef(3);
-  var maxNumberOfPostBeforeNextQuiz = useRef(5);
+  const maxNumberOfPostsWithoutQuiz = 6;
+  const minNumberOfPostsBetweenQuizzes = 3;
+
   var numberOfPostBeforeNextQuiz = 5;
+  var numberOfConsecutivePosts = 0;
+  var numberOfConsecutiveQuizzes = 0;
+
   const router = useRouter();
 
   const { data, fetchNextPage, isFetchingNextPage, hasNextPage, refetch } =
@@ -117,11 +122,12 @@ const Main: FC<MainProps> = ({ origin }) => {
 
 
   function showQuiz(refetch: Function, quizzes: Quiz[], posts: Post[], progresses: Progress[], post: any, key: string, origin: string) {
-    //minNumberOfPostBeforeNextQuiz.current = 3;
-    //maxNumberOfPostBeforeNextQuiz.current = 5;
-    numberOfPostBeforeNextQuiz = numberOfPostBeforeNextQuiz + 3;
-    return <div>
-      <h1 className="text-3xl font-bold">It's time to solve a quiz</h1>
+    //numberOfPostBeforeNextQuiz = numberOfPostBeforeNextQuiz + 3;
+    numberOfConsecutivePosts = 0;
+    console.log("called show quiz ", post.worthShowingQuizBeforeThePost);
+    //numberOfConsecutiveQuizzes = 1;
+    return <div key={post.id}>
+      <h1 className="text-3xl font-bold text-center text-lime-600">QUIZ</h1>
       < QuizMicro
         refetch={refetch}
         quizzes={quizzes}
@@ -140,10 +146,11 @@ const Main: FC<MainProps> = ({ origin }) => {
   }
 
   function showPost(post: any, key: string, refetch: any, origin: string) {
-    //maxNumberOfPostBeforeNextQuiz.current--;
-    //minNumberOfPostBeforeNextQuiz.current--;
-    numberOfPostBeforeNextQuiz--;
-    return <div>
+    //numberOfPostBeforeNextQuiz--;
+    numberOfConsecutivePosts++;
+    console.log("called show post ", post.worthShowingQuizBeforeThePost);
+    //numberOfConsecutiveQuizzes = 0;
+    return <div key={post.id}>
       <PostSection
         post={post}
         key={key}
@@ -152,6 +159,15 @@ const Main: FC<MainProps> = ({ origin }) => {
       /></div>
   }
 
+  /*
+  function showQuizOrPost(page: any, quiz_or_post: any, refetch: any, origin: string) {
+    if (quiz_or_post instanceof String) {
+
+    } else {
+
+    }
+  }
+*/
 
 
   // if minNumberOfPostBeforeNextQuiz.current==0 and post is familiar show Quiz
@@ -162,16 +178,27 @@ const Main: FC<MainProps> = ({ origin }) => {
     <div className="flex-grow">
       {data?.pages.map((page) =>
         page.items.map(
-          (post) => ((numberOfPostBeforeNextQuiz <= 0 && post.worthShowingQuizBeforeThePost)
-            //|| (minNumberOfPostBeforeNextQuiz.current == 0 && post.worthShowingQuizBeforeThePost)
+          (post) => ((numberOfConsecutivePosts > 1 && post.worthShowingQuizBeforeThePost)
+            // || (numberOfConsecutivePosts >= maxNumberOfPostsWithoutQuiz)
           ) ?
             showQuiz(refetch, page.quizzes, page.posts, page.progresses, post, post.id, origin)
             :
             showPost(post, post.id, refetch, origin)
+        )
 
+
+      )
+
+      }
+
+
+      { /*data?.pages.map((page) =>
+        page.all_quizzes_and_posts.map(
+          (quiz_or_post) => showQuizOrPost(page, quiz_or_post, refetch, origin)
         )
       )
-      }
+       */}
+
 
       {/* At the bottom to detect infinite scroll */}
       <InView
@@ -185,6 +212,9 @@ const Main: FC<MainProps> = ({ origin }) => {
       >
         {({ ref }) => <div ref={ref} className="h-10"></div>}
       </InView>
+
+      <div className="text-center text-amber-400"> <h1 className="text-5xl font-bold">You have reached the end of the feed</h1></div>
+
 
     </div>
   );

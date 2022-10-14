@@ -116,7 +116,7 @@ export const getServerSideProps = async ({
       : Promise.resolve([]),
     isFetchingFollowing
       ? ssg.fetchInfiniteQuery("post.following", {})
-      : ssg.fetchInfiniteQuery("post.for-you-with-quizzes", {}),
+      : ssg.fetchInfiniteQuery("post.for-you", {}),
   ]);
 
   return {
