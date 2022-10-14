@@ -1,38 +1,42 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
 generator client {
-  provider        = "prisma-client-js"
-  previewFeatures = ["referentialIntegrity", "fullTextSearch", "fullTextIndex"]
+    provider        = "prisma-client-js"
+    previewFeatures = ["referentialIntegrity", "fullTextSearch", "fullTextIndex"]
 }
 
 datasource db {
-  provider             = "mysql"
-  url                  = env("DATABASE_URL")
-  referentialIntegrity = "prisma"
+    provider             = "mysql"
+    url                  = env("DATABASE_URL")
+    referentialIntegrity = "prisma"
 }
 
+// Necessary for Next auth
 model Account {
-  id                String  @id @default(cuid())
-  userId            String
-  type              String
-  provider          String
-  providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
-  expires_at        Int?
-  token_type        String?
-  scope             String?
-  id_token          String? @db.Text
-  session_state     String?
-  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+    id                String  @id @default(cuid())
+    userId            String
+    type              String
+    provider          String
+    providerAccountId String
+    refresh_token     String? @db.Text
+    access_token      String? @db.Text
+    expires_at        Int?
+    token_type        String?
+    scope             String?
+    id_token          String? @db.Text
+    session_state     String?
+    user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([provider, providerAccountId])
+    @@unique([provider, providerAccountId])
 }
 
 model Session {
-  id           String   @id @default(cuid())
-  sessionToken String   @unique
-  userId       String
-  expires      DateTime
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    id           String   @id @default(cuid())
+    sessionToken String   @unique
+    userId       String
+    expires      DateTime
+    user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model User {
@@ -56,26 +60,27 @@ model User {
     concepts      Concept[]
     Feed          Feed[]
 
-  @@fulltext([name, email])
+    @@fulltext([name, email])
 }
 
 model Progress {
-  lastEvaluated DateTime
-  interval      Float    @default(0)
-  repetition    Float    @default(0)
-  efactor       Float    @default(2.5)
-  userId        String
-  questionId    String
-  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    nextEvaluate DateTime
+    interval     Float    @default(0)
+    repetition   Int      @default(0)
+    efactor      Float    @default(2.5)
+    userId       String
+    user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    quizId       Int
+    quizzes      Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
 
-  @@id([userId, questionId])
-  @@unique([userId, questionId])
+    @@id([userId, quizId], name: "progress_identifier")
+    @@unique([userId, quizId])
 }
 
 model VerificationToken {
-  identifier String
-  token      String   @unique
-  expires    DateTime
+    identifier String
+    token      String   @unique
+    expires    DateTime
 
     @@unique([identifier, token])
 }
@@ -118,11 +123,12 @@ model Mastery {
 }
 
 model Like {
-  questionId String
-  userId     String
-  user       User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+    postId String
+    userId String
+    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+    post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
 
-  @@id([questionId, userId])
+    @@id([postId, userId])
 }
 
 model Notification {
@@ -139,47 +145,52 @@ model Notification {
 }
 
 model Comment {
-  id         String   @id @default(cuid())
-  questionId String
-  userId     String
-  content    String
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    id        String   @id @default(cuid())
+    postId    String
+    userId    String
+    content   String
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
 }
 
 model Follow {
-  followerId  String
-  followingId String
-  follower    User   @relation("followers", fields: [followerId], references: [id], onDelete: Cascade)
-  following   User   @relation("followings", fields: [followingId], references: [id], onDelete: Cascade)
+    followerId  String
+    followingId String
+    follower    User   @relation("followers", fields: [followerId], references: [id], onDelete: Cascade)
+    following   User   @relation("followings", fields: [followingId], references: [id], onDelete: Cascade)
 
-  @@id([followingId, followerId])
+    @@id([followingId, followerId])
 }
 
-model Hashtag {
-  id  Int    @id @default(autoincrement())
-  tag String @unique
+model Subject {
+    id      String   @id
+    name    String
+    domains Domain[]
 }
 
-model Question {
-  id          String   @id
-  caption     String   @db.Text
-  videoURL    String   @db.Text
-  coverURL    String   @db.Text
-  videoWidth  Int
-  videoHeight Int
-  userId      String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime
-  contentType Int      @default(3)
-
-  @@fulltext([caption])
+model Domain {
+    id        String  @id
+    name      String
+    subjectId String
+    subject   Subject @relation(fields: [subjectId], references: [id])
+    skills    Skill[]
 }
 
+<<<<<<< HEAD
 model HashtagToQuestion {
   A Int
   B String
+=======
+model Skill {
+    id       String    @id
+    name     String
+    domainId String
+    Domain   Domain    @relation(fields: [domainId], references: [id])
+    concepts Concept[]
+}
+>>>>>>> f82b6006efdd7734f121afde2cc0b733c2db2c27
 
 model Concept {
     id        String    @id
