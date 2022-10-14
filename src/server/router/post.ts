@@ -177,7 +177,8 @@ export const postRouter = createRouter()
         where: {
           concepts: {
             id: input.conceptId,
-          }
+          },
+          idInConcept: input.quizId as string,
         }
       });
 

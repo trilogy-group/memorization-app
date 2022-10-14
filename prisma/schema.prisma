@@ -200,6 +200,7 @@ model Concept {
 
 model Quiz {
     id           Int            @id @default(autoincrement())
+    idInConcept  String
     name         String         @db.Text
     type         String
     options      String         @db.Text
