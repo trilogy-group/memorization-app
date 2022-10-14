@@ -23,6 +23,22 @@ export const userRouter = createRouter()
           },
         },
       });
+      const postSuggested = await prisma.post.findMany({
+        take: 5,
+        where: {
+          concepts: {
+            id: input.conceptId,
+          }
+        }
+      });
+      const feedsCreated = await prisma.feed.createMany({
+        data: postSuggested.map((post) => ({
+          postId: post.id,
+          userId: session?.user?.id as string,
+          quizId: post.quizId,
+          viewed: false,
+        }))
+      });
       return ;
     },
   })

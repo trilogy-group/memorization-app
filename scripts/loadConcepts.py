@@ -3,13 +3,13 @@ import subprocess, os, sys
 import logging
 import MySQLdb
 
-mysql -h cn-central-db-mysql.cluster-cbzs7kxmytip.us-east-1.rds.amazonaws.com -u tu22memory -D tu22_memorization -p
+#mysql -h cn-central-db-mysql.cluster-cbzs7kxmytip.us-east-1.rds.amazonaws.com -u tu22memory -D tu22_memorization -p
 
 
-db_host = "cn-central-db-mysql.cluster-cbzs7kxmytip.us-east-1.rds.amazonaws.com"
-db_user = "tu22memory"
-db_name = "tu22_memorization"
-password = "password"
+db_host = "127.0.0.1"
+db_user = "root"
+db_name = "memoryapp"
+password = "14pepon"
 port = 3306
 login_session = {}
 connect_pool=[]
@@ -36,9 +36,10 @@ def get_connect():
 
 def get_cg_tree():
     logging.info(cmd)
-
-    p = subprocess.run(cmd, capture_output=True)
-    cg_tree = json.loads(p.stdout)
+    # read "concept_data.txt" file
+    with open('concept_data.txt') as f:
+        json_data = json.load(f)
+    cg_tree = json_data
     
     domains_lst = cg_tree['data']['domains']
     return domains_lst
