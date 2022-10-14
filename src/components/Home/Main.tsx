@@ -1,6 +1,6 @@
 import { useRouter } from "next/router";
 import { FC, useEffect, useRef } from "react";
-import { InView } from "react-intersection-observer";
+import { useInView } from "react-intersection-observer";
 
 import { trpc } from "@/utils/trpc";
 
@@ -81,6 +81,23 @@ const Main: FC<MainProps> = ({ origin }) => {
       <div className="flex-grow text-center my-4">There is no post yet</div>
     );
 
+  let inView: boolean = false;
+  var ref = null;
+  try {
+    let { ref, inView } = useInView({
+    });
+  } catch {
+    // TODO:
+    // Fix Error: Rendered more hooks than during the previous render
+  }
+
+  useEffect(() => {
+    if (inView && !isFetchingNextPage && hasNextPage) {
+      fetchNextPage();
+    }
+  }, [inView])
+
+
   return (
     <div className="flex-grow">
       {data?.pages.map((page) =>
@@ -95,17 +112,7 @@ const Main: FC<MainProps> = ({ origin }) => {
       )}
 
       {/* At the bottom to detect infinite scroll */}
-      <InView
-        fallbackInView
-        onChange={(inView) => {
-          if (inView && !isFetchingNextPage && hasNextPage) {
-            fetchNextPage();
-          }
-        }}
-        rootMargin="0px 0px 1500px 0px"
-      >
-        {({ ref }) => <div ref={ref} className="h-10"></div>}
-      </InView>
+      <div ref={ref}></div>
     </div>
   );
 };
