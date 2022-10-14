@@ -33,8 +33,14 @@ import Button from "@mui/material/Button";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import BackIcon from "@mui/icons-material/ArrowBackIosNew";
 
-// import { Navigation } from "../components/navigation/navigation";
 import Navigation from "../components/navigation/navigation";
+
+interface ConceptState {
+  id: string;
+  name: string;
+  parentId: string;
+  parentName: string;
+}
 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#fff",
@@ -57,7 +63,6 @@ const Item2 = styled(Paper)(({ theme }) => ({
 const wordList: string[] = [];
 
 const CreateListOfWords: NextPage = () => {
-
   const uploadMutation = trpc.useMutation("post.createVideo");
 
   const [mnemonicImage, setMnemonicImage] = useState<string[]>([]);
@@ -367,13 +372,34 @@ const CreateListOfWords: NextPage = () => {
                     <Navigation
                       open={open}
                       onClose={() => setOpen(false)}
-                      addNodeToWorkspace={function (nodeId: string, nodeName: string, parentId: string, parentName: string): void {
-                        console.log("Id: " + nodeId + " Name: " + nodeName + " ParentId: " + parentId + " ParentName: " + parentName);
+                      multiselect={false}
+                      questions={true}
+                      addNodeToWorkspace={function (
+                        nodeId: string,
+                        nodeName: string,
+                        parentId: string,
+                        parentName: string
+                      ): void {
+                        console.log(
+                          "Id: " +
+                            nodeId +
+                            " Name: " +
+                            nodeName +
+                            " ParentId: " +
+                            parentId +
+                            " ParentName: " +
+                            parentName
+                        );
                         setNodeId(nodeId);
                         setNodeName(nodeName);
                         setParentId(parentId);
                         setParentName(parentName);
                         setInputPostValue(nodeName);
+                      }}
+                      addNodeListToWorkspace={function (
+                        concepts: ConceptState[]
+                      ): void {
+                        throw new Error("Function not implemented.");
                       }}
                     />
                   </h1>
@@ -387,9 +413,11 @@ const CreateListOfWords: NextPage = () => {
                       Select content
                     </button>
                     {parentName != "" && (
-                    <div>
-                      <h3 className="text-lg font-bold">Selected content: {parentName}</h3>
-                    </div>
+                      <div>
+                        <h3 className="text-lg font-bold">
+                          Selected content: {parentName}
+                        </h3>
+                      </div>
                     )}
                     <Textarea
                       label="Enter your question"
@@ -597,7 +625,9 @@ const CreateListOfWords: NextPage = () => {
                                   margin: 5,
                                 }}
                                 onClick={async () => {
-                                  setSelectedMnemonicType(mnemonicImage[index] || "");
+                                  setSelectedMnemonicType(
+                                    mnemonicImage[index] || ""
+                                  );
                                   setSelectedMnemonic(true);
                                 }}
                               >
