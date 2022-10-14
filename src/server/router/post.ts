@@ -17,9 +17,21 @@ export const postRouter = createRouter()
       cursor: z.number().nullish(),
     }),
     resolve: async ({ ctx: { prisma, session }, input }) => {
-      const skip = input.cursor || 4;
+      const skip = input.cursor || 1;
+      const feedItems = await prisma.feed.findMany({
+        where: {
+          userId: session?.user?.id as string,
+        },
+        select: {
+          postId: true,
+        }
+      });
+      console.log(feedItems);
+
+      const feedPostIdArr = feedItems.map((feed)=>feed.postId);
+
       const items = await prisma.post.findMany({
-        take: 4,
+        take: 1,
         skip,
         include: {
           user: true,
@@ -31,7 +43,15 @@ export const postRouter = createRouter()
             _count: "desc"
           }
         },
+        where: {
+          Feed: {
+            some: {
+              postId: {in: feedPostIdArr}
+            }
+          }
+        }
       });
+
       let likes: Like[] = [];
       let followings: Follow[] = [];
 
