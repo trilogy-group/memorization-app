@@ -11,9 +11,11 @@ import { acronymRecommendationRouter } from "./recommendAcro";
 import { storyRecommendationRouter } from "./recommendStory";
 import { notificationRouter } from "./notification";
 import { contentTreeRouter } from "./contentTree";
+import { userRouter } from "./user";
 
 export const appRouter = createRouter()
   .transformer(superjson)
+  .merge("user.", userRouter)
   .merge("post.", postRouter)
   .merge("like.", likeRouter)
   .merge("follow.", followRouter)

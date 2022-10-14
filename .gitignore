@@ -42,3 +42,5 @@ migrations
 # images
 .out/
 public/*.png
+concept_data.txt
+log
