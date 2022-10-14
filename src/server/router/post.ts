@@ -17,7 +17,7 @@ export const postRouter = createRouter()
       cursor: z.number().nullish(),
     }),
     resolve: async ({ ctx: { prisma, session }, input }) => {
-      const skip = input.cursor || 1;
+      const skip = input.cursor || 0;
       const feedItems = await prisma.feed.findMany({
         where: {
           userId: session?.user?.id as string,
@@ -31,7 +31,7 @@ export const postRouter = createRouter()
       const feedPostIdArr = feedItems.map((feed)=>feed.postId);
 
       const items = await prisma.post.findMany({
-        take: 1,
+        take: 4,
         skip,
         include: {
           user: true,
@@ -173,12 +173,16 @@ export const postRouter = createRouter()
       quizId: z.string(),
     }),
     async resolve({ ctx: { prisma, session }, input }) {
+      console.log("conceptid", input.conceptId);
+      console.log("idInconcept", input.quizId);
       const quizFound = await prisma.quiz.findFirst({
         where: {
-          concepts: {
+          AND: [
+          {concepts: {
             id: input.conceptId,
-          },
-          idInConcept: input.quizId as string,
+          }},
+          {idInConcept: input.quizId as string,
+          }]
         }
       });
 

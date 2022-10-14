@@ -45,6 +45,7 @@ const Sidebar: FC<SidebarProps> = ({
   const addConceptMutation = trpc.useMutation("user.addConcept");
 
   const handleAddConcept = async (concept: ConceptState[]) => {
+    console.log('handle add concept');
     for (let i = 0; i < concept.length; i++) {
       console.log(concept[i]?.id);
       await addConceptMutation.mutateAsync({
