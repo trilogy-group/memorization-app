@@ -34,6 +34,7 @@ import RefreshIcon from "@mui/icons-material/Refresh";
 import BackIcon from "@mui/icons-material/ArrowBackIosNew";
 
 import Navigation from "../components/navigation/navigation";
+import Upload from "../components/upload/upload";
 
 interface ConceptState {
   id: string;
@@ -63,6 +64,8 @@ const Item2 = styled(Paper)(({ theme }) => ({
 const wordList: string[] = [];
 
 const CreateListOfWords: NextPage = () => {
+  const [openUpload, setOpenUpload] = useState(false);
+
   const uploadMutation = trpc.useMutation("post.createVideo");
 
   const [mnemonicImage, setMnemonicImage] = useState<string[]>([]);
@@ -324,7 +327,7 @@ const CreateListOfWords: NextPage = () => {
   };
 
   const handleUpload = async () => {
-    // TODO: connect to the mnemonics generation backend
+    setOpenUpload(true);// TODO: connect to the mnemonics generation backend
   };
 
   const handleAddToSequence = async () => {
@@ -402,6 +405,34 @@ const CreateListOfWords: NextPage = () => {
                         throw new Error("Function not implemented.");
                       }}
                     />
+                    <Upload
+                      open={openUpload}
+                      onClose={() => setOpenUpload(false)}
+                      conceptId={parentId}
+                      questionId={nodeId}
+                      addNodeToWorkspace={function (
+                        nodeId: string,
+                        nodeName: string,
+                        parentId: string,
+                        parentName: string
+                      ): void {
+                        console.log(
+                          "Id: " +
+                            nodeId +
+                            " Name: " +
+                            nodeName +
+                            " ParentId: " +
+                            parentId +
+                            " ParentName: " +
+                            parentName
+                        );
+                        setNodeId(nodeId);
+                        setNodeName(nodeName);
+                        setParentId(parentId);
+                        setParentName(parentName);
+                        setInputPostValue(nodeName);
+                      }}
+                    />
                   </h1>
 
                   <div className="grid gap-1" style={{ marginBottom: 10 }}>
@@ -469,7 +500,7 @@ const CreateListOfWords: NextPage = () => {
                   <div>
                     <button
                       onClick={async () => await handleUpload()}
-                      disabled={!inputValue.trim() || isLoading}
+                      disabled={isLoading}
                       className={`flex justify-center items-center gap-2 py-3 min-w-[170px] hover:brightness-90 transition text-white bg-red-1 disabled:text-gray-400 disabled:bg-gray-200`}
                       style={{ borderRadius: 5, padding: 5 }}
                     >
