@@ -17,18 +17,18 @@ interface MainProps {
 const Main: FC<MainProps> = ({ origin }) => {
 
   const maxNumberOfPostsWithoutQuiz = 6;
-  const minNumberOfPostsBetweenQuizzes = 3;
 
-  var numberOfPostBeforeNextQuiz = 5;
   var numberOfConsecutivePosts = 0;
-  var numberOfConsecutiveQuizzes = 0;
+
 
   const router = useRouter();
 
   const { data, fetchNextPage, isFetchingNextPage, hasNextPage, refetch } =
     trpc.useInfiniteQuery(
       [
-        "post.for-you-with-quizzes",
+        Boolean(Number(router.query.following))
+          ? "post.for-you-with-quizzes"
+          : "post.for-you-with-quizzes",
         {},
       ],
       {
@@ -122,10 +122,7 @@ const Main: FC<MainProps> = ({ origin }) => {
 
 
   function showQuiz(refetch: Function, quizzes: Quiz[], posts: Post[], progresses: Progress[], post: any, key: string, origin: string) {
-    //numberOfPostBeforeNextQuiz = numberOfPostBeforeNextQuiz + 3;
     numberOfConsecutivePosts = 0;
-    console.log("called show quiz ", post.worthShowingQuizBeforeThePost);
-    //numberOfConsecutiveQuizzes = 1;
     return <div key={post.id}>
       <h1 className="text-3xl font-bold text-center text-lime-600">QUIZ</h1>
       < QuizMicro
@@ -146,10 +143,8 @@ const Main: FC<MainProps> = ({ origin }) => {
   }
 
   function showPost(post: any, key: string, refetch: any, origin: string) {
-    //numberOfPostBeforeNextQuiz--;
     numberOfConsecutivePosts++;
     console.log("called show post ", post.worthShowingQuizBeforeThePost);
-    //numberOfConsecutiveQuizzes = 0;
     return <div key={post.id}>
       <PostSection
         post={post}
@@ -159,27 +154,12 @@ const Main: FC<MainProps> = ({ origin }) => {
       /></div>
   }
 
-  /*
-  function showQuizOrPost(page: any, quiz_or_post: any, refetch: any, origin: string) {
-    if (quiz_or_post instanceof String) {
-
-    } else {
-
-    }
-  }
-*/
-
-
-  // if minNumberOfPostBeforeNextQuiz.current==0 and post is familiar show Quiz
-  // if maxNumberOfPostBeforeNextQuiz.current==0 show Quiz, show the post right after that
-  // have parameter worthShowingQuizBeforeThePost
-
   return (
     <div className="flex-grow">
       {data?.pages.map((page) =>
         page.items.map(
           (post) => ((numberOfConsecutivePosts > 1 && post.worthShowingQuizBeforeThePost)
-            // || (numberOfConsecutivePosts >= maxNumberOfPostsWithoutQuiz)
+            || (numberOfConsecutivePosts >= maxNumberOfPostsWithoutQuiz)
           ) ?
             showQuiz(refetch, page.quizzes, page.posts, page.progresses, post, post.id, origin)
             :
@@ -190,14 +170,6 @@ const Main: FC<MainProps> = ({ origin }) => {
       )
 
       }
-
-
-      { /*data?.pages.map((page) =>
-        page.all_quizzes_and_posts.map(
-          (quiz_or_post) => showQuizOrPost(page, quiz_or_post, refetch, origin)
-        )
-      )
-       */}
 
 
       {/* At the bottom to detect infinite scroll */}

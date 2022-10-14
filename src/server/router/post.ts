@@ -33,6 +33,12 @@ export const postRouter = createRouter()
       let likes: Like[] = [];
       let followings: Follow[] = [];
 
+      let quizIds: number[] = [];
+      let quizzes: Quiz[] = [];
+      let progresses: Progress[] = [];
+      let posts: Post[] = [];
+      let worthShowingQuizBeforeThePost: boolean;
+
       if (session?.user?.id) {
         [likes, followings] = await Promise.all([
           prisma.like.findMany({
@@ -50,18 +56,113 @@ export const postRouter = createRouter()
             },
           }),
         ]);
+
+        // GETTING QUIZZES BEGIN
+        const existingProgress = await prisma.progress.findMany({
+          take: 5,
+          skip,
+          where: {
+            userId: session?.user?.id!,
+            nextEvaluate: {
+              lt: new Date()
+            }
+          },
+          orderBy: {
+            // quizzes from the most recent ones
+            nextEvaluate: "asc"
+          }
+        });
+        if (existingProgress == null) {
+          console.log("no existing progress");
+        }
+
+
+        existingProgress?.forEach(progress => { quizIds.push(progress.quizId) });
+        console.log("quiz ids are", quizIds);
+
+        quizzes = await prisma.quiz.findMany({
+          where: {
+            id: { in: quizIds }
+          },
+        });
+
+
+        for (let i = 0; i < quizIds.length; i++) {
+          let post = await prisma.post.findFirst({
+            where: {
+              quizId: quizIds[i],
+            }
+          });
+          if (post != null) {
+            posts.push(post);
+          }
+
+          let progress = await prisma.progress.findFirst({
+            where: {
+              quizId: quizIds[i],
+              userId: session?.user?.id!
+            }
+          });
+          if (progress != null) {
+            progresses.push(progress);
+          }
+
+        }
+        // GETTING QUIZZES END
+
+
       }
 
+      let itemsToBeReturned = items.map((item) => ({
+        ...item,
+        likedByMe: likes.some((like) => like.postId === item.id),
+        followedByMe: followings.some(
+          (following) => following.followingId === item.userId
+        ),
+        worthShowingQuizBeforeThePost: false
+      }));
+
+      if (session?.user?.id) {
+        for (let i = 0; i < itemsToBeReturned.length; i++) {
+          let progressForThatPost = await prisma.progress.findFirst({
+            where: {
+              quizId: itemsToBeReturned[i]?.quizId,
+              userId: session?.user?.id!
+            }
+          });
+
+          if (progressForThatPost) {
+            let item_to_be_returned_i = itemsToBeReturned[i];
+            if (item_to_be_returned_i) {
+              item_to_be_returned_i.worthShowingQuizBeforeThePost = progressForThatPost.efactor < 4;
+            }
+          }
+        }
+      }
+
+      //let new_quiz = { quizzes, posts, progresses };
+      //let new_post = itemsToBeReturned[0];
+
+      //type quiz_type = typeof new_quiz;
+      //type post_type = typeof new_post;
+
+      //type quiz_or_post_type = quiz_type | post_type;
+
+      //let all_quizzes_and_posts: quiz_or_post_type[] = [];
+
+      //itemsToBeReturned.forEach(item => all_quizzes_and_posts.push(item));
+      //all_quizzes_and_posts.push({ quizzes, posts, progresses});
+
+
       return {
-        items: items.map((item) => ({
-          ...item,
-          likedByMe: likes.some((like) => like.postId === item.id),
-          followedByMe: followings.some(
-            (following) => following.followingId === item.userId
-          ),
-        })),
-        nextSkip: items.length === 0 ? null : skip + 10,
-      };
+        items: itemsToBeReturned,
+        quizzes,
+        progresses,
+        posts,
+        //all_quizzes_and_posts,
+        nextSkip: items.length === 0 ? null : skip + 15,
+      }
+
     },
   })
   .middleware(async ({ ctx, next }) => {
@@ -254,32 +355,17 @@ export const postRouter = createRouter()
           if (progressForThatPost) {
             let item_to_be_returned_i = itemsToBeReturned[i];
             if (item_to_be_returned_i) {
-              item_to_be_returned_i.worthShowingQuizBeforeThePost = progressForThatPost.efactor < 4;
+              item_to_be_returned_i.worthShowingQuizBeforeThePost = progressForThatPost.efactor < 2;
             }
           }
         }
       }
-
-      let new_quiz = { quizzes, posts, progresses };
-      let new_post = itemsToBeReturned[0];
-
-      type quiz_type = typeof new_quiz;
-      type post_type = typeof new_post;
-
-      type quiz_or_post_type = quiz_type | post_type;
-
-      let all_quizzes_and_posts: quiz_or_post_type[] = [];
-
-      itemsToBeReturned.forEach(item => all_quizzes_and_posts.push(item));
-      all_quizzes_and_posts.push({ quizzes, posts, progresses });
-
 
       return {
         items: itemsToBeReturned,
         quizzes,
         progresses,
         posts,
-        all_quizzes_and_posts,
         nextSkip: items.length === 0 ? null : skip + 10,
       }
 
