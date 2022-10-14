@@ -18,6 +18,19 @@ export const postRouter = createRouter()
     }),
     resolve: async ({ ctx: { prisma, session }, input }) => {
       const skip = input.cursor || 0;
+      const concepts = await prisma.concept.findMany({
+          where: {
+            users: {
+              every: {
+                id: session?.user?.id as string,
+              }
+            }
+          },
+          select: {
+            id: true,
+          }
+      });
+      const conceptIds = concepts.map(concept=>concept.id);
       const items = await prisma.post.findMany({
         take: 10,
         skip,
@@ -27,6 +40,11 @@ export const postRouter = createRouter()
             every: {
               userId: session?.user?.id as string,
               viewed: false,
+            },
+            some: {
+              quiz: {
+                conceptId: {in: conceptIds}
+              }
             }
           }
         },
