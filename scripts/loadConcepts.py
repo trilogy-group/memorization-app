@@ -3,14 +3,17 @@ import subprocess, os, sys
 import logging
 import MySQLdb
 
-db_host = "localhost"
-db_user = "sammy"
-db_name = "memoryapp"
-password = "admin"
+mysql -h cn-central-db-mysql.cluster-cbzs7kxmytip.us-east-1.rds.amazonaws.com -u tu22memory -D tu22_memorization -p
+
+
+db_host = "cn-central-db-mysql.cluster-cbzs7kxmytip.us-east-1.rds.amazonaws.com"
+db_user = "tu22memory"
+db_name = "tu22_memorization"
+password = "password"
 port = 3306
 login_session = {}
 connect_pool=[]
-log_filename = 'conceptstore_log.txt'
+log_filename = 'log'
 
 cmd =  ['bash', 'get_concepts.sh']
 
@@ -36,7 +39,7 @@ def get_cg_tree():
 
     p = subprocess.run(cmd, capture_output=True)
     cg_tree = json.loads(p.stdout)
-
+    
     domains_lst = cg_tree['data']['domains']
     return domains_lst
 

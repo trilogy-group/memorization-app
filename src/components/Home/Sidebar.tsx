@@ -1,13 +1,19 @@
 import Image from "next/future/image";
 import Link from "next/link";
+import Button from "@mui/material/Button";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
 import { FC } from "react";
-import { AiFillHome, AiOutlineHome } from "react-icons/ai";
+import { AiFillHome, AiOutlineHome, AiOutlinePlusCircle } from "react-icons/ai";
 import { BsFillCheckCircleFill } from "react-icons/bs";
 import { RiUserShared2Fill, RiUserShared2Line } from "react-icons/ri";
 
 import { formatAccountName } from "@/utils/text";
+
+import Navigation from "../navigation/navigation";
+
+import { useEffect, useState } from "react";
+import { trpc } from "@/utils/trpc";
 
 interface User {
   id: string | null;
@@ -20,33 +26,102 @@ interface SidebarProps {
   leaderboardAccounts: User[];
   followingAccounts: User[];
 }
+
+interface ConceptState {
+  id: string;
+  name: string;
+  parentId: string;
+  parentName: string;
+}
+
 const Sidebar: FC<SidebarProps> = ({
   leaderboardAccounts = [],
   followingAccounts = [],
 }) => {
   const router = useRouter();
   const session = useSession();
+  const [open, setOpen] = useState(false);
+
+  const addConceptMutation = trpc.useMutation("user.addConcept");
+
+  const handleAddConcept = async (concept: ConceptState[]) => {
+    for (let i = 0; i < concept.length; i++) {
+      console.log(concept[i]?.id);
+      await addConceptMutation.mutateAsync({
+        conceptId: concept[i]?.id || "",
+      });
+    }
+  };
 
   return (
     <div className="w-[48px] border-r lg:border-none lg:w-[348px] h-[calc(100vh-60px)] sticky top-[60px] overflow-y-auto flex-shrink-0 py-5">
       <div className="flex flex-col items-stretch gap-5 [&_svg]:h-7 [&_svg]:w-7 font-semibold pb-6 border-b">
+        <Navigation
+          multiselect={true}
+          questions={false}
+          open={open}
+          onClose={() => setOpen(false)}
+          addNodeToWorkspace={function (
+            nodeId: string,
+            nodeName: string,
+            parentId: string,
+            parentName: string
+          ): void {
+            console.log(
+              "Id: " +
+                nodeId +
+                " Name: " +
+                nodeName +
+                " ParentId: " +
+                parentId +
+                " ParentName: " +
+                parentName
+            );
+            /* setNodeId(nodeId);
+                          setNodeName(nodeName);
+                          setParentId(parentId);
+                          setParentName(parentName);
+                          setInputPostValue(nodeName); */
+          }}
+          addNodeListToWorkspace={function (concepts: ConceptState[]): void {
+            handleAddConcept(concepts);
+            /* concepts.forEach((concept: { name: any; id: any }) => {
+              //console.log(concept.name + " " + concept.id);
+            }); */
+          }}
+        />
         <Link href="/">
           <a
-            className={`flex items-center gap-2 ${!router.query.following
-              ? "fill-pink text-pink"
-              : "fill-black text-black"
-              }`}
+            className={`flex items-center gap-2 ${
+              !router.query.following
+                ? "fill-pink text-pink"
+                : "fill-black text-black"
+            }`}
           >
             {!router.query.following ? <AiFillHome /> : <AiOutlineHome />}
             <span className="hidden lg:inline">For You</span>
           </a>
         </Link>
+        <Link href="/">
+          <a
+            onClick={() => {
+              console.log(open);
+              setOpen(true);
+              console.log(open);
+            }}
+            className={`flex items-center gap-2 fill-black text-black`}
+          >
+            {<AiOutlinePlusCircle />}
+            <span className="hidden lg:inline">Select content</span>
+          </a>
+        </Link>
         <Link href={session.data?.user ? "/?following=1" : "/sign-in"}>
           <a
-            className={`flex items-center gap-2 ${router.query.following
-              ? "fill-pink text-pink"
-              : "fill-black text-black"
-              }`}
+            className={`flex items-center gap-2 ${
+              router.query.following
+                ? "fill-pink text-pink"
+                : "fill-black text-black"
+            }`}
           >
             {router.query.following ? (
               <RiUserShared2Fill />
@@ -95,7 +170,6 @@ const Sidebar: FC<SidebarProps> = ({
                   />
                   <div className="col-span-1">{account.points}</div>
                 </div>
-
               </a>
             </Link>
           ))}
