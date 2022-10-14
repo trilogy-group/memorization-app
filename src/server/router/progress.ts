@@ -1,4 +1,5 @@
 import { User } from "@nextui-org/react";
+import { Quiz } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { getRepetition, newRepetition, SuperMemoItem, SuperMemoGrade } from "../../utils/spacedRepetition";
@@ -18,6 +19,27 @@ export const progressRouter = createRouter()
       throw new TRPCError({ code: "UNAUTHORIZED" });
     }
     return next();
+  })
+  .mutation("get-many-quizzes", {
+    // get quizzes based on progress, and concept
+    async resolve({ ctx: { prisma, session } }) {
+      // TODO: add query if all relating posts have been checked
+      // TODO: filter by Concepts
+      const quizzes = await prisma.quiz.findMany({
+        take: 10,
+        where: {
+          progress: {
+            every: {
+              userId: session?.user?.id as string,
+              nextEvaluate: {
+                lt: new Date()
+              },
+            },
+          },
+        },
+      });
+      return quizzes;
+    },
   })
   .mutation("get-one-quiz", {
     // get quizzes based on progress

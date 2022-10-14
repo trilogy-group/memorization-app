@@ -17,37 +17,10 @@ export const postRouter = createRouter()
       cursor: z.number().nullish(),
     }),
     resolve: async ({ ctx: { prisma, session }, input }) => {
-      const skip = input.cursor || 0;
-      const concepts = await prisma.concept.findMany({
-          where: {
-            users: {
-              every: {
-                id: session?.user?.id as string,
-              }
-            }
-          },
-          select: {
-            id: true,
-          }
-      });
-      const conceptIds = concepts.map(concept=>concept.id);
+      const skip = input.cursor || 4;
       const items = await prisma.post.findMany({
-        take: 10,
+        take: 4,
         skip,
-        where: {
-          Feed: {
-            // concept filter is not needed, because they are applied when we add posts to the feed
-            every: {
-              userId: session?.user?.id as string,
-              viewed: false,
-            },
-            some: {
-              quiz: {
-                conceptId: {in: conceptIds}
-              }
-            }
-          }
-        },
         include: {
           user: true,
           quizzes: true,
@@ -80,6 +53,13 @@ export const postRouter = createRouter()
           }),
         ]);
       }
+
+      console.log("cursor", input.cursor);
+      console.log("items.length", items.length);
+      for (const i of items) {
+          console.log("items", i.caption);
+      }
+      console.log("skip", skip);
 
       return {
         items: items.map((item) => ({
