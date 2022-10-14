@@ -178,11 +178,6 @@ model Domain {
     skills    Skill[]
 }
 
-<<<<<<< HEAD
-model HashtagToQuestion {
-  A Int
-  B String
-=======
 model Skill {
     id       String    @id
     name     String
@@ -190,7 +185,6 @@ model Skill {
     Domain   Domain    @relation(fields: [domainId], references: [id])
     concepts Concept[]
 }
->>>>>>> f82b6006efdd7734f121afde2cc0b733c2db2c27
 
 model Concept {
     id        String    @id
