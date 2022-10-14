@@ -36,20 +36,25 @@ model Session {
 }
 
 model User {
-  id            String         @id @default(cuid())
-  name          String?
-  email         String?        @unique
-  emailVerified DateTime?
-  image         String?
-  accounts      Account[]
-  sessions      Session[]
-  likes         Like[]
-  comments      Comment[]
-  followers     Follow[]       @relation("followings")
-  followings    Follow[]       @relation("followers")
-  points        Int            @default(0)
-  progress      Progress[]
-  notifications Notification[]
+    id            String         @id @default(cuid())
+    name          String?
+    email         String?        @unique
+    emailVerified DateTime?
+    image         String?
+    accounts      Account[]
+    sessions      Session[]
+    posts         Post[]
+    likes         Like[]
+    comments      Comment[]
+    followers     Follow[]       @relation("followings")
+    followings    Follow[]       @relation("followers")
+    points        Int            @default(0)
+    progress      Progress[]
+    notifications Notification[]
+    masteryId     Int?
+    mastery       Mastery?       @relation(fields: [masteryId], references: [id])
+    concepts      Concept[]
+    Feed          Feed[]
 
   @@fulltext([name, email])
 }
@@ -72,7 +77,44 @@ model VerificationToken {
   token      String   @unique
   expires    DateTime
 
-  @@unique([identifier, token])
+    @@unique([identifier, token])
+}
+
+// Main models
+model Post {
+    id            String @id @default(cuid())
+    caption       String @db.Text
+    videoURL      String @db.Text
+    coverURL      String @db.Text // video cover or mnemonic image or ""
+    videoWidth    Int    @default(0)
+    videoHeight   Int    @default(0)
+    mnemonic_text String @db.Text
+    contentType   Int    @default(3) // 1: image, 2: video, 3: text, 4: unknown
+
+    createdAt     DateTime       @default(now())
+    updatedAt     DateTime       @updatedAt
+    likes         Like[]
+    comments      Comment[]
+    notifications Notification[]
+    userId        String
+    user          User           @relation(fields: [userId], references: [id])
+
+    quizId  Int
+    quizzes Quiz  @relation(fields: [quizId], references: [id])
+    Feed    Feed[]
+
+    @@fulltext([caption])
+}
+
+// One user has many masteries
+// A check on all quizzes of one concept is conducted once a 60-day-interval quiz is completed
+// If all quizzes of one concept have reached the 60-day-interval threshold, we deem the concept mastered.
+// The mastered concepts are inserted into the Mastery table, the relating questions are removed from the progress table
+model Mastery {
+    id        Int     @id @default(autoincrement())
+    user      User[]
+    conceptId String
+    concepts  Concept @relation(fields: [conceptId], references: [id])
 }
 
 model Like {
@@ -84,13 +126,16 @@ model Like {
 }
 
 model Notification {
-  id          Int      @id @default(autoincrement())
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  content     String
-  status      Int      @default(0)
-  questionId  String   @default("")
-  lastUpdated DateTime @updatedAt
+    id          Int      @id @default(autoincrement())
+    userId      String // who are we notifying
+    user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    content     String // e.g., you have a new like from user <name>
+    status      Int      @default(0) // 1: checked, 0: unchecked
+    postId      String   @default("")
+    posts       Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+    quizId      Int      @default(0)
+    quizzes     Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+    lastUpdated DateTime @updatedAt
 }
 
 model Comment {
@@ -136,7 +181,41 @@ model HashtagToQuestion {
   A Int
   B String
 
-  @@unique([A, B], map: "_HashtagToQuestion_AB_unique")
-  @@index([B], map: "_HashtagToQuestion_B_index")
-  @@map("_HashtagToQuestion")
+model Concept {
+    id        String    @id
+    name      String
+    masteries Mastery[]
+    quizzes   Quiz[]
+    users     User[]
+    skillId   String
+    skill     Skill     @relation(fields: [skillId], references: [id])
+
+    @@fulltext([name])
+}
+
+model Quiz {
+    id           Int            @id @default(autoincrement())
+    name         String         @db.Text
+    type         String
+    options      String         @db.Text
+    answer       String?        @db.Text // optional due to MCQ has answer true/false in the options string
+    Post         Post[]
+    progress     Progress[]
+    conceptId    String
+    concepts     Concept        @relation(fields: [conceptId], references: [id])
+    Notification Notification[]
+    Feed         Feed[]
+}
+
+model Feed {
+    postId String
+    post   Post    @relation(fields: [postId], references: [id])
+    userId String
+    user   User    @relation(fields: [userId], references: [id])
+    quizId Int
+    quiz   Quiz    @relation(fields: [quizId], references: [id])
+    viewed Boolean
+
+    @@id([postId, userId], name: "feed_identifier")
+    @@unique([postId, userId])
 }
