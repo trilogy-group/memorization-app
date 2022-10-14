@@ -29,8 +29,8 @@
     position: absolute;
     top: 50px;
     right: 0;
-    background-color: grey;
-    color: white;
+    background-color: white;
+    color: black;
     font-weight: 800;
     font-size: 12px;
     display: flex;
@@ -39,4 +39,8 @@
     width: 350px;
     height: 250px;
     overflow: auto;
+    opacity: 0.95;
+    border: 1px;
+    border-color: black;
+    border-style: solid;
 }

@@ -48,10 +48,11 @@ const Navbar: FC = () => {
       : ""
   );
 
-  useEffect(()=>{
+  useEffect(() => {
     notificationMutation.mutateAsync().then(notifs => {
       console.log(notifs);
-      setNotifications(notifs)});
+      setNotifications(notifs)
+    });
   }, []);
 
   const handleFormSubmit = (e: FormEvent) => {
@@ -69,9 +70,9 @@ const Navbar: FC = () => {
 
     return contentLst.map((n, i) => {
       if (n == "Quiz") {
-        return <Link href={`/quizUltimate`} key={i}>Go to Quiz Page</Link>
+        return <div><Link href={`/quizUltimate`} key={i}>Go to Quiz Page</Link> <hr></hr></div>
       } else {
-        return <span className="notification" key={i}>{n}</span>
+        return <div><span className="notification" key={i}>{n} <hr></hr></span></div>
       }
     })
   }
