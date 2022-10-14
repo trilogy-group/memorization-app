@@ -26,8 +26,10 @@ export const userRouter = createRouter()
       const postSuggested = await prisma.post.findMany({
         take: 5,
         where: {
-          concepts: {
-            id: input.conceptId,
+          quizzes: {
+            concepts: {
+              id: input.conceptId,
+            }
           }
         }
       });
@@ -39,7 +41,7 @@ export const userRouter = createRouter()
           viewed: false,
         }))
       });
-      return ;
+      return feedsCreated;
     },
   })
   .mutation("score", {
