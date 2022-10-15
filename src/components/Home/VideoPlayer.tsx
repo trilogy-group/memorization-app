@@ -15,6 +15,9 @@ const Video: FC<HTMLProps<HTMLVideoElement>> = (props) => {
 
   const { isMuted, setIsMuted } = useContext(VolumeContext);
 
+  const standardPostWidth = 500;
+  const standardPostHeight = 300;
+
   useEffect(() => {
     if (isPaused) {
       if (!videoRef.current?.paused) {
@@ -27,12 +30,13 @@ const Video: FC<HTMLProps<HTMLVideoElement>> = (props) => {
     }
   }, [isPaused]);
 
+
   return (
     <div className="h-full w-auto relative cursor-pointer">
-      <video
+      <video width={standardPostWidth} height={standardPostHeight}
         {...props}
         ref={videoRef}
-        className="max-h-full w-auto"
+        className=""
         onPauseCapture={() => setIsPaused(true)}
         onPlayCapture={() => setIsPaused(false)}
         muted={isMuted}
