@@ -76,14 +76,8 @@ const Main: FC<MainProps> = ({ origin }) => {
     // eslint-disable-next-line
   }, [data?.pages.length, Boolean(Number(router.query.following))]);
 
-  if (data?.pages.length === 0 || data?.pages[0]?.items.length === 0)
-    return (
-      <div className="flex-grow text-center my-4">There is no post yet</div>
-    );
-
   let { ref, inView } = useInView({
     /* Optional options */
-//    threshold: 0,
   });
 
   useEffect(() => {
@@ -92,6 +86,11 @@ const Main: FC<MainProps> = ({ origin }) => {
     }
   }, [inView])
 
+  
+  if (data?.pages.length === 0 || data?.pages[0]?.items.length === 0)
+    return (
+      <div className="flex-grow text-center my-4">There is no post yet</div>
+    );
 
   return (
     <div className="flex-grow">
