@@ -211,11 +211,7 @@ export const postRouter = createRouter()
       let likes: Like[] = [];
       let followings: Follow[] = [];
 
-      let quizIds: number[] = [];
       let quizzes: Quiz[] = [];
-      let progresses: Progress[] = [];
-      let posts: Post[] = [];
-
       let coverURLs_or_mnemonicTexts: string[] = [];
       let efactors: number[] = [];
 
