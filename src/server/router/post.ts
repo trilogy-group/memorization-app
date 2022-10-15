@@ -20,6 +20,7 @@ export const postRouter = createRouter()
     }),
     resolve: async ({ ctx: { prisma, session }, input }) => {
       const skip = input.cursor || 0;
+      // TODO: add cursor and skip for quiz
       /**     
             const items = await prisma.post.findMany({
               take: 4,
@@ -114,11 +115,7 @@ export const postRouter = createRouter()
           }
         },
         where: {
-          Feed: {
-            some: {
-              postId: { in: feedPostIdArr }
-            }
-          }
+          id: {in: feedPostIdArr}
         }
       });
 
@@ -144,7 +141,6 @@ export const postRouter = createRouter()
         ]);
       }
 
-
       console.log("cursor", input.cursor);
       console.log("items.length", items.length);
       for (const i of items) {
@@ -169,6 +165,7 @@ export const postRouter = createRouter()
 
       // quizzes for the viewed feeds
       quizzes = await prisma.quiz.findMany({
+        skip,
           where: {
             progress: {
               some: {
@@ -182,6 +179,7 @@ export const postRouter = createRouter()
           },
         });
       console.log("all feeds have been viewed", quizzes);
+      // TODO: if the last quiz was correct, then the posts will not be shown, the quiz will still appear
       // TODO: if feeds are incomplete, do not add the quiz
 
       const posts = items.map((item) => {
@@ -199,7 +197,6 @@ export const postRouter = createRouter()
         results.push({ type: "Post", post: post })
       })
       results.push({ type: 'Quiz', quizzes: quizzes })
-      console.log('post-for-you results', results);
 
       return {
         items: results,

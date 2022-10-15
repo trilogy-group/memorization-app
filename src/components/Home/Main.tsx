@@ -32,8 +32,6 @@ const Main: FC<MainProps> = ({ origin }) => {
         getNextPageParam: (lastPage) => lastPage.nextSkip,
       }
     );
-  const quizMutation = useMutation("progress.get-one-quiz");
-  // null check
 
   const observer = useRef<IntersectionObserver | null>(null);
 
@@ -100,6 +98,7 @@ const Main: FC<MainProps> = ({ origin }) => {
           console.log('page', page);
           return <div key={idx}>{
             page.items.map(feedItem => {
+              console.log('feedItem', feedItem);
               if (feedItem.type === 'Post') {
                 return <PostSection
                   post={feedItem?.post as FeedPostType}
@@ -112,8 +111,8 @@ const Main: FC<MainProps> = ({ origin }) => {
                   quiz={feedItem.quizzes as Quiz[]}
                   refetch={refetch}
                   origin={origin}
-                  key={v4()}
-                // key={feedItem?.quizzes[0]?.id}
+                  //key={v4()}
+                  key={feedItem?.quizzes[0]?.idInConcept as string}
                 />
               }
             })

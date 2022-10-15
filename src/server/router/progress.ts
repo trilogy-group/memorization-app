@@ -1,6 +1,7 @@
 import { User } from "@nextui-org/react";
-import { Quiz } from "@prisma/client";
+import { Post, Quiz } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
+import moment from "moment";
 import { z } from "zod";
 import { getRepetition, newRepetition, SuperMemoItem, SuperMemoGrade } from "../../utils/spacedRepetition";
 
@@ -132,26 +133,31 @@ export const progressRouter = createRouter()
       grade: z.number().gt(0),
     }),
     async resolve({ ctx: { prisma, session }, input }) {
-      let grade: SuperMemoGrade = Number(input.grade || "") % 5 as SuperMemoGrade; // 0 ~ 5, type SuperMemoItems
+      console.log('post-one-quiz-result', input.quizId, input.grade);
+      let grade: SuperMemoGrade = (input.grade) as SuperMemoGrade; // 0 ~ 5, type SuperMemoItems
+      console.log('supermemograde', grade);
 
-      // if this quiz has already in progress
       const existingProgress = await prisma.progress.findFirst({
         where: {
           userId: session?.user?.id!,
           quizId: input.quizId,
         }
       });
+      console.log('get progress', existingProgress);
       if (existingProgress == null) {
-        throw new TRPCError({code: "INTERNAL_SERVER_ERROR"});
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
       }
-      
+
       // update the spaced repetition item if it's an existing item
+      console.log("update the spaced repetition item if it's an existing item");
       let item: SuperMemoItem = {
         interval: existingProgress.interval,
         repetition: existingProgress.repetition,
         efactor: existingProgress.efactor,
       };
-      const repetitionItem = await getRepetition(item, grade);
+      const repetitionItem = getRepetition(item, grade);
+      console.log('get repetition', repetitionItem);
+
       var progress = await prisma.progress.update({
         where: {
           progress_identifier: {
@@ -161,18 +167,21 @@ export const progressRouter = createRouter()
         },
         data: {
           // TODO: add interval to the next evaluate time
-          nextEvaluate: new Date(),
+          nextEvaluate: moment(new Date()).add(1, 'm').toDate(),
           efactor: repetitionItem.efactor,
           interval: repetitionItem.interval,
           repetition: repetitionItem.repetition
         }
       });
+      console.log('updated progress', progress);
       if (progress == null) {
         throw new Error("Database update error, spaced repetition failed");
       }
+      console.log('spaced repetition update finished', repetitionItem);
 
       // populate the feeds with post if grade falls below 3
       if (grade < 3) {
+        console.log('grade falls below 3, re-populate with posts');
         const postsSuggested = await prisma.post.findMany({
           take: 6 - grade * 2, // 2, 4, or 6
           where: {
@@ -238,6 +247,27 @@ export const progressRouter = createRouter()
             }
           });
         }
+      } else {
+        // Quiz correct -> posts will not appear in the feeds
+        // delete feeds for the quiz, the feeds will be generated if they fail a quiz again
+        console.log('answer correct');
+        const relatedPosts = await prisma.post.findMany({
+          where: {
+            quizId: input.quizId
+          },
+          select: {
+            id: true
+          }
+        });
+        console.log('check related posts', relatedPosts);
+        await prisma.feed.deleteMany({
+          where: {
+              userId: session?.user?.id as string,
+              postId: {
+                in: relatedPosts.map((p: any) => { return p.id; })
+              }
+          }
+        });
       }
 
       return;
