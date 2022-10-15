@@ -76,20 +76,9 @@ const Main: FC<MainProps> = ({ origin }) => {
     // eslint-disable-next-line
   }, [data?.pages.length, Boolean(Number(router.query.following))]);
 
-  if (data?.pages.length === 0 || data?.pages[0]?.items.length === 0)
-    return (
-      <div className="flex-grow text-center my-4">There is no post yet</div>
-    );
-
-  let inView: boolean = false;
-  var ref = null;
-  try {
-    let { ref, inView } = useInView({
-    });
-  } catch {
-    // TODO:
-    // Fix Error: Rendered more hooks than during the previous render
-  }
+  let { ref, inView } = useInView({
+    /* Optional options */
+  });
 
   useEffect(() => {
     if (inView && !isFetchingNextPage && hasNextPage) {
@@ -97,6 +86,11 @@ const Main: FC<MainProps> = ({ origin }) => {
     }
   }, [inView])
 
+  
+  if (data?.pages.length === 0 || data?.pages[0]?.items.length === 0)
+    return (
+      <div className="flex-grow text-center my-4">There is no post yet</div>
+    );
 
   return (
     <div className="flex-grow">

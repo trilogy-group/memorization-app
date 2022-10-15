@@ -217,7 +217,7 @@ export const postRouter = createRouter()
   .mutation("createImg", {
     input: z.object({
       caption: z.string(),
-      coverURL: z.string().url(),
+      coverURL: z.string(),
       conceptId: z.string(),
       quizId: z.string(),
     }),
