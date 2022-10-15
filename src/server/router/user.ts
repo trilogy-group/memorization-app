@@ -30,7 +30,7 @@ export const userRouter = createRouter()
       console.log('user exists', user);
       // If the concept exists, take no action
       if (user != null) {
-        console.log("concept exists");
+        console.log("concept exists", input.conceptId);
         return;
       } else {
         console.log('add concept for the user');
@@ -54,14 +54,17 @@ export const userRouter = createRouter()
           }
         }
       });
+      console.log('post suggested', postSuggested);
       const feedsCreated = await prisma.feed.createMany({
         data: postSuggested.map((post) => ({
           postId: post.id,
           userId: session?.user?.id as string,
           quizId: post.quizId,
           viewed: false,
+          conceptId: input.conceptId,
         }))
       });
+      console.log(feedsCreated);
       return feedsCreated;
     },
   })

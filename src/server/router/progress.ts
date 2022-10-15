@@ -214,6 +214,15 @@ export const progressRouter = createRouter()
             }
           }
         });
+        const concept = await prisma.concept.findFirst({
+          where: {
+            quizzes: {
+              every: {
+                id: input.quizId,
+              }
+            }
+          }
+        });
 
         for (const post of postsSuggested) {
           const feedsCreated = await prisma.feed.create({
@@ -222,6 +231,7 @@ export const progressRouter = createRouter()
               userId: session?.user?.id as string,
               quizId: post.quizId,
               viewed: false,
+              conceptId: concept?.id as string,
             }
           });
           if (feedsCreated == null) {

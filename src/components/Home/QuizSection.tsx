@@ -26,13 +26,12 @@ const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin }) => {
   const session = useSession();
 
   const quizPostMutation = trpc.useMutation("progress.post-one-quiz-result");
-  const quizGetMutation = trpc.useMutation("progress.get-many-quizzes");
   const [choice, setChoice] = useState<string>("");
+  let quizIndex = 0;
 
-  useEffect(() => {
-  }, []);
-
-  console.log('handle quiz');
+  if (quiz == null || quiz.length == 0) {
+    return <>No Quiz now</>;
+  }
 
   const getScoreBasedOnTimeTaken = (correct: boolean, timeTaken: number) => {
     if (correct) {
@@ -64,24 +63,21 @@ const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin }) => {
   const handleSingleQuiz = (quiz: Quiz) => {
     const name = quiz.name;
     const answer = quiz.answer;
+    console.log(quiz.options);
     const options: Option[] = JSON.parse(quiz.options);
-    console.log(options);
 
     if (quiz.type == QuizType.MCQ) {
       return <div className="flex">
         <FormControl component="fieldset">
           <FormLabel component="legend">{name}</FormLabel>
           <RadioGroup
-            aria-label=""
-            name=""
-            className=""
             value={choice}
             onChange={handleChange}
           >
-            {options.map((op)=>{
-              return <FormControlLabel value={op.id} control={<Radio />} label={op.desc} />;
+            {options.map((op, idx) => {
+              return <FormControlLabel value={op.id} key={idx} control={<Radio />} label={op.desc} />;
             })}
-         </RadioGroup>
+          </RadioGroup>
         </FormControl>
       </div>
     }
@@ -90,19 +86,20 @@ const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin }) => {
     }
   };
 
-  const handleAllQuizzes = (quizzes: Quiz[]) => {
-    //console.log('handle all quizzes', quizzes);
-    if (quizzes == null || quizzes.length == 0) {
-      return <>No Quiz now</>;
-    }
-    return quizzes.map(quiz => {
-      return handleSingleQuiz(quiz);
-    });
-  }
-
   const handleChange = (e: any) => {
     console.log('handlechange', e.target.value);
     setChoice(e.target.value as string);
+  };
+
+  const handleCheckAnswer = async () => {
+    // Check correctness
+
+    // Post result
+    await quizPostMutation.mutateAsync({
+      quizId: quiz[quizIndex]?.id as number,
+      grade: 5,
+    });
+    quizIndex += 1;
   };
 
   return (
@@ -111,7 +108,18 @@ const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin }) => {
         <div className="flex justify-center mx-2 flex-grow bg-white-1">
           <div className="w-full max-w-[1000px] p-8 bg-white my-4">
             <div className="flex flex-col items-center justify-center">
-              {handleAllQuizzes(quiz)}
+              {handleSingleQuiz(quiz[quizIndex] as Quiz)}
+            </div>
+            <div className="flex flex-wrap gap-3 justify-center">
+              <button
+                disabled={choice == "" && quizIndex < quiz.length}
+                onClick={() => {
+                  handleCheckAnswer();
+                }}
+                className="py-3 min-w-[170px] border border-gray-2 bg-white hover:bg-gray-100 transition"
+              >
+                Check Answer
+              </button>
             </div>
           </div>
         </div>

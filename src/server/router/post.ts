@@ -156,40 +156,30 @@ export const postRouter = createRouter()
       let quizzes: Quiz[];
       let coverURLs_or_mnemonicTexts: string[] = [];
       let efactors: number[] = [];
-      /*
-            const feedFiltered = await prisma.feed.findMany({
-              where: {
-                userId: session?.user?.id as string,
-                quiz: {
-                  Feed: {
-                    every: {
-                      userId: session?.user?.id as string,
-                      viewed: true
-                    }
-                  }
-                }
-              },
-              include: {
-                quiz: true
-              }
-            });
-      
-            quizzes = feedFiltered.map((q) => { return q.quiz; });*/
 
-      quizzes = await prisma.quiz.findMany({
+      const unviewedFeeds = await prisma.feed.findMany({
         where: {
-          progress: {
-            some: {
-              userId: session?.user?.id as string,
-            }
-          },
-          Feed: {
-            every: {
-              viewed: true
-            }
-          }
+          userId: session?.user?.id as string,
+          viewed: false,
         },
       });
+
+      if (unviewedFeeds.length != 0) {
+        quizzes = []
+        console.log('haven\'t viewed', unviewedFeeds);
+      } else {
+        // all feeds have been viewed
+        quizzes = await prisma.quiz.findMany({
+          where: {
+            progress: {
+              some: {
+                userId: session?.user?.id as string,
+              }
+            }
+          },
+        });
+        console.log("all feeds have been viewed", quizzes);
+      }
 
       const posts = items.map((item) => {
         return {
