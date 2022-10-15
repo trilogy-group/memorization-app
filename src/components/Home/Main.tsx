@@ -17,8 +17,6 @@ interface MainProps {
 const Main: FC<MainProps> = ({ origin }) => {
   const router = useRouter();
 
-  const maxNumberOfPostsWithoutQuiz = 6;
-
   var quizIndex = 0;
   const numberOfQuestionsPerQuiz = 5;
 
@@ -134,14 +132,9 @@ const Main: FC<MainProps> = ({ origin }) => {
     quizIndex += quizInputToQuizMicro.length;
 
     if (quizInputToQuizMicro.length == 0) {
-      return <div>
+      return <div key={key}>
         <h1 className="text-3xl font-bold text-center text-red-600">No Quizzes</h1>
-        <PostSection
-          post={post}
-          key={key}
-          refetch={refetch}
-          origin={origin}
-        />
+        {showPost(post, key, refetch, origin)}
       </div>
     } else {
       return <div key={quizzes.length}>
@@ -152,12 +145,7 @@ const Main: FC<MainProps> = ({ origin }) => {
           posts={coverURL_or_mnemonicText_InputToQuizMicro}
           efactors={efactorsInputToQuizMicro}
         />
-        <PostSection
-          post={post}
-          key={key}
-          refetch={refetch}
-          origin={origin}
-        />
+        {showPost(post, key, refetch, origin)}
       </div>
     }
 
