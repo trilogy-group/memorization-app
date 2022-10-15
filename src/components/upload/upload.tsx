@@ -92,6 +92,7 @@ export type UploadProps = {
   questionId: string;
   caption: string;
   mnemonicType: string;
+  imageUrl: string;
 };
 
 const Upload = ({
@@ -101,6 +102,7 @@ const Upload = ({
   questionId,
   caption,
   mnemonicType,
+  imageUrl,
 }: UploadProps) => {
   const router = useRouter();
 
@@ -229,10 +231,10 @@ const Upload = ({
   };
 
   const handleOpen = async () => {
-    console.log("handleOpen " + caption + " " + mnemonicType);
+    console.log("handleOpen " + imageUrl + " " + mnemonicType);
     if (open) {
       if (mnemonicType === "image") {
-        setCoverImageURL(caption);
+        setCoverImageURL(imageUrl);
       } else {
         setCoverImageURL(null);
       }
@@ -510,17 +512,28 @@ const Upload = ({
                 />
 
                 <p className="font-medium">Cover</p>
-                <div className="p-2 border border-gray-2 h-[170px] mb-2">
-                  {coverImageURL ? (
+                {mnemonicType !== "image" && (
+                  <div className="p-2 border border-gray-2 h-[170px] mb-2">
+                    {coverImageURL ? (
+                      <img
+                        className="h-full w-auto object-contain"
+                        src={coverImageURL}
+                        alt=""
+                      />
+                    ) : (
+                      <div className="bg-gray-1 h-full w-[100px]"></div>
+                    )}
+                  </div>
+                )}
+                {mnemonicType === "image" && coverImageURL && (
+                  <div className="p-1 border border-gray-2 h-[350px] mb-2">
                     <img
                       className="h-full w-auto object-contain"
                       src={coverImageURL}
                       alt=""
                     />
-                  ) : (
-                    <div className="bg-gray-1 h-full w-[100px]"></div>
-                  )}
-                </div>
+                  </div>
+                )}
 
                 <div className="flex flex-wrap gap-3">
                   <button

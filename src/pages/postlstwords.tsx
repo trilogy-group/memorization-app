@@ -408,14 +408,24 @@ const CreateListOfWords: NextPage = () => {
                         throw new Error("Function not implemented.");
                       }}
                     />
-                    <Upload
+                    {mnemonicType === "image" && (<Upload
+                      open={openUpload}
+                      onClose={() => setOpenUpload(false)}
+                      conceptId={parentId}
+                      questionId={nodeId}
+                      caption={inputPromptValue}
+                      mnemonicType={mnemonicType}
+                      imageUrl={selectedMnemonicType}
+                    />)} 
+                    {mnemonicType !== "image" && (<Upload
                       open={openUpload}
                       onClose={() => setOpenUpload(false)}
                       conceptId={parentId}
                       questionId={nodeId}
                       caption={selectedMnemonicType}
                       mnemonicType={mnemonicType}
-                    />
+                      imageUrl={""}
+                    />)}
                   </h1>
 
                   <div className="grid gap-1" style={{ marginBottom: 10 }}>
@@ -646,6 +656,7 @@ const CreateListOfWords: NextPage = () => {
                                     mnemonicImage[index] || ""
                                   );
                                   setMnemonicType("image");
+                                  
                                   setSelectedMnemonic(true);
                                 }}
                               >
