@@ -1,4 +1,4 @@
-import { Follow, Like } from "@prisma/client";
+import { Follow, Like, Post, Quiz, Progress } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
@@ -28,7 +28,8 @@ export const postRouter = createRouter()
       });
       console.log(feedItems);
 
-      const feedPostIdArr = feedItems.map((feed)=>feed.postId);
+      const feedPostIdArr = feedItems.map((feed) => feed.postId);
+      console.log("feed post Id arr", feedPostIdArr);
 
       const items = await prisma.post.findMany({
         take: 4,
@@ -43,13 +44,15 @@ export const postRouter = createRouter()
             _count: "desc"
           }
         },
+
         where: {
           Feed: {
             some: {
-              postId: {in: feedPostIdArr}
+              postId: { in: feedPostIdArr }
             }
           }
         }
+
       });
 
       let likes: Like[] = [];
@@ -77,7 +80,7 @@ export const postRouter = createRouter()
       console.log("cursor", input.cursor);
       console.log("items.length", items.length);
       for (const i of items) {
-          console.log("items", i.caption);
+        console.log("items", i.caption);
       }
       console.log("skip", skip);
 
@@ -161,6 +164,182 @@ export const postRouter = createRouter()
         nextSkip: items.length === 0 ? skip : skip + items.length,
       };
     },
+  }).
+  query("for-you-posts-and-quizzes", {
+    input: z.object({
+      cursor: z.number().nullish(),
+    }),
+    resolve: async ({ ctx: { prisma, session }, input }) => {
+      const skip = input.cursor || 0;
+      const feedItems = await prisma.feed.findMany({
+        where: {
+          userId: session?.user?.id as string,
+        },
+        select: {
+          postId: true,
+        }
+      });
+      console.log(feedItems);
+
+      const feedPostIdArr = feedItems.map((feed) => feed.postId);
+      console.log("feed post Id arr", feedPostIdArr);
+
+      const items = await prisma.post.findMany({
+        take: 4,
+        skip,
+        include: {
+          user: true,
+          quizzes: true,
+          _count: { select: { likes: true, comments: true } },
+        },
+        orderBy: {
+          likes: {
+            _count: "desc"
+          }
+        },
+
+        where: {
+          Feed: {
+            some: {
+              postId: { in: feedPostIdArr }
+            }
+          }
+        }
+
+      });
+
+      let likes: Like[] = [];
+      let followings: Follow[] = [];
+
+      let quizIds: number[] = [];
+      let quizzes: Quiz[] = [];
+      let progresses: Progress[] = [];
+      let posts: Post[] = [];
+
+      let coverURLs_or_mnemonicTexts: string[] = [];
+      let efactors: number[] = [];
+
+      if (session?.user?.id) {
+        [likes, followings] = await Promise.all([
+          prisma.like.findMany({
+            where: {
+              userId: session.user.id,
+              postId: { in: items.map((item) => item.id) },
+            },
+          }),
+          prisma.follow.findMany({
+            where: {
+              followerId: session.user.id,
+              followingId: {
+                in: items.map((item) => item.userId),
+              },
+            },
+          }),
+        ]);
+      }
+
+      console.log("cursor", input.cursor);
+      console.log("items.length", items.length);
+      for (const i of items) {
+        console.log("items", i.caption);
+      }
+      console.log("skip", skip);
+
+      // GETTING QUIZZES BEGIN
+
+      const quizIdsThatWereViewed = await prisma.feed.findMany({
+        where: {
+          userId: session?.user?.id as string,
+          viewed: true
+        },
+        include: {
+          quiz: true
+        }
+      });
+
+      const quizIdsThatAreWorthGoingThrough = await prisma.progress.findMany({
+        where: {
+          userId: session?.user?.id as string,
+          quizId: { in: quizIdsThatWereViewed.map((quiz) => (quiz.quizId)) },
+          nextEvaluate: {
+            lt: new Date()
+          },
+        },
+        include: {
+          quizzes: true
+        }
+      });
+
+      efactors = quizIdsThatAreWorthGoingThrough.map((quizId) => (quizId.efactor));
+      quizzes = quizIdsThatAreWorthGoingThrough.map((quizIds) => (quizIds.quizzes));
+
+
+      const existingProgress = await prisma.progress.findMany({
+        take: 5,
+        skip,
+        where: {
+          userId: session?.user?.id!,
+          nextEvaluate: {
+            lt: new Date()
+          }
+        },
+        orderBy: {
+          // quizzes from the most recent ones
+          nextEvaluate: "asc"
+        }
+      });
+      if (existingProgress == null) {
+        console.log("no existing progress");
+      }
+
+
+      existingProgress?.forEach(progress => { quizIds.push(progress.quizId) });
+      console.log("quiz ids are", quizIds);
+
+      quizzes = await prisma.quiz.findMany({
+        where: {
+          id: { in: quizIds }
+        },
+      });
+
+
+      for (let i = 0; i < quizIds.length; i++) {
+        let post = await prisma.post.findFirst({
+          where: {
+            quizId: quizIds[i],
+          }
+        });
+        if (post != null) {
+          posts.push(post);
+        }
+
+        let progress = await prisma.progress.findFirst({
+          where: {
+            quizId: quizIds[i],
+            userId: session?.user?.id!
+          }
+        });
+        if (progress != null) {
+          progresses.push(progress);
+        }
+
+      }
+      // GETTING QUIZZES END
+
+      return {
+        items: items.map((item) => ({
+          ...item,
+          likedByMe: likes.some((like) => like.postId === item.id),
+          followedByMe: followings.some(
+            (following) => following.followingId === item.userId
+          ),
+        })),
+        quizzes,
+        efactors,
+        coverURLs_or_mnemonicTexts,
+        nextSkip: items.length === 0 ? null : skip + items.length,
+      };
+    },
   })
   .mutation("createVideo", {
     input: z.object({
@@ -178,11 +357,14 @@ export const postRouter = createRouter()
       const quizFound = await prisma.quiz.findFirst({
         where: {
           AND: [
-          {concepts: {
-            id: input.conceptId,
-          }},
-          {idInConcept: input.quizId as string,
-          }]
+            {
+              concepts: {
+                id: input.conceptId,
+              }
+            },
+            {
+              idInConcept: input.quizId as string,
+            }]
         }
       });
 
