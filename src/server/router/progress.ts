@@ -6,7 +6,6 @@ import { getRepetition, newRepetition, SuperMemoItem, SuperMemoGrade } from "../
 
 import { createRouter } from "./context";
 
-
 export type ProgressWhereUniqueInput = {
   postId?: string | null,
   userId?: string | null,
@@ -85,24 +84,30 @@ export const progressRouter = createRouter()
       if (post == null) {
         throw new Error("Post not found!");
       }
-      const id = post.quizId;
       const grade = 5;
 
-      if (id == null) {
+      if (post.quizId == null) {
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
       }
 
       // create progress entry if not existing
       const repetitionItem = newRepetition(grade);
-      const progressCreated = await prisma.progress.create({
-        data: {
+      const progressCreated = await prisma.progress.upsert({
+        where: {
+          progress_identifier: {
+            userId: session?.user?.id as string,
+            quizId: post.quizId
+          }
+        },
+        update: {},
+        create: {
           // TODO: do not add interval in nextEvaluate estimate for demo purposes
           nextEvaluate: new Date(),
           efactor: repetitionItem.efactor,
           interval: repetitionItem.interval,
           userId: session?.user?.id!,
-          quizId: id,
-        }
+          quizId: post.quizId,
+        },
       });
       // Do not update the spaced repetition item if it's an existing item
       // Update the feeds to set viewed as true

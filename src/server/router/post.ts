@@ -1,4 +1,5 @@
-import { Follow, Like } from "@prisma/client";
+import { FeedItem } from "@/utils/text";
+import { Follow, Like, Quiz, Post } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
@@ -11,6 +12,7 @@ enum contentType {
   unknown = 4,
 }
 
+
 export const postRouter = createRouter()
   .query("for-you", {
     input: z.object({
@@ -18,6 +20,74 @@ export const postRouter = createRouter()
     }),
     resolve: async ({ ctx: { prisma, session }, input }) => {
       const skip = input.cursor || 0;
+      /**     
+            const items = await prisma.post.findMany({
+              take: 4,
+              skip,
+              select: {
+                id: true,
+      
+                user: true,
+                quizzes: true,
+                _count: { select: { likes: true, comments: true } },
+                Feed: {
+                  where: {
+                    AND:[
+                      {userId: session?.user?.id!}, 
+                      {viewed: false}
+                    ]
+                  }
+                },
+              },
+              orderBy: {
+                likes: {
+                  _count: "desc"
+                }
+              },
+              }
+            );
+      
+       */
+      /*
+      const items = await prisma.post.findMany({
+        take: 4,
+        skip,
+        where: {
+          Feed: {
+            every: {
+              AND: [
+              { userId: session?.user?.id! },
+              { viewed: false }
+            ]
+          }
+          }
+        },
+        select: {
+          id: true,
+          userId: true,
+          caption: true,
+          videoURL: true,
+          coverURL: true,
+          contentType: true,
+          createdAt: true,
+          updatedAt: true,
+          quizId: true,
+          videoHeight: true,
+          videoWidth: true,
+          mnemonic_text: true,
+          quizzes: true,
+          _count: { select: { likes: true, comments: true } },
+        },
+        orderBy: {
+          likes: {
+            _count: "desc"
+          }
+        },
+      }
+      );
+      */
+
+      // Change two queries into one
       const feedItems = await prisma.feed.findMany({
         where: {
           userId: session?.user?.id as string,
@@ -28,7 +98,7 @@ export const postRouter = createRouter()
       });
       console.log(feedItems);
 
-      const feedPostIdArr = feedItems.map((feed)=>feed.postId);
+      const feedPostIdArr = feedItems.map((feed) => feed.postId);
 
       const items = await prisma.post.findMany({
         take: 4,
@@ -46,7 +116,7 @@ export const postRouter = createRouter()
         where: {
           Feed: {
             some: {
-              postId: {in: feedPostIdArr}
+              postId: { in: feedPostIdArr }
             }
           }
         }
@@ -74,21 +144,72 @@ export const postRouter = createRouter()
         ]);
       }
 
+
       console.log("cursor", input.cursor);
       console.log("items.length", items.length);
       for (const i of items) {
-          console.log("items", i.caption);
+        console.log("items", i.caption);
       }
       console.log("skip", skip);
 
-      return {
-        items: items.map((item) => ({
+      // get the quizzes
+      let quizzes: Quiz[];
+      let coverURLs_or_mnemonicTexts: string[] = [];
+      let efactors: number[] = [];
+      /*
+            const feedFiltered = await prisma.feed.findMany({
+              where: {
+                userId: session?.user?.id as string,
+                quiz: {
+                  Feed: {
+                    every: {
+                      userId: session?.user?.id as string,
+                      viewed: true
+                    }
+                  }
+                }
+              },
+              include: {
+                quiz: true
+              }
+            });
+      
+            quizzes = feedFiltered.map((q) => { return q.quiz; });*/
+
+      quizzes = await prisma.quiz.findMany({
+        where: {
+          progress: {
+            some: {
+              userId: session?.user?.id as string,
+            }
+          },
+          Feed: {
+            every: {
+              viewed: true
+            }
+          }
+        },
+      });
+
+      const posts = items.map((item) => {
+        return {
           ...item,
           likedByMe: likes.some((like) => like.postId === item.id),
           followedByMe: followings.some(
             (following) => following.followingId === item.userId
-          ),
-        })),
+          )
+        }
+      });
+
+      const results: FeedItem[] = []
+      posts.forEach((post) => {
+        results.push({ type: "Post", post: post })
+      })
+      results.push({ type: 'Quiz', quizzes: quizzes })
+      console.log('post-for-you results', results);
+
+      return {
+        items: results,
         nextSkip: items.length === 0 ? null : skip + items.length,
       };
     },
@@ -178,11 +299,14 @@ export const postRouter = createRouter()
       const quizFound = await prisma.quiz.findFirst({
         where: {
           AND: [
-          {concepts: {
-            id: input.conceptId,
-          }},
-          {idInConcept: input.quizId as string,
-          }]
+            {
+              concepts: {
+                id: input.conceptId,
+              }
+            },
+            {
+              idInConcept: input.quizId as string,
+            }]
         }
       });
 

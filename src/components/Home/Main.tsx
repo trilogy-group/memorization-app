@@ -1,15 +1,23 @@
 import { useRouter } from "next/router";
 import { FC, useEffect, useRef } from "react";
 import { useInView } from "react-intersection-observer";
-
+import { v4 } from 'uuid'
 import { trpc } from "@/utils/trpc";
 
 import PostSection from "./PostSection";
 import { useMutation } from "react-query";
+import { Post, Quiz } from "@prisma/client";
+import { array } from "zod";
+import QuizSection from "./QuizSection";
+import { FeedPostType } from "@/utils/text";
+//import { FeedItem } from "@/server/router/post";
 
 interface MainProps {
   origin: string;
 }
+
+
+
 
 const Main: FC<MainProps> = ({ origin }) => {
   const router = useRouter();
@@ -17,9 +25,7 @@ const Main: FC<MainProps> = ({ origin }) => {
   const { data, fetchNextPage, isFetchingNextPage, hasNextPage, refetch } =
     trpc.useInfiniteQuery(
       [
-        Boolean(Number(router.query.following))
-          ? "post.following"
-          : "post.for-you",
+        "post.for-you",
         {},
       ],
       {
@@ -96,23 +102,38 @@ const Main: FC<MainProps> = ({ origin }) => {
       fetchNextPage();
     }
   }, [inView])
-
+  console.log('pages length', data?.pages.length);
 
   return (
-    <div className="flex-grow">
-      {data?.pages.map((page) =>
-        page.items.map((post) => (
-          <PostSection
-            post={post}
-            key={post.id}
-            refetch={refetch}
-            origin={origin}
-          />
-        ))
-      )}
+    <div className="flex-grow"><>
+      {
+        data?.pages.map(page => {
+          console.log('page', page);
+          return <div>{
+            page.items.map(feedItem => {
+              if (feedItem.type === 'Post') {
+                return <PostSection
+                  post={feedItem?.post as FeedPostType}
+                  key={feedItem?.post?.id}
+                  refetch={refetch}
+                  origin={origin}
+                />
+              } else {
+                return <QuizSection
+                  quiz={feedItem.quizzes as Quiz[]}
+                  refetch={refetch}
+                  origin={origin}
+                  key={v4()}
+                // key={feedItem?.quizzes[0]?.id}
+                />
+              }
+            })
+          }</div>
+        })
+      }
 
       {/* At the bottom to detect infinite scroll */}
-      <div ref={ref}></div>
+      <div ref={ref}></div></>
     </div>
   );
 };
