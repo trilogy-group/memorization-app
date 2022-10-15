@@ -19,10 +19,6 @@ interface QuizMicroProps {
 //: FC<QuizMicroProps> = ({ inputQuestions, inputAnswer, inputType, inputIncorrectAnswer, inputHint,inputDifficulty }) =>
 const QuizMicro: FC<QuizMicroProps> = ({ refetch, quizzes, efactors, posts }) => {
     const session = useSession();
-    const quizGradeMutation = trpc.useMutation("progress.post-one-quiz-result");
-    //const quizQuestionAnswersEtc = trpc.useMutation("progress.get-one-quiz");
-    //const mnemonic_difficulty_Info = trpc.useMutation("progress.get-data-about-quiz-mnemonic-and-difficulty-using-quizId");
-    const manyQuizzesWithInfo = trpc.useMutation("progress.my-get-multiple-quizzes");
     const [optionMCQ, setOptionMCQ] = useState();
     const [optionsList, setOptionsList] = useState<string[]>([]);
     const [optionA, setOptionA] = useState("");
@@ -30,6 +26,8 @@ const QuizMicro: FC<QuizMicroProps> = ({ refetch, quizzes, efactors, posts }) =>
     const [optionC, setOptionC] = useState("");
     const [optionD, setOptionD] = useState("");
     const [scoreArray, setScoreArray] = useState<number[]>([]);
+
+    const quizGradeMutation = trpc.useMutation("progress.post-one-quiz-result");
 
     const [hintImageVisibility, setHintImageVisibility] = useState(true);
     const [hintVideoVisibility, setHintVideoVisibility] = useState(false);
@@ -85,49 +83,43 @@ const QuizMicro: FC<QuizMicroProps> = ({ refetch, quizzes, efactors, posts }) =>
 
 
     useEffect(() => {
-        manyQuizzesWithInfo.mutateAsync().then(quizVariables => {
-            if (quizVariables != null) {
-                if (quizVariables.posts.length != quizVariables.quizzes.length || quizVariables.posts.length != quizVariables.progresses.length || quizVariables.quizzes.length != quizVariables.progresses.length) {
-                    toast("the returned arrays don't have the same length");
+
+        if (quizzes.length != efactors.length || quizzes.length != posts.length || efactors.length != posts.length) {
+            toast("the returned arrays don't have the same length");
+        }
+
+        quizzes.forEach(quiz => arrayQuestion.current.push(quiz.name));
+        quizzes.forEach(quiz => arrayType.current.push(quiz.type));
+        arrayQuestionDifficulty.current = efactors;
+        arraySrc.current = posts;
+
+        for (let i = 0; i < quizzes.length; i++) {
+            if (arrayType.current[i] == "MCQ") {
+                let optionsString = quizzes[i]?.options!;
+                let regexp = /desc': '([^']*)'/gm;
+                let match = regexp.exec(optionsString);
+                let arrayOfAnswersForThisInstance = new Array<string>;
+                while (match != null) {
+                    arrayOfAnswersForThisInstance.push(match[1] as string);
+                    optionsThatIGetFromMassiveMCQDatabase.current.push(arrayOfAnswersForThisInstance);
+                    match = regexp.exec(optionsString);
                 }
 
-                quizVariables.quizzes.forEach(quiz => arrayQuestion.current.push(quiz.name));
-                quizVariables.quizzes.forEach(quiz => arrayType.current.push(quiz.type));
-                quizVariables.progresses.forEach(progress => arrayQuestionDifficulty.current.push(progress.efactor));
-                quizVariables.posts.forEach(post => arraySrc.current.push(post.coverURL));
-                quizVariables.posts.forEach(post => postId.current.push(post.id));
-
-                for (let i = 0; i < quizVariables.quizzes.length; i++) {
-                    if (arrayType.current[i] == "MCQ") {
-                        let optionsString = quizVariables.quizzes[i]?.options!;
-                        let regexp = /desc': '([^']*)'/gm;
-                        let match = regexp.exec(optionsString);
-                        let arrayOfAnswersForThisInstance = new Array<string>;
-                        while (match != null) {
-                            arrayOfAnswersForThisInstance.push(match[1] as string);
-                            optionsThatIGetFromMassiveMCQDatabase.current.push(arrayOfAnswersForThisInstance);
-                            match = regexp.exec(optionsString);
-                        }
-
-                        regexp = /'is_correct': ([^}]*)}/gm;
-                        match = regexp.exec(optionsString);
-                        while (match != null) {
-                            correctnessOfOptionsThatIGetFromMassiveMCQDatabase.push(match[1] == "True" ? true : false);
-                            match = regexp.exec(optionsString);
-                        }
-
-                        let indexOfCorrectAnswerMCQ = correctnessOfOptionsThatIGetFromMassiveMCQDatabase.indexOf(true);
-                        arrayOfArrayCorrectAnswers.current[i] = [optionsThatIGetFromMassiveMCQDatabase.current[i]![indexOfCorrectAnswerMCQ] as string];
-                    }
-
+                regexp = /'is_correct': ([^}]*)}/gm;
+                match = regexp.exec(optionsString);
+                while (match != null) {
+                    correctnessOfOptionsThatIGetFromMassiveMCQDatabase.push(match[1] == "True" ? true : false);
+                    match = regexp.exec(optionsString);
                 }
 
+                let indexOfCorrectAnswerMCQ = correctnessOfOptionsThatIGetFromMassiveMCQDatabase.indexOf(true);
+                arrayOfArrayCorrectAnswers.current[i] = [optionsThatIGetFromMassiveMCQDatabase.current[i]![indexOfCorrectAnswerMCQ] as string];
             }
-            else {
-                toast("problem with getting many quizzes from DB");
-            }
-            quizMakerUltimateHelper();
-        });
+
+        }
+
+        quizMakerUltimateHelper();
+
 
         // adding script that makes elements of the list able to be dragged
         setTimeout(() => {
@@ -286,28 +278,28 @@ const QuizMicro: FC<QuizMicroProps> = ({ refetch, quizzes, efactors, posts }) =>
 
         questionNumber.current = questionNumber.current + 1;
 
+        // writing the score to DB
+        if (!session.data?.user) {
+            toast("You need to login");
+        } else {
+            quizGradeMutation
+                .mutateAsync({
+                    quizId: quizzes[questionNumber!.current - 2]?.id!,
+                    grade: (score.current)
+                })
+                .then(() => {
+                    refetch();
+                })
+                .catch((err) => {
+                    toast(err);
+                });
+        }
+
         // check if by any chance we have finished all the questions
         if (questionNumber.current - 1 == arrayQuestion.current.length) {
             setQuizContentVisibility(false);
             setScoreVisibility(true);
-            if (!session.data?.user) {
-                toast("You need to login");
-            } else {
 
-                quizGradeMutation
-                    .mutateAsync({
-                        quizId: 1,
-                        grade: (score.current)
-                    })
-                    .then(() => {
-                        refetch();
-                    })
-                    .catch((err) => {
-                        toast(err);
-                    });
-
-
-            }
 
         } else {
             // create new question and new answer options and mnemonic hint
