@@ -44,7 +44,7 @@ def get_cg_tree():
 def insert_question(conceptId, question, db, c):
     # Only for MCQ
     # Ignore question id due to duplications in data source
-    cmd = "INSERT IGNORE INTO Quiz (idInConcept, name, type, options, conceptId) VALUES ('"+question['id']+"', '" + question['desc'].replace('\'', '\\\'').replace('\"', '\\\"') + "', '" + question['type'] + "', '" + str(question['options']).replace('\'', '\\\'').replace('\"', '\\\"') + "', '"+ conceptId +"');"
+    cmd = "INSERT IGNORE INTO Quiz (idInConcept, name, type, options, conceptId) VALUES ('"+question['id']+"', '" + question['desc'].replace('\'', '\\\'').replace('\"', '\\\"') + "', '" + question['type'] + "', '" + json.dumps(question['options']).replace('\'', '\\\'').replace('\"', '\\\"') + "', '"+ conceptId +"');"
     logging.debug(cmd)
     c.execute(cmd)
 

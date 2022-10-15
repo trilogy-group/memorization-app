@@ -196,8 +196,8 @@ const Upload: NextPage = () => {
 
       toast.loading("Uploading metadata...", { id: toastID });
 
-      const conceptId = "CO8";
-      const quizId = "Q1";
+      const conceptId = "";
+      const quizId = "";
 
       const created = await uploadImgMutation.mutateAsync({
         caption: inputValue.trim(),

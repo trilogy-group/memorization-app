@@ -1,11 +1,17 @@
 import { User } from "@nextui-org/react";
-import { Quiz } from "@prisma/client";
+import { Post, Progress, Quiz } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { getRepetition, newRepetition, SuperMemoItem, SuperMemoGrade } from "../../utils/spacedRepetition";
 
 import { createRouter } from "./context";
 
+enum fileDataType {
+  video,
+  image,
+  text,
+  unknown,
+}
 
 export type ProgressWhereUniqueInput = {
   postId?: string | null,
@@ -38,7 +44,25 @@ export const progressRouter = createRouter()
           },
         },
       });
-      return quizzes;
+      const quizIdArr: number[] = quizzes.map((q) => { return q.id; });
+
+      let progresses: Progress[] = [];
+      let posts: Post[] = [];
+      posts = await prisma.post.findMany({
+        where: {
+          quizId: { in: quizIdArr },
+        }
+      });
+
+      progresses = await prisma.progress.findMany({
+        where: {
+          quizId: { in: quizIdArr },
+          userId: session?.user?.id as string,
+        }
+      });
+
+      // create progress entry if not existing
+      return { quizzes, progresses, posts };
     },
   })
   .mutation("get-one-quiz", {
@@ -65,9 +89,31 @@ export const progressRouter = createRouter()
           id: quizId
         }
       });
-
+      const mnemonicImgURL = await prisma.post.findFirst({
+        where: {
+          AND: [
+            { quizId: quizId },
+            { contentType: fileDataType.image }
+          ]
+        },
+        select: {
+          coverURL: true,
+        }
+      });
+      const mnemonic_text = await prisma.post.findFirst({
+        where: {
+          AND: [
+            { quizId: quizId },
+            { contentType: fileDataType.text }
+          ]
+        },
+        select: {
+          mnemonic_text: true,
+        }
+      });
+ 
       // create progress entry if not existing
-      return quiz;
+      return { mnemonic_text: mnemonic_text, mnemonicImgURL: mnemonicImgURL, question: quiz?.name, answer: quiz?.answer, options: quiz?.options };
     },
   })
   .mutation("post-got-it", {
