@@ -157,29 +157,32 @@ export const postRouter = createRouter()
       let coverURLs_or_mnemonicTexts: string[] = [];
       let efactors: number[] = [];
 
-      const unviewedFeeds = await prisma.feed.findMany({
+      const viewedFeeds = await prisma.feed.findMany({
         where: {
           userId: session?.user?.id as string,
-          viewed: false,
+          viewed: true,
         },
+        select: {
+          quizId: true
+        }
       });
 
-      if (unviewedFeeds.length != 0) {
-        quizzes = []
-        console.log('haven\'t viewed', unviewedFeeds);
-      } else {
-        // all feeds have been viewed
-        quizzes = await prisma.quiz.findMany({
+      // quizzes for the viewed feeds
+      quizzes = await prisma.quiz.findMany({
           where: {
             progress: {
               some: {
                 userId: session?.user?.id as string,
+                nextEvaluate: {
+                  lt: new Date()
+                }
               }
-            }
+            },
+            id: {in: viewedFeeds.map((f)=>{return f.quizId;})}
           },
         });
-        console.log("all feeds have been viewed", quizzes);
-      }
+      console.log("all feeds have been viewed", quizzes);
+      // TODO: if feeds are incomplete, do not add the quiz
 
       const posts = items.map((item) => {
         return {
