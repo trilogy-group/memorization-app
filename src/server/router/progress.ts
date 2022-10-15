@@ -141,46 +141,33 @@ export const progressRouter = createRouter()
           quizId: input.quizId,
         }
       });
-
-      // create progress entry if not existing
-      var progressCreated;
-      if (!existingProgress) {
-        progressCreated = await prisma.progress.create({
-          data: {
-            // TODO: add interval to nextEvaluate. Now quizzes are always pending for demo
-            nextEvaluate: new Date(),
-            efactor: 2.5,
-            interval: 1,
+      if (existingProgress == null) {
+        throw new TRPCError({code: "INTERNAL_SERVER_ERROR"});
+      }
+      
+      // update the spaced repetition item if it's an existing item
+      let item: SuperMemoItem = {
+        interval: existingProgress.interval,
+        repetition: existingProgress.repetition,
+        efactor: existingProgress.efactor,
+      };
+      const repetitionItem = await getRepetition(item, grade);
+      var progress = await prisma.progress.update({
+        where: {
+          progress_identifier: {
             userId: session?.user?.id!,
             quizId: input.quizId,
           }
-        });
-      }
-      else {
-        // update the spaced repetition item if it's an existing item
-        let item: SuperMemoItem = {
-          interval: existingProgress.interval,
-          repetition: existingProgress.repetition,
-          efactor: existingProgress.efactor,
-        };
-        const repetitionItem = await getRepetition(item, grade);
-        progressCreated = await prisma.progress.update({
-          where: {
-            progress_identifier: {
-              userId: session?.user?.id!,
-              quizId: input.quizId,
-            }
-          },
-          data: {
-            // TODO: add interval to the next evaluate time
-            nextEvaluate: new Date(),
-            efactor: repetitionItem.efactor,
-            interval: repetitionItem.interval,
-            repetition: repetitionItem.repetition
-          }
-        });
-      }
-      if (progressCreated == null) {
+        },
+        data: {
+          // TODO: add interval to the next evaluate time
+          nextEvaluate: new Date(),
+          efactor: repetitionItem.efactor,
+          interval: repetitionItem.interval,
+          repetition: repetitionItem.repetition
+        }
+      });
+      if (progress == null) {
         throw new Error("Database update error, spaced repetition failed");
       }
 

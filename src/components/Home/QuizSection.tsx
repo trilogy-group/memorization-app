@@ -4,7 +4,8 @@ import { trpc } from "@/utils/trpc";
 import React from "react";
 import { useSession } from "next-auth/react";
 import { FormControl, FormControlLabel, FormHelperText, FormLabel, Radio, RadioGroup } from "@mui/material";
-import { QuizType } from "@/utils/text";
+import { QuizType, Option } from "@/utils/text";
+import Example from "./SwipeCard";
 
 interface QuizSectionProps {
   quiz: Quiz[];
@@ -27,12 +28,21 @@ const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin }) => {
 
   const quizPostMutation = trpc.useMutation("progress.post-one-quiz-result");
   const [choice, setChoice] = useState<string>("");
-  let quizIndex = 0;
+  const [done, setDone] = useState<boolean>(false);
+  const [quizIndex, setQuizIndex] = useState<number>(0);
 
   if (quiz == null || quiz.length == 0) {
     return <>No Quiz now</>;
   }
 
+  const forceUpdate = () => {
+    if(quizIndex == quiz.length){
+      setDone(true);
+    }
+    setQuizIndex(quizIndex + 1);
+  }
+
+  //
   const getScoreBasedOnTimeTaken = (correct: boolean, timeTaken: number) => {
     if (correct) {
       if (timeTaken < 5000) {
@@ -53,17 +63,9 @@ const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin }) => {
     }
   }
 
-  interface Option {
-    id: string,
-    desc: string,
-    ordinal: string,
-    is_correct: boolean,
-  }
-
   const handleSingleQuiz = (quiz: Quiz) => {
     const name = quiz.name;
     const answer = quiz.answer;
-    console.log(quiz.options);
     const options: Option[] = JSON.parse(quiz.options);
 
     if (quiz.type == QuizType.MCQ) {
@@ -86,6 +88,7 @@ const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin }) => {
     }
   };
 
+
   const handleChange = (e: any) => {
     console.log('handlechange', e.target.value);
     setChoice(e.target.value as string);
@@ -93,13 +96,16 @@ const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin }) => {
 
   const handleCheckAnswer = async () => {
     // Check correctness
-
+    console.log('quizindex', quizIndex);
     // Post result
-    await quizPostMutation.mutateAsync({
+    const PostQuizResult = await quizPostMutation.mutateAsync({
       quizId: quiz[quizIndex]?.id as number,
       grade: 5,
     });
-    quizIndex += 1;
+    console.log(PostQuizResult);
+    console.log('quizindex', quizIndex);
+    forceUpdate();
+    
   };
 
   return (
@@ -108,9 +114,35 @@ const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin }) => {
         <div className="flex justify-center mx-2 flex-grow bg-white-1">
           <div className="w-full max-w-[1000px] p-8 bg-white my-4">
             <div className="flex flex-col items-center justify-center">
+              {
+                done ? <></> : handleSingleQuiz(quiz[quizIndex] as Quiz)
+              }
+            </div>
+            <div className="flex fljjex-wrap gap-3 justify-center">
+              <button
+                onClick={() => {
+                  handleCheckAnswer();
+                }}
+                className="py-3 min-w-[170px] border border-gray-2 bg-white hover:bg-gray-100 transition"
+              >
+                Check Answer
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+  /*
+  return (
+    <>
+      <div className="min-h-screen flex flex-col items-stretch microQuiz">
+        <div className="flex justify-center mx-2 flex-grow bg-white-1">
+          <div className="w-full max-w-[1000px] p-8 bg-white my-4">
+            <div className="flex flex-col items-center justify-center">
               {handleSingleQuiz(quiz[quizIndex] as Quiz)}
             </div>
-            <div className="flex flex-wrap gap-3 justify-center">
+            <div className="flex fljjex-wrap gap-3 justify-center">
               <button
                 disabled={choice == "" && quizIndex < quiz.length}
                 onClick={() => {
@@ -126,6 +158,7 @@ const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin }) => {
       </div>
     </>
   );
+  */
 };
 
 export default QuizSection;
