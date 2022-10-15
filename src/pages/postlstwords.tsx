@@ -328,8 +328,7 @@ const CreateListOfWords: NextPage = () => {
   };
 
   const handleUpload = async () => {
-    console.log("Selected mnemonic type: " + selectedMnemonicType + " Mnemonic type: " + mnemonicType);
-    setOpenUpload(true);// TODO: connect to the mnemonics generation backend
+    setOpenUpload(true); // TODO: connect to the mnemonics generation backend
   };
 
   const handleAddToSequence = async () => {
@@ -376,7 +375,9 @@ const CreateListOfWords: NextPage = () => {
                     Memorize a list of words{" "}
                     <Navigation
                       open={open}
-                      onClose={() => setOpen(false)}
+                      onClose={() => {
+                        setOpen(false);
+                      }}
                       multiselect={false}
                       questions={true}
                       addNodeToWorkspace={function (
@@ -414,7 +415,6 @@ const CreateListOfWords: NextPage = () => {
                       questionId={nodeId}
                       caption={selectedMnemonicType}
                       mnemonicType={mnemonicType}
-                      
                     />
                   </h1>
 
@@ -483,7 +483,9 @@ const CreateListOfWords: NextPage = () => {
                   <div>
                     <button
                       onClick={async () => await handleUpload()}
-                      disabled={isLoading || !selectedMnemonic || parentName === ""}
+                      disabled={
+                        isLoading || !selectedMnemonic || parentName === ""
+                      }
                       className={`flex justify-center items-center gap-2 py-3 min-w-[170px] hover:brightness-90 transition text-white bg-red-1 disabled:text-gray-400 disabled:bg-gray-200`}
                       style={{ borderRadius: 5, padding: 5 }}
                     >
@@ -541,6 +543,7 @@ const CreateListOfWords: NextPage = () => {
                                 }}
                                 onClick={async () => {
                                   setSelectedMnemonicType(acronym[index] || "");
+                                  setMnemonicType("acronym");
                                   setSelectedMnemonic(true);
                                 }}
                               >
@@ -642,6 +645,7 @@ const CreateListOfWords: NextPage = () => {
                                   setSelectedMnemonicType(
                                     mnemonicImage[index] || ""
                                   );
+                                  setMnemonicType("image");
                                   setSelectedMnemonic(true);
                                 }}
                               >
@@ -699,6 +703,7 @@ const CreateListOfWords: NextPage = () => {
                                   margin: 5,
                                 }}
                                 onClick={async () => {
+                                  setMnemonicType("story");
                                   setSelectedMnemonicType(story[index] || "");
                                   setSelectedMnemonic(true);
                                 }}
@@ -765,7 +770,7 @@ const CreateListOfWords: NextPage = () => {
                               onClick={async () => {
                                 //handleConfirmMnemonic();
                                 setSelectedMnemonic(true);
-                                setMnemonicType("acronym")
+                                setMnemonicType("acronym");
                               }}
                             >
                               Accept

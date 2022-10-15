@@ -38,7 +38,6 @@ import { fetchWithProgress } from "@/utils/fetch";
 import Meta from "../Shared/Meta";
 import { BsFillCloudUploadFill } from "react-icons/bs";
 
-
 enum fileDataType {
   video,
   image,
@@ -230,16 +229,12 @@ const Upload = ({
   };
 
   const handleOpen = async () => {
+    console.log("handleOpen " + caption + " " + mnemonicType);
     if (open) {
-      //If mnemonictype is image
       if (mnemonicType === "image") {
-        
-        //Read image file from local storage
-        const imageFile = localStorage.getItem(caption);
-        if (imageFile) {
-          handleImageFileChange(imageFile);
-        }
-        
+        setCoverImageURL(caption);
+      } else {
+        setCoverImageURL(null);
       }
     }
   };
@@ -249,26 +244,31 @@ const Upload = ({
   }, [open]);
 
   const handleImageUpload = async () => {
-    if (!coverImageURL || !inputValue.trim() || isLoading) return;
+    //if (!coverImageURL || !inputValue.trim() || isLoading) return;
     setIsLoading(true);
 
     const toastID = toast.loading("Uploading...");
+
     try {
-      const coverBlob = await (await fetch(coverImageURL)).blob();
+      var uploadedCover: string;
+      console.log("uploading cover");
+      if (mnemonicType !== "image") {
+        const coverBlob = await (await fetch(coverImageURL || "")).blob();
 
-      const formData = new FormData();
-      formData.append("file", coverBlob, "cover.png");
-      formData.append("content", "From webhook");
-
-      const uploadedCover = (
-        await (
-          await fetch(process.env.NEXT_PUBLIC_IMAGE_UPLOAD_URL!, {
-            method: "POST",
-            body: formData,
-          })
-        ).json()
-      ).attachments[0].proxy_url;
-
+        const formData = new FormData();
+        formData.append("file", coverBlob, "cover.png");
+        formData.append("content", "From webhook");
+        uploadedCover = (
+          await (
+            await fetch(process.env.NEXT_PUBLIC_IMAGE_UPLOAD_URL!, {
+              method: "POST",
+              body: formData,
+            })
+          ).json()
+        ).attachments[0].proxy_url;
+      } else {
+        uploadedCover = coverImageURL || "";
+      }
       toast.loading("Uploading metadata...", { id: toastID });
 
       const created = await uploadImgMutation.mutateAsync({
@@ -386,12 +386,18 @@ const Upload = ({
   };
 
   const handleUpload = async () => {
-    if (fileType == fileDataType.image) {
+    if (mnemonicType === "image") {
       handleImageUpload();
-    } else if (fileType == fileDataType.video) {
-      handleVideoUpload();
     } else {
-      throw new Error("Unknown file type. Only support video/image uploading.");
+      if (fileType == fileDataType.image) {
+        handleImageUpload();
+      } else if (fileType == fileDataType.video) {
+        handleVideoUpload();
+      } else {
+        throw new Error(
+          "Unknown file type. Only support video/image uploading."
+        );
+      }
     }
   };
 
@@ -434,47 +440,50 @@ const Upload = ({
             </p>
 
             <div className="flex items-start mt-10 gap-4">
-              {videoURL ? (
-                <video
-                  className="w-[250px] h-[340px] object-contain"
-                  muted
-                  autoPlay
-                  controls
-                  src={videoURL}
-                  playsInline
-                />
-              ) : (
-                <button
-                  onDrop={dropFile}
-                  onDragLeave={dragBlur}
-                  onDragEnter={dragFocus}
-                  onDragOver={dragFocus}
-                  onClick={() => inputRef.current?.click()}
-                  className={`w-[250px] flex-shrink-0 border-2 border-gray-300 rounded-md border-dashed flex flex-col items-center p-8 cursor-pointer hover:border-red-1 transition ${
-                    isFileDragging ? "border-red-1" : ""
-                  }`}
-                >
-                  <BsFillCloudUploadFill className="fill-[#B0B0B4] w-10 h-10" />
-                  <h1 className="font-semibold mt-4 mb-2">
-                    Select a file to upload
-                  </h1>
-                  <p className="text-gray-500 text-sm">
-                    Or drag and drop a file
-                  </p>
+              {mnemonicType !== "image" && (
+                <div className="flex flex-col items-center justify-center w-1/2">
+                  {videoURL ? (
+                    <video
+                      className="w-[250px] h-[340px] object-contain"
+                      muted
+                      autoPlay
+                      controls
+                      src={videoURL}
+                      playsInline
+                    />
+                  ) : (
+                    <button
+                      onDrop={dropFile}
+                      onDragLeave={dragBlur}
+                      onDragEnter={dragFocus}
+                      onDragOver={dragFocus}
+                      onClick={() => inputRef.current?.click()}
+                      className={`w-[250px] flex-shrink-0 border-2 border-gray-300 rounded-md border-dashed flex flex-col items-center p-8 cursor-pointer hover:border-red-1 transition ${
+                        isFileDragging ? "border-red-1" : ""
+                      }`}
+                    >
+                      <BsFillCloudUploadFill className="fill-[#B0B0B4] w-10 h-10" />
+                      <h1 className="font-semibold mt-4 mb-2">
+                        Select a file to upload
+                      </h1>
+                      <p className="text-gray-500 text-sm">
+                        Or drag and drop a file
+                      </p>
 
-                  <div className="flex flex-col items-center text-gray-400 my-4 gap-1 text-sm">
-                    <p>MP4, WebM, PNG, JPG ...</p>
-                    <p>Any resolution</p>
-                    <p>Any duration</p>
-                    <p>Less than 200MB</p>
-                  </div>
+                      <div className="flex flex-col items-center text-gray-400 my-4 gap-1 text-sm">
+                        <p>MP4, WebM, PNG, JPG ...</p>
+                        <p>Any resolution</p>
+                        <p>Any duration</p>
+                        <p>Less than 200MB</p>
+                      </div>
 
-                  <div className="w-full bg-red-1 text-white p-2">
-                    Select file
-                  </div>
-                </button>
+                      <div className="w-full bg-red-1 text-white p-2">
+                        Select file
+                      </div>
+                    </button>
+                  )}
+                </div>
               )}
-
               <input
                 ref={inputRef}
                 type="file"
@@ -532,15 +541,15 @@ const Upload = ({
                   <button
                     onClick={async () => await handleUpload()}
                     disabled={
-                      !inputValue.trim() ||
+                      /* !inputValue.trim() || */
                       !(
                         !videoURL ||
                         !videoFile ||
                         !coverImageURL ||
                         !imageFile ||
                         !imageURL
-                      ) ||
-                      isLoading
+                      ) &&
+                      (isLoading || mnemonicType === "image")
                     }
                     className={`flex justify-center items-center gap-2 py-3 min-w-[170px] hover:brightness-90 transition text-white bg-red-1 disabled:text-gray-400 disabled:bg-gray-200`}
                   >
