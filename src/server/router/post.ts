@@ -273,57 +273,6 @@ export const postRouter = createRouter()
       efactors = quizIdsThatAreWorthGoingThrough.map((quizId) => (quizId.efactor));
       quizzes = quizIdsThatAreWorthGoingThrough.map((quizIds) => (quizIds.quizzes));
 
-
-      const existingProgress = await prisma.progress.findMany({
-        take: 5,
-        skip,
-        where: {
-          userId: session?.user?.id!,
-          nextEvaluate: {
-            lt: new Date()
-          }
-        },
-        orderBy: {
-          // quizzes from the most recent ones
-          nextEvaluate: "asc"
-        }
-      });
-      if (existingProgress == null) {
-        console.log("no existing progress");
-      }
-
-
-      existingProgress?.forEach(progress => { quizIds.push(progress.quizId) });
-      console.log("quiz ids are", quizIds);
-
-      quizzes = await prisma.quiz.findMany({
-        where: {
-          id: { in: quizIds }
-        },
-      });
-
-
-      for (let i = 0; i < quizIds.length; i++) {
-        let post = await prisma.post.findFirst({
-          where: {
-            quizId: quizIds[i],
-          }
-        });
-        if (post != null) {
-          posts.push(post);
-        }
-
-        let progress = await prisma.progress.findFirst({
-          where: {
-            quizId: quizIds[i],
-            userId: session?.user?.id!
-          }
-        });
-        if (progress != null) {
-          progresses.push(progress);
-        }
-
-      }
       // GETTING QUIZZES END
 
       return {
