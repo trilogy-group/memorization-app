@@ -115,7 +115,7 @@ export const postRouter = createRouter()
           }
         },
         where: {
-          id: {in: feedPostIdArr}
+          id: { in: feedPostIdArr }
         }
       });
 
@@ -164,20 +164,21 @@ export const postRouter = createRouter()
       });
 
       // quizzes for the viewed feeds
+      // TODO: implement skip, fix viewed reset bugs
       quizzes = await prisma.quiz.findMany({
         skip,
-          where: {
-            progress: {
-              some: {
-                userId: session?.user?.id as string,
-                nextEvaluate: {
-                  lt: new Date()
-                }
+        where: {
+          progress: {
+            some: {
+              userId: session?.user?.id as string,
+              nextEvaluate: {
+                lt: new Date()
               }
-            },
-            id: {in: viewedFeeds.map((f)=>{return f.quizId;})}
+            }
           },
-        });
+          //id: { in: viewedFeeds.map((f) => { return f.quizId; }) }
+        },
+      });
       console.log("all feeds have been viewed", quizzes);
       // TODO: if the last quiz was correct, then the posts will not be shown, the quiz will still appear
       // TODO: if feeds are incomplete, do not add the quiz
@@ -284,19 +285,12 @@ export const postRouter = createRouter()
       quizId: z.string(),
     }),
     async resolve({ ctx: { prisma, session }, input }) {
-      console.log("conceptid", input.conceptId);
-      console.log("idInconcept", input.quizId);
+      console.log("conceptid", input.conceptId as string);
+      console.log("idInconcept", input.quizId as string);
       const quizFound = await prisma.quiz.findFirst({
         where: {
-          AND: [
-            {
-              concepts: {
-                id: input.conceptId,
-              }
-            },
-            {
-              idInConcept: input.quizId as string,
-            }]
+          conceptId: 'CO164', // input.conceptId,
+          idInConcept: 'GQ5079e922-4bdb-11ed-ae21-12a7910fac19'//input.quizId as string,
         }
       });
 

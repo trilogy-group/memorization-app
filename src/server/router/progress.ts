@@ -213,12 +213,13 @@ export const progressRouter = createRouter()
         const concept = await prisma.concept.findFirst({
           where: {
             quizzes: {
-              every: {
+              some: {
                 id: input.quizId,
               }
             }
           }
         });
+        console.log('failed a quiz on concept', concept);
 
         for (const post of postsSuggested) {
           const feedsCreated = await prisma.feed.create({
@@ -233,19 +234,19 @@ export const progressRouter = createRouter()
           if (feedsCreated == null) {
             throw new Error("Cannot create Feeds in DB");
           }
+          console.log('feeds created due to failed quiz', feedsCreated);
         }
         for (const post of postsLiked) {
-          const feedsLikedUpdated = await prisma.feed.update({
-            where: {
-              feed_identifier: {
-                userId: session?.user?.id as string,
-                postId: post.id
-              }
-            },
-            data: {
+          const feedsLikedUpdated = await prisma.feed.create({
+           data: {
+              postId: post.id,
+              userId: session?.user?.id as string,
+              quizId: post.quizId,
               viewed: false,
+              conceptId: concept?.id as string,
             }
           });
+          console.log('feeds created due to failed quiz', feedsLikedUpdated);
         }
       } else {
         // Quiz correct -> posts will not appear in the feeds
