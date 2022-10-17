@@ -5,6 +5,40 @@ import { z } from "zod";
 
 import { createRouter } from "./context";
 
+import * as fs from "fs";
+import * as AWS from "aws-sdk";
+
+const BUCKET_NAME = process.env.BUCKET_NAME;
+const IAM_USER_KEY = process.env.IAM_USER_KEY;
+const IAM_USER_SECRET = process.env.IAM_USER_SECRET;
+
+const s3bucket = new AWS.S3({
+  accessKeyId: IAM_USER_KEY,
+  secretAccessKey: IAM_USER_SECRET
+});
+
+function uploadToS3(fileName: string): Promise<any> {
+  const readStream = fs.createReadStream("./public/" + fileName);
+
+  const params = {
+    Bucket: BUCKET_NAME as string,
+    Key: fileName,
+    Body: readStream
+  };
+
+  return new Promise((resolve, reject) => {
+    s3bucket.upload(params, function(err: any, data: { Location: string; }) {
+      readStream.destroy();
+      
+      if (err) {
+        return reject(err);
+      }
+      console.log(data.Location);
+      return resolve(data.Location);
+    });
+  });
+}
+
 enum contentType {
   image = 1,
   video = 2,
@@ -334,5 +368,15 @@ export const postRouter = createRouter()
       });
       return created;
     },
+  })
+  .mutation("uploadToS3", {
+    input: z.object({
+      file: z.string(),
+      }),
+      async resolve({ ctx: { prisma, session }, input }) {
+        const Location: String = (await uploadToS3(input.file)) as string;
+        return Location;
+      },
   });
+
 

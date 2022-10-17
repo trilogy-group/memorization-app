@@ -136,7 +136,7 @@ const Post: NextPage<PostProps> = ({ post, href, title }) => {
             onVolumeChange={(e: any) => setIsMuted(e.target.muted)}
             autoPlay
             loop
-            poster={"/" + post.coverURL}
+            poster={post.coverURL}
             controls
             playsInline
           ></video>

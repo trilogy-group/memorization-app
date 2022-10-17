@@ -24,6 +24,7 @@
     "@trpc/react": "^9.27.0",
     "@trpc/server": "^9.27.0",
     "moment": "^2.29.4",
+    "aws-sdk": "^2.1233.0",
     "next": "12.2.5",
     "next-auth": "^4.10.3",
     "next-superjson": "^0.0.4",
