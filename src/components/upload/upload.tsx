@@ -200,7 +200,7 @@ const Upload = ({
         position: "bottom-right",
       });
     });
-
+    console.log("Uploading")
     video.addEventListener("loadeddata", () => {
       setTimeout(() => {
         const canvas = document.createElement("canvas");
@@ -212,8 +212,8 @@ const Upload = ({
         setVideoHeight(video.videoHeight);
 
         ctx.drawImage(video, 0, 0);
-        setCoverImageURL(canvas.toDataURL("image/png"));
-
+        const url = canvas.toDataURL("image/png");
+        setCoverImageURL(url)
         document.body.removeChild(video);
       }, 300);
     });
@@ -231,12 +231,11 @@ const Upload = ({
   };
 
   const handleOpen = async () => {
-    console.log("handleOpen " + imageUrl + " " + mnemonicType);
     if (open) {
       if (mnemonicType === "image") {
         setCoverImageURL(imageUrl);
       } else {
-        setCoverImageURL(null);
+        //setCoverImageURL(null);
       }
     }
   };
@@ -253,7 +252,6 @@ const Upload = ({
 
     try {
       var uploadedCover: string;
-      console.log("uploading cover");
       if (mnemonicType !== "image") {
         const coverBlob = await (await fetch(coverImageURL || "")).blob();
 
@@ -301,11 +299,10 @@ const Upload = ({
   };
 
   const handleVideoUpload = async () => {
-    if (
+     if (
       !coverImageURL ||
       !videoFile ||
       !videoURL ||
-      !inputValue.trim() ||
       isLoading
     )
       return;
@@ -330,7 +327,6 @@ const Upload = ({
       ).url;
 
       toast.loading("Uploading cover image...", { id: toastID });
-
       const coverBlob = await (await fetch(coverImageURL)).blob();
 
       const formData = new FormData();
@@ -368,7 +364,6 @@ const Upload = ({
         conceptId: conceptId,
         quizId: questionId,
       });
-      console.log("Concept ID: ", conceptId + " Question ID: ", questionId);
       toast.loading("Mnemonics Created! Points +1", { id: toastID });
       await new Promise((r) => setTimeout(r, 800));
 
