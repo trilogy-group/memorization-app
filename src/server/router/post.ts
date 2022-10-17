@@ -68,7 +68,7 @@ export const postRouter = createRouter()
       const feedPostIdArr = feedItems.map((feed) => feed.postId);
 
       const items = await prisma.post.findMany({
-        take: 4,
+        take: 2,
         skip,
         include: {
           user: true,
@@ -130,7 +130,7 @@ export const postRouter = createRouter()
       // quizzes for the viewed feeds
       // TODO: implement skip, fix viewed reset bugs
       quizzes = await prisma.quiz.findMany({
-        skip,
+        skip: skip == 0?0:Number.MAX_SAFE_INTEGER,
         where: {
           progress: {
             some: {

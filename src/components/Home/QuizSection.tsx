@@ -33,7 +33,8 @@ const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin }) => {
   const [quizIndex, setQuizIndex] = useState<number>(0);
 
   if (quiz == null || quiz.length == 0) {
-    return <>No Quiz now</>;
+    // no quiz now
+    return <></>;
   }
 
   const forceUpdate = () => {
