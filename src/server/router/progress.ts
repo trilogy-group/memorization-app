@@ -212,9 +212,24 @@ export const progressRouter = createRouter()
           }
         });
 
+        if (concept == null) {
+          throw new Error('Cannot find concept based on the quizId. Internal server error');
+        }
+
         for (const post of postsSuggested) {
-          const feedsCreated = await prisma.feed.create({
-            data: {
+         const feedsCreated = await prisma.feed.upsert({
+            where: {
+              postId_userId: {
+                postId: post.id,
+                userId: session?.user?.id as string,
+              }
+            },
+            update: {
+              quizId: post.quizId,
+              viewed: false,
+              conceptId: concept?.id as string,
+            },
+            create: {
               postId: post.id,
               userId: session?.user?.id as string,
               quizId: post.quizId,
@@ -222,13 +237,25 @@ export const progressRouter = createRouter()
               conceptId: concept?.id as string,
             }
           });
+
           if (feedsCreated == null) {
             throw new Error("Cannot create Feeds in DB");
           }
         }
         for (const post of postsLiked) {
-          const feedsLikedUpdated = await prisma.feed.create({
-           data: {
+          const feedsLikedUpdated = await prisma.feed.upsert({
+            where: {
+              postId_userId: {
+                postId: post.id,
+                userId: session?.user?.id as string,
+              }
+            },
+            update: {
+              quizId: post.quizId,
+              viewed: false,
+              conceptId: concept?.id as string,
+            },
+            create: {
               postId: post.id,
               userId: session?.user?.id as string,
               quizId: post.quizId,
@@ -236,6 +263,9 @@ export const progressRouter = createRouter()
               conceptId: concept?.id as string,
             }
           });
+          if (feedsLikedUpdated == null) {
+            throw new Error("Cannot create Feeds in DB");
+          }
         }
       } else {
         // Quiz correct -> posts will not appear in the feeds
@@ -250,10 +280,10 @@ export const progressRouter = createRouter()
         });
         await prisma.feed.deleteMany({
           where: {
-              userId: session?.user?.id as string,
-              postId: {
-                in: relatedPosts.map((p: any) => { return p.id; })
-              }
+            userId: session?.user?.id as string,
+            postId: {
+              in: relatedPosts.map((p: any) => { return p.id; })
+            }
           }
         });
       }
