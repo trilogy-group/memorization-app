@@ -59,6 +59,7 @@ export const postRouter = createRouter()
       const feedItems = await prisma.feed.findMany({
         where: {
           userId: session?.user?.id as string,
+          viewed: false,
         },
         select: {
           postId: true,
