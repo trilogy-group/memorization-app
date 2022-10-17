@@ -38,6 +38,7 @@ import { fetchWithProgress } from "@/utils/fetch";
 import Meta from "../Shared/Meta";
 import { BsFillCloudUploadFill } from "react-icons/bs";
 
+
 enum fileDataType {
   video,
   image,
@@ -70,7 +71,7 @@ const useConceptStore = create<ConceptState>()(
 
 interface ConceptStateList {
   concepts: ConceptState[];
-}
+};
 
 const useConceptListStore = create<ConceptStateList>()(
   devtools(
@@ -108,6 +109,7 @@ const Upload = ({
 
   const uploadMutation = trpc.useMutation("post.createVideo");
   const uploadImgMutation = trpc.useMutation("post.createImg");
+  const uploadToS3Mutation = trpc.useMutation("post.uploadToS3");
 
   const inputRef = useRef<HTMLInputElement | null>(null);
 
@@ -131,6 +133,11 @@ const Upload = ({
       });
     }
   }, [uploadMutation.error]);
+
+  const handleUploadToS3 = async (file: string) => {
+    const res = await uploadToS3Mutation.mutateAsync({file: file});
+    return res;
+  };
 
   const handleImageFileChange = (file: File) => {
     const url = URL.createObjectURL(file);
@@ -166,6 +173,8 @@ const Upload = ({
       });
     });
   };
+  
+  
 
   const handleVideoFileChange = (file: File) => {
     if (!file.type.startsWith("video")) {
@@ -267,7 +276,9 @@ const Upload = ({
           ).json()
         ).attachments[0].proxy_url;
       } else {
-        uploadedCover = coverImageURL || "";
+        const s3Upload = await handleUploadToS3(coverImageURL || "")
+        console.log(s3Upload)
+        uploadedCover = s3Upload as string;
       }
       toast.loading("Uploading metadata...", { id: toastID });
 
