@@ -38,6 +38,7 @@ const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin }) => {
   const [startButtonVisibility, setStartButtonVisibility] = useState<boolean>(true);
   const [quizContentVisibility, setQuizContentVisibility] = useState<boolean>(false);
 
+  var correctAnswerId = useRef<string>("");
 
   var arrayHints = useRef<string[]>([]);
   var arrayEfactors = useRef<number[]>([]);
@@ -113,7 +114,12 @@ const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin }) => {
     const name = quiz.name;
     const options: Option[] = JSON.parse(quiz.options);
     const currentQuestionsEfactor = arrayEfactors.current[quizIndex];
-
+    correctAnswerId.current = options?.map((op: Option) => {
+      if (op.is_correct)
+        return op.id;
+    }) as unknown as string;
+    // the array of correct answers; but I need only the first because the rest are undefined
+    correctAnswerId.current = correctAnswerId.current[0] as string;
     if (currentQuestionsEfactor) {
       if (currentQuestionsEfactor > 2) {
         imgVisibility.current = false;
@@ -126,13 +132,14 @@ const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin }) => {
       return <div className="flex">
         <FormControl component="fieldset">
           <FormLabel component="legend">{name}</FormLabel>
-          {imgVisibility.current && <img id="hintImage" style={{ width: "200", height: "200" }} src={(arrayHints.current[quizIndex] == null) ? "" : arrayHints.current[quizIndex] as string} alt={`Hint could not be loaded/displayed at the URL:  ${arrayHints.current[quizIndex]}`} />}
+          {imgVisibility.current && <img id="hintImage" style={{ width: "350px", height: "350px" }} src={(arrayHints.current[quizIndex] == null) ? "" : arrayHints.current[quizIndex] as string} alt={`Hint could not be loaded/displayed at the URL:  ${arrayHints.current[quizIndex]}`} />}
           <RadioGroup
             value={choice}
             onChange={handleChange}
           >
             {options?.map((op, idx) => {
-              return <FormControlLabel value={op.id} key={idx} control={<Radio />} label={op.desc} />;
+              return <FormControlLabel value={op.id} key={idx} control={<Radio />} label={op.desc} className={`bg-opacity-70 ${(choice == op.id) && (op.id != correctAnswerId.current) && attempted ? "bg-red-600" : (op.id == correctAnswerId.current) && attempted ? "bg-lime-500" : ""}`} onChange={e => { console.log("the op.id ", op.id) }
+              } />
             })}
           </RadioGroup>
         </FormControl>
@@ -146,6 +153,7 @@ const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin }) => {
 
   const handleChange = (e: any) => {
     setChoice(e.target.value as string);
+    console.log("the correct id ", correctAnswerId.current);
   };
 
   const handleCheckAnswer = async () => {
