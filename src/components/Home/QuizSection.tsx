@@ -48,7 +48,8 @@ const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin }) => {
   var quizStart = useRef(0);
 
   if (quiz == null || quiz.length == 0) {
-    return <>No Quiz now</>;
+    // no quiz now
+    return <></>;
   }
 
   useEffect(() => {
