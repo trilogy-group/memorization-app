@@ -48,8 +48,7 @@ const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin }) => {
   var quizStart = useRef(0);
 
   if (quiz == null || quiz.length == 0) {
-    // no quiz now
-    return <></>;
+    return <>No Quiz now</>;
   }
 
   useEffect(() => {
@@ -106,7 +105,7 @@ const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin }) => {
       } else if (timeTaken < 7000) {
         return 1;
       } else {
-        return 0;
+        return 1;
       }
     }
   }
@@ -182,6 +181,13 @@ const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin }) => {
       quizId: quiz[quizIndex]?.id as number,
       grade: score,
     });
+
+    /*
+    if (quizIndex == quiz.length - 1) {
+      console.log("the quiz index is ", quizIndex);
+      setQuizContentVisibility(false);
+    }
+    */
   };
 
   const handleNextQuestion = async () => {
@@ -231,7 +237,7 @@ const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin }) => {
                     }}
                     className="py-3 min-w-[170px] border border-gray-2 bg-white hover:bg-gray-100 transition"
                   >
-                    Next Question
+                    {quizIndex != quiz.length - 1 ? <span>Next Question</span> : <span>Finish the Quiz</span>}
                   </button>
                 </div> : <></>
               }
