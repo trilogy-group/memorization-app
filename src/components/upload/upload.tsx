@@ -90,22 +90,19 @@ export type UploadProps = {
   onClose: () => void;
   conceptId: string;
   questionId: string;
-  addNodeToWorkspace: (
-    nodeId: string,
-    nodeName: string,
-    parentId: string,
-    parentName: string
-  ) => void;
+  caption: string;
+  mnemonicType: string;
+  imageUrl: string;
 };
-
-
 
 const Upload = ({
   open = false,
   onClose,
   conceptId,
   questionId,
-  addNodeToWorkspace,
+  caption,
+  mnemonicType,
+  imageUrl,
 }: UploadProps) => {
   const router = useRouter();
 
@@ -121,8 +118,6 @@ const Upload = ({
   const [videoWidth, setVideoWidth] = useState(0);
   const [videoHeight, setVideoHeight] = useState(0);
   const [inputValue, setInputValue] = useState("");
-  const [subjectValue, setSubjectValue] = useState<string[]>([]);
-  const [chapterValue, setChapterValue] = useState<string[]>([]);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imageURL, setImageURL] = useState<string | null>(null);
 
@@ -136,7 +131,6 @@ const Upload = ({
       });
     }
   }, [uploadMutation.error]);
-
 
   const handleImageFileChange = (file: File) => {
     const url = URL.createObjectURL(file);
@@ -172,7 +166,6 @@ const Upload = ({
       });
     });
   };
-
 
   const handleVideoFileChange = (file: File) => {
     if (!file.type.startsWith("video")) {
@@ -227,7 +220,6 @@ const Upload = ({
     video.load();
   };
 
-
   const handleFileChange = (file: File) => {
     if (file.type.startsWith("image")) {
       handleImageFileChange(file);
@@ -238,45 +230,57 @@ const Upload = ({
     }
   };
 
+  const handleOpen = async () => {
+    console.log("handleOpen " + imageUrl + " " + mnemonicType);
+    if (open) {
+      if (mnemonicType === "image") {
+        setCoverImageURL(imageUrl);
+      } else {
+        setCoverImageURL(null);
+      }
+    }
+  };
+
+  useEffect(() => {
+    handleOpen();
+  }, [open]);
 
   const handleImageUpload = async () => {
-    if (
-      !coverImageURL ||
-      !inputValue.trim() ||
-      isLoading
-    )
-      return;
+    //if (!coverImageURL || !inputValue.trim() || isLoading) return;
     setIsLoading(true);
 
     const toastID = toast.loading("Uploading...");
+
     try {
-      const coverBlob = await (await fetch(coverImageURL)).blob();
+      var uploadedCover: string;
+      console.log("uploading cover");
+      if (mnemonicType !== "image") {
+        const coverBlob = await (await fetch(coverImageURL || "")).blob();
 
-      const formData = new FormData();
-      formData.append("file", coverBlob, "cover.png");
-      formData.append("content", "From webhook");
-
-      const uploadedCover = (
-        await (
-          await fetch(process.env.NEXT_PUBLIC_IMAGE_UPLOAD_URL!, {
-            method: "POST",
-            body: formData,
-          })
-        ).json()
-      ).attachments[0].proxy_url;
-
-
+        const formData = new FormData();
+        formData.append("file", coverBlob, "cover.png");
+        formData.append("content", "From webhook");
+        uploadedCover = (
+          await (
+            await fetch(process.env.NEXT_PUBLIC_IMAGE_UPLOAD_URL!, {
+              method: "POST",
+              body: formData,
+            })
+          ).json()
+        ).attachments[0].proxy_url;
+      } else {
+        uploadedCover = coverImageURL || "";
+      }
       toast.loading("Uploading metadata...", { id: toastID });
 
-
       const created = await uploadImgMutation.mutateAsync({
-        caption: inputValue.trim(),
+        caption: caption,
         coverURL: uploadedCover,
         conceptId: conceptId,
         quizId: questionId,
       });
       toast.loading("Mnemonics Created! Points +1", { id: toastID });
-      await new Promise(r => setTimeout(r, 800));
+      await new Promise((r) => setTimeout(r, 800));
 
       toast.dismiss(toastID);
 
@@ -293,9 +297,8 @@ const Upload = ({
       });
 
       return;
-    };
+    }
   };
-
 
   const handleVideoUpload = async () => {
     if (
@@ -334,11 +337,14 @@ const Upload = ({
       formData.append("file", coverBlob, "cover.png");
       formData.append("content", "From webhook");
 
-      let demo_response = await fetch(process.env.NEXT_PUBLIC_IMAGE_UPLOAD_URL!, {
-        method: "POST",
-        body: formData,
-      })
-      demo_response = await demo_response.json()
+      let demo_response = await fetch(
+        process.env.NEXT_PUBLIC_IMAGE_UPLOAD_URL!,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+      demo_response = await demo_response.json();
 
       const uploadedCover = (
         await (
@@ -349,14 +355,12 @@ const Upload = ({
         ).json()
       ).attachments[0].proxy_url;
 
-
       toast.loading("Uploading metadata...", { id: toastID });
 
       // Replace with concept from user input
 
-
       const created = await uploadMutation.mutateAsync({
-        caption: inputValue.trim(),
+        caption: caption,
         coverURL: uploadedCover,
         videoURL: uploadedVideo,
         videoHeight,
@@ -364,9 +368,9 @@ const Upload = ({
         conceptId: conceptId,
         quizId: questionId,
       });
-      console.log("Concept ID: ", conceptId + " Question ID: ", questionId)
+      console.log("Concept ID: ", conceptId + " Question ID: ", questionId);
       toast.loading("Mnemonics Created! Points +1", { id: toastID });
-      await new Promise(r => setTimeout(r, 800));
+      await new Promise((r) => setTimeout(r, 800));
 
       toast.dismiss(toastID);
 
@@ -383,14 +387,19 @@ const Upload = ({
     }
   };
 
-
   const handleUpload = async () => {
-    if (fileType == fileDataType.image) {
+    if (mnemonicType === "image") {
       handleImageUpload();
-    } else if (fileType == fileDataType.video) {
-      handleVideoUpload();
     } else {
-      throw new Error("Unknown file type. Only support video/image uploading.");
+      if (fileType == fileDataType.image) {
+        handleImageUpload();
+      } else if (fileType == fileDataType.video) {
+        handleVideoUpload();
+      } else {
+        throw new Error(
+          "Unknown file type. Only support video/image uploading."
+        );
+      }
     }
   };
 
@@ -421,7 +430,6 @@ const Upload = ({
     setIsFileDragging(false);
   };
 
-
   return (
     <Dialog open={open} onClose={onClose}>
       <Meta title="Upload | EdTok" description="Upload" image="/favicon.png" />
@@ -429,49 +437,55 @@ const Upload = ({
         <div className="flex justify-center mx-2 flex-grow bg-gray-1">
           <div className="w-full max-w-[1000px] p-8 bg-white my-4">
             <h1 className="text-2xl font-bold">Upload mnemonic media</h1>
-            <p className="text-gray-400 mt-2">Memorize with your videos/images</p>
+            <p className="text-gray-400 mt-2">
+              Memorize with your videos/images
+            </p>
 
             <div className="flex items-start mt-10 gap-4">
-              {videoURL ? (
-                <video
-                  className="w-[250px] h-[340px] object-contain"
-                  muted
-                  autoPlay
-                  controls
-                  src={videoURL}
-                  playsInline
-                />
-              ) : (
-                <button
-                  onDrop={dropFile}
-                  onDragLeave={dragBlur}
-                  onDragEnter={dragFocus}
-                  onDragOver={dragFocus}
-                  onClick={() => inputRef.current?.click()}
-                  className={`w-[250px] flex-shrink-0 border-2 border-gray-300 rounded-md border-dashed flex flex-col items-center p-8 cursor-pointer hover:border-red-1 transition ${isFileDragging ? "border-red-1" : ""
-                    }`}
-                >
-                  <BsFillCloudUploadFill className="fill-[#B0B0B4] w-10 h-10" />
-                  <h1 className="font-semibold mt-4 mb-2">
-                    Select a file to upload
-                  </h1>
-                  <p className="text-gray-500 text-sm">
-                    Or drag and drop a file
-                  </p>
+              {mnemonicType !== "image" && (
+                <div className="flex flex-col items-center justify-center w-1/2">
+                  {videoURL ? (
+                    <video
+                      className="w-[250px] h-[340px] object-contain"
+                      muted
+                      autoPlay
+                      controls
+                      src={videoURL}
+                      playsInline
+                    />
+                  ) : (
+                    <button
+                      onDrop={dropFile}
+                      onDragLeave={dragBlur}
+                      onDragEnter={dragFocus}
+                      onDragOver={dragFocus}
+                      onClick={() => inputRef.current?.click()}
+                      className={`w-[250px] flex-shrink-0 border-2 border-gray-300 rounded-md border-dashed flex flex-col items-center p-8 cursor-pointer hover:border-red-1 transition ${
+                        isFileDragging ? "border-red-1" : ""
+                      }`}
+                    >
+                      <BsFillCloudUploadFill className="fill-[#B0B0B4] w-10 h-10" />
+                      <h1 className="font-semibold mt-4 mb-2">
+                        Select a file to upload
+                      </h1>
+                      <p className="text-gray-500 text-sm">
+                        Or drag and drop a file
+                      </p>
 
-                  <div className="flex flex-col items-center text-gray-400 my-4 gap-1 text-sm">
-                    <p>MP4, WebM, PNG, JPG ...</p>
-                    <p>Any resolution</p>
-                    <p>Any duration</p>
-                    <p>Less than 200MB</p>
-                  </div>
+                      <div className="flex flex-col items-center text-gray-400 my-4 gap-1 text-sm">
+                        <p>MP4, WebM, PNG, JPG ...</p>
+                        <p>Any resolution</p>
+                        <p>Any duration</p>
+                        <p>Less than 200MB</p>
+                      </div>
 
-                  <div className="w-full bg-red-1 text-white p-2">
-                    Select file
-                  </div>
-                </button>
+                      <div className="w-full bg-red-1 text-white p-2">
+                        Select file
+                      </div>
+                    </button>
+                  )}
+                </div>
               )}
-
               <input
                 ref={inputRef}
                 type="file"
@@ -486,7 +500,6 @@ const Upload = ({
               />
 
               <div className="flex-grow">
-                
                 <label className="block font-medium" htmlFor="caption">
                   Caption
                 </label>
@@ -494,37 +507,47 @@ const Upload = ({
                   type="text"
                   id="caption"
                   className="p-2 w-full border border-gray-2 mt-1 mb-3 outline-none focus:border-gray-400 transition"
-                  value={inputValue}
-                  onChange={(e) => {
-                    if (!isLoading) setInputValue(e.target.value);
-                  }}
+                  value={caption}
+                  readOnly
                 />
 
                 <p className="font-medium">Cover</p>
-                <div className="p-2 border border-gray-2 h-[170px] mb-2">
-                  {coverImageURL ? (
+                {mnemonicType !== "image" && (
+                  <div className="p-2 border border-gray-2 h-[170px] mb-2">
+                    {coverImageURL ? (
+                      <img
+                        className="h-full w-auto object-contain"
+                        src={coverImageURL}
+                        alt=""
+                      />
+                    ) : (
+                      <div className="bg-gray-1 h-full w-[100px]"></div>
+                    )}
+                  </div>
+                )}
+                {mnemonicType === "image" && coverImageURL && (
+                  <div className="p-1 border border-gray-2 h-[350px] mb-2">
                     <img
                       className="h-full w-auto object-contain"
                       src={coverImageURL}
                       alt=""
                     />
-                  ) : (
-                    <div className="bg-gray-1 h-full w-[100px]"></div>
-                  )}
-                </div>
+                  </div>
+                )}
 
      
                   <button
                     onClick={async () => await handleUpload()}
                     disabled={
-                      !inputValue.trim() ||
-                      !((!videoURL ||
+                      /* !inputValue.trim() || */
+                      !(
+                        !videoURL ||
                         !videoFile ||
-                        !coverImageURL) || (
+                        !coverImageURL ||
                         !imageFile ||
-                        !imageURL)
-                      ) ||
-                      isLoading
+                        !imageURL
+                      ) &&
+                      (isLoading || mnemonicType === "image")
                     }
                     className={`flex justify-center items-center gap-2 py-3 min-w-[170px] hover:brightness-90 transition text-white bg-red-1 disabled:text-gray-400 disabled:bg-gray-200`}
                   >

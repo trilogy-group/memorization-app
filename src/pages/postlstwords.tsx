@@ -120,6 +120,7 @@ const CreateListOfWords: NextPage = () => {
   const [nodeName, setNodeName] = useState("");
   const [parentId, setParentId] = useState("");
   const [parentName, setParentName] = useState("");
+  const [mnemonicType, setMnemonicType] = useState("");
 
   const handleChange = (event: React.SyntheticEvent, newValue: string) => {
     setValue(newValue);
@@ -327,7 +328,7 @@ const CreateListOfWords: NextPage = () => {
   };
 
   const handleUpload = async () => {
-    setOpenUpload(true);// TODO: connect to the mnemonics generation backend
+    setOpenUpload(true); // TODO: connect to the mnemonics generation backend
   };
 
   const handleAddToSequence = async () => {
@@ -374,7 +375,9 @@ const CreateListOfWords: NextPage = () => {
                     Memorize a list of words{" "}
                     <Navigation
                       open={open}
-                      onClose={() => setOpen(false)}
+                      onClose={() => {
+                        setOpen(false);
+                      }}
                       multiselect={false}
                       questions={true}
                       addNodeToWorkspace={function (
@@ -405,34 +408,24 @@ const CreateListOfWords: NextPage = () => {
                         throw new Error("Function not implemented.");
                       }}
                     />
-                    <Upload
+                    {mnemonicType === "image" && (<Upload
                       open={openUpload}
                       onClose={() => setOpenUpload(false)}
                       conceptId={parentId}
                       questionId={nodeId}
-                      addNodeToWorkspace={function (
-                        nodeId: string,
-                        nodeName: string,
-                        parentId: string,
-                        parentName: string
-                      ): void {
-                        console.log(
-                          "Id: " +
-                            nodeId +
-                            " Name: " +
-                            nodeName +
-                            " ParentId: " +
-                            parentId +
-                            " ParentName: " +
-                            parentName
-                        );
-                        setNodeId(nodeId);
-                        setNodeName(nodeName);
-                        setParentId(parentId);
-                        setParentName(parentName);
-                        setInputPostValue(nodeName);
-                      }}
-                    />
+                      caption={inputPromptValue}
+                      mnemonicType={mnemonicType}
+                      imageUrl={selectedMnemonicType}
+                    />)} 
+                    {mnemonicType !== "image" && (<Upload
+                      open={openUpload}
+                      onClose={() => setOpenUpload(false)}
+                      conceptId={parentId}
+                      questionId={nodeId}
+                      caption={selectedMnemonicType}
+                      mnemonicType={mnemonicType}
+                      imageUrl={""}
+                    />)}
                   </h1>
 
                   <div className="grid gap-1" style={{ marginBottom: 10 }}>
@@ -500,7 +493,9 @@ const CreateListOfWords: NextPage = () => {
                   <div>
                     <button
                       onClick={async () => await handleUpload()}
-                      disabled={isLoading}
+                      disabled={
+                        isLoading || !selectedMnemonic || parentName === ""
+                      }
                       className={`flex justify-center items-center gap-2 py-3 min-w-[170px] hover:brightness-90 transition text-white bg-red-1 disabled:text-gray-400 disabled:bg-gray-200`}
                       style={{ borderRadius: 5, padding: 5 }}
                     >
@@ -558,6 +553,7 @@ const CreateListOfWords: NextPage = () => {
                                 }}
                                 onClick={async () => {
                                   setSelectedMnemonicType(acronym[index] || "");
+                                  setMnemonicType("acronym");
                                   setSelectedMnemonic(true);
                                 }}
                               >
@@ -659,6 +655,8 @@ const CreateListOfWords: NextPage = () => {
                                   setSelectedMnemonicType(
                                     mnemonicImage[index] || ""
                                   );
+                                  setMnemonicType("image");
+                                  
                                   setSelectedMnemonic(true);
                                 }}
                               >
@@ -716,6 +714,7 @@ const CreateListOfWords: NextPage = () => {
                                   margin: 5,
                                 }}
                                 onClick={async () => {
+                                  setMnemonicType("story");
                                   setSelectedMnemonicType(story[index] || "");
                                   setSelectedMnemonic(true);
                                 }}
@@ -782,6 +781,7 @@ const CreateListOfWords: NextPage = () => {
                               onClick={async () => {
                                 //handleConfirmMnemonic();
                                 setSelectedMnemonic(true);
+                                setMnemonicType("acronym");
                               }}
                             >
                               Accept
@@ -790,6 +790,8 @@ const CreateListOfWords: NextPage = () => {
                               className="disabled:text-gray-400 disabled:bg-gray-200`"
                               disabled={!acronymGenerated || isLoadingMnemonic}
                               onClick={async () => {
+                                setSelectedMnemonicType("");
+                                setMnemonicType("");
                                 setSelectedMnemonic(false);
                               }}
                               variant="outlined"
@@ -800,7 +802,7 @@ const CreateListOfWords: NextPage = () => {
                                 margin: 5,
                               }}
                             >
-                              {" "}
+                              {""}
                               <BackIcon />
                             </Button>
                           </Grid>
@@ -842,6 +844,8 @@ const CreateListOfWords: NextPage = () => {
                             <Button
                               className="disabled:text-gray-400 disabled:bg-gray-200`"
                               onClick={async () => {
+                                setSelectedMnemonicType("");
+                                setMnemonicType("");
                                 setSelectedMnemonic(false);
                               }}
                               variant="outlined"
@@ -887,6 +891,8 @@ const CreateListOfWords: NextPage = () => {
                               className="disabled:text-gray-400 disabled:bg-gray-200`"
                               disabled={!storyGenerated || isLoadingMnemonic}
                               onClick={async () => {
+                                setSelectedMnemonicType("");
+                                setMnemonicType("");
                                 setSelectedMnemonic(false);
                               }}
                               variant="outlined"

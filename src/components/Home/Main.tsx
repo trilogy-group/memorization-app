@@ -1,13 +1,10 @@
 import { useRouter } from "next/router";
 import { FC, useEffect, useRef } from "react";
 import { useInView } from "react-intersection-observer";
-import { v4 } from 'uuid'
 import { trpc } from "@/utils/trpc";
 
 import PostSection from "./PostSection";
-import { useMutation } from "react-query";
-import { Post, Quiz } from "@prisma/client";
-import { array } from "zod";
+import { Quiz } from "@prisma/client";
 import QuizSection from "./QuizSection";
 import { FeedPostType } from "@/utils/text";
 //import { FeedItem } from "@/server/router/post";
@@ -109,6 +106,7 @@ const Main: FC<MainProps> = ({ origin }) => {
                   refetch={refetch}
                   origin={origin}
                   //key={v4()}
+                  // TODO: bug fix
                   key={feedItem?.quizzes[0]?.idInConcept as string}
                 />
               }
