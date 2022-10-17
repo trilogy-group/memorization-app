@@ -91,21 +91,19 @@ const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin }) => {
 
 
   const handleChange = (e: any) => {
-    console.log('handlechange', e.target.value);
     setChoice(e.target.value as string);
   };
 
   const handleCheckAnswer = async () => {
     // Check correctness
     setAttempted(true);
-    console.log('quizindex', quizIndex);
     const options = JSON.parse(quiz[quizIndex]?.options as string);
     const correctChoiceId = options?.map((op: Option) => {
       if (op.is_correct) return op.id;
     }) as string[];
-    console.log(correctChoiceId);
     if (correctChoiceId.includes(choice)) {
       console.log('Correct!');
+      // TODO: change colour of the choices
     } else {
       console.log('wrong, answer is ' + choice);
     }
@@ -113,11 +111,7 @@ const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin }) => {
     quizPostMutation.mutateAsync({
       quizId: quiz[quizIndex]?.id as number,
       grade: correctChoiceId.includes(choice) ? 5 : 1,
-    }).then((response) => {
-      console.log("completed mutate async")
-      console.log(response)
     });
-    console.log('quizindex', quizIndex);
   };
 
   const handleNextQuestion = async () => {

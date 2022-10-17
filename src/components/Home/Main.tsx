@@ -89,16 +89,13 @@ const Main: FC<MainProps> = ({ origin }) => {
       fetchNextPage();
     }
   }, [inView])
-  console.log('pages length', data?.pages.length);
 
   return (
     <div className="flex-grow"><>
       {
         data?.pages.map((page, idx) => {
-          console.log('page', page);
           return <div key={idx}>{
             page.items.map(feedItem => {
-              console.log('feedItem', feedItem);
               if (feedItem.type === 'Post') {
                 return <PostSection
                   post={feedItem?.post as FeedPostType}

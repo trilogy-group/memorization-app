@@ -133,9 +133,7 @@ export const progressRouter = createRouter()
       grade: z.number().gt(0),
     }),
     async resolve({ ctx: { prisma, session }, input }) {
-      console.log('post-one-quiz-result', input.quizId, input.grade);
       let grade: SuperMemoGrade = (input.grade) as SuperMemoGrade; // 0 ~ 5, type SuperMemoItems
-      console.log('supermemograde', grade);
 
       const existingProgress = await prisma.progress.findFirst({
         where: {
@@ -143,20 +141,17 @@ export const progressRouter = createRouter()
           quizId: input.quizId,
         }
       });
-      console.log('get progress', existingProgress);
       if (existingProgress == null) {
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
       }
 
       // update the spaced repetition item if it's an existing item
-      console.log("update the spaced repetition item if it's an existing item");
       let item: SuperMemoItem = {
         interval: existingProgress.interval,
         repetition: existingProgress.repetition,
         efactor: existingProgress.efactor,
       };
       const repetitionItem = getRepetition(item, grade);
-      console.log('get repetition', repetitionItem);
 
       var progress = await prisma.progress.update({
         where: {
@@ -173,15 +168,12 @@ export const progressRouter = createRouter()
           repetition: repetitionItem.repetition
         }
       });
-      console.log('updated progress', progress);
       if (progress == null) {
         throw new Error("Database update error, spaced repetition failed");
       }
-      console.log('spaced repetition update finished', repetitionItem);
 
       // populate the feeds with post if grade falls below 3
       if (grade < 3) {
-        console.log('grade falls below 3, re-populate with posts');
         const postsSuggested = await prisma.post.findMany({
           take: 6 - grade * 2, // 2, 4, or 6
           where: {
@@ -219,7 +211,6 @@ export const progressRouter = createRouter()
             }
           }
         });
-        console.log('failed a quiz on concept', concept);
 
         for (const post of postsSuggested) {
           const feedsCreated = await prisma.feed.create({
@@ -234,7 +225,6 @@ export const progressRouter = createRouter()
           if (feedsCreated == null) {
             throw new Error("Cannot create Feeds in DB");
           }
-          console.log('feeds created due to failed quiz', feedsCreated);
         }
         for (const post of postsLiked) {
           const feedsLikedUpdated = await prisma.feed.create({
@@ -246,12 +236,10 @@ export const progressRouter = createRouter()
               conceptId: concept?.id as string,
             }
           });
-          console.log('feeds created due to failed quiz', feedsLikedUpdated);
         }
       } else {
         // Quiz correct -> posts will not appear in the feeds
         // delete feeds for the quiz, the feeds will be generated if they fail a quiz again
-        console.log('answer correct');
         const relatedPosts = await prisma.post.findMany({
           where: {
             quizId: input.quizId
@@ -260,7 +248,6 @@ export const progressRouter = createRouter()
             id: true
           }
         });
-        console.log('check related posts', relatedPosts);
         await prisma.feed.deleteMany({
           where: {
               userId: session?.user?.id as string,

@@ -45,9 +45,7 @@ const Sidebar: FC<SidebarProps> = ({
   const addConceptMutation = trpc.useMutation("user.addConcept");
 
   const handleAddConcept = async (concept: ConceptState[]) => {
-    console.log('handle add concept');
     for (let i = 0; i < concept.length; i++) {
-      console.log(concept[i]?.id);
       await addConceptMutation.mutateAsync({
         conceptId: concept[i]?.id || "",
       });
@@ -78,17 +76,9 @@ const Sidebar: FC<SidebarProps> = ({
                 " ParentName: " +
                 parentName
             );
-            /* setNodeId(nodeId);
-                          setNodeName(nodeName);
-                          setParentId(parentId);
-                          setParentName(parentName);
-                          setInputPostValue(nodeName); */
           }}
           addNodeListToWorkspace={function (concepts: ConceptState[]): void {
             handleAddConcept(concepts);
-            /* concepts.forEach((concept: { name: any; id: any }) => {
-              //console.log(concept.name + " " + concept.id);
-            }); */
           }}
         />
         <Link href="/">

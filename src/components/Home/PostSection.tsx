@@ -46,7 +46,6 @@ const PostSection: FC<PostSectionProps> = ({ post, refetch, origin }) => {
   >(undefined);
 
   const videoURL = `${origin}/post/${post.id}`;
-  console.log('reached post section');
 
   const toggleLike = () => {
     if (!session.data?.user) {

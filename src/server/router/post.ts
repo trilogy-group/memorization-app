@@ -21,74 +21,7 @@ export const postRouter = createRouter()
     resolve: async ({ ctx: { prisma, session }, input }) => {
       const skip = input.cursor || 0;
       // TODO: add cursor and skip for quiz
-      /**     
-            const items = await prisma.post.findMany({
-              take: 4,
-              skip,
-              select: {
-                id: true,
-      
-                user: true,
-                quizzes: true,
-                _count: { select: { likes: true, comments: true } },
-                Feed: {
-                  where: {
-                    AND:[
-                      {userId: session?.user?.id!}, 
-                      {viewed: false}
-                    ]
-                  }
-                },
-              },
-              orderBy: {
-                likes: {
-                  _count: "desc"
-                }
-              },
-              }
-            );
-      
-       */
-      /*
-      const items = await prisma.post.findMany({
-        take: 4,
-        skip,
-        where: {
-          Feed: {
-            every: {
-              AND: [
-              { userId: session?.user?.id! },
-              { viewed: false }
-            ]
-          }
-          }
-        },
-        select: {
-          id: true,
-          userId: true,
-          caption: true,
-          videoURL: true,
-          coverURL: true,
-          contentType: true,
-          createdAt: true,
-          updatedAt: true,
-          quizId: true,
-          videoHeight: true,
-          videoWidth: true,
-          mnemonic_text: true,
-          quizzes: true,
-          _count: { select: { likes: true, comments: true } },
-        },
-        orderBy: {
-          likes: {
-            _count: "desc"
-          }
-        },
-      }
-      );
-      */
-
-      // Change two queries into one
+      // TODO: Change two queries into one
       const feedItems = await prisma.feed.findMany({
         where: {
           userId: session?.user?.id as string,
@@ -97,7 +30,6 @@ export const postRouter = createRouter()
           postId: true,
         }
       });
-      console.log(feedItems);
 
       const feedPostIdArr = feedItems.map((feed) => feed.postId);
 
@@ -141,12 +73,10 @@ export const postRouter = createRouter()
         ]);
       }
 
-      console.log("cursor", input.cursor);
-      console.log("items.length", items.length);
-      for (const i of items) {
+      /*for (const i of items) {
         console.log("items", i.caption);
-      }
-      console.log("skip", skip);
+      }*/
+      // TODO: Implement skip for quizzes
 
       // get the quizzes
       let quizzes: Quiz[];
@@ -179,8 +109,7 @@ export const postRouter = createRouter()
           //id: { in: viewedFeeds.map((f) => { return f.quizId; }) }
         },
       });
-      console.log("all feeds have been viewed", quizzes);
-      // TODO: if the last quiz was correct, then the posts will not be shown, the quiz will still appear
+      // TODO: test - if the last quiz was correct, then the posts will not be shown, the quiz will still appear
       // TODO: if feeds are incomplete, do not add the quiz
 
       const posts = items.map((item) => {
@@ -284,13 +213,12 @@ export const postRouter = createRouter()
       conceptId: z.string(),
       quizId: z.string(),
     }),
+    // TODO: test whether quizFound works properly
     async resolve({ ctx: { prisma, session }, input }) {
-      console.log("conceptid", input.conceptId as string);
-      console.log("idInconcept", input.quizId as string);
       const quizFound = await prisma.quiz.findFirst({
         where: {
-          conceptId: 'CO164', // input.conceptId,
-          idInConcept: 'GQ5079e922-4bdb-11ed-ae21-12a7910fac19'//input.quizId as string,
+          conceptId: input.conceptId,
+          idInConcept: input.quizId as string,
         }
       });
 

@@ -15,7 +15,6 @@ export const userRouter = createRouter()
       conceptId: z.string(),
     }),
     async resolve({ ctx: { prisma, session }, input }) {
-      console.log('add concept', input.conceptId);
       const user = await prisma.user.findFirst({
         where: {
           AND: [
@@ -27,8 +26,8 @@ export const userRouter = createRouter()
             }]
         },
       });
-      console.log('user exists', user);
       // If the concept exists, take no action
+      // TODO: apply proper logging
       if (user != null) {
         console.log("concept exists", input.conceptId);
         return;
@@ -54,7 +53,6 @@ export const userRouter = createRouter()
           }
         }
       });
-      console.log('post suggested', postSuggested);
       const feedsCreated = await prisma.feed.createMany({
         data: postSuggested.map((post) => ({
           postId: post.id,
@@ -64,7 +62,6 @@ export const userRouter = createRouter()
           conceptId: input.conceptId,
         }))
       });
-      console.log(feedsCreated);
       return feedsCreated;
     },
   })
