@@ -5,6 +5,7 @@ import React from "react";
 import { useSession } from "next-auth/react";
 import { FormControl, FormControlLabel, FormHelperText, FormLabel, Radio, RadioGroup } from "@mui/material";
 import { QuizType, Option } from "@/utils/text";
+import toast from "react-hot-toast";
 
 
 interface QuizSectionProps {
@@ -27,14 +28,30 @@ const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin }) => {
   const session = useSession();
 
   const quizPostMutation = trpc.useMutation("progress.post-one-quiz-result");
+  const quizGetHint = trpc.useMutation("post.getHint");
   const [choice, setChoice] = useState<string>("");
   const [done, setDone] = useState<boolean>(false);
   const [attempted, setAttempted] = useState<boolean>(false);
   const [quizIndex, setQuizIndex] = useState<number>(0);
+  const [hintImageVisibility, setHintImageVisibility] = useState(true);
+
+  var arrayHints = useRef<string[]>([]);
 
   if (quiz == null || quiz.length == 0) {
     return <>No Quiz now</>;
   }
+
+  useEffect(() => {
+    quiz.forEach(quiz => quizGetHint
+      .mutateAsync({
+        quizId: quiz.id,
+      }).then(questionHint => {
+        console.log(questionHint.coverURL as string),
+          arrayHints.current.push(questionHint.coverURL)
+      }
+      )
+      .catch(err => toast(err)));
+  }, [])
 
   const forceUpdate = () => {
     if (quizIndex == quiz.length - 1) {
@@ -73,6 +90,7 @@ const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin }) => {
       return <div className="flex">
         <FormControl component="fieldset">
           <FormLabel component="legend">{name}</FormLabel>
+          {hintImageVisibility && <img id="hintImage" style={{ width: "200", height: "200" }} src={(arrayHints.current[quizIndex] == null) ? "" : arrayHints.current[quizIndex] as string} alt={"Hint could not be loaded/displayed at the URL: ${arrayHints.current[quizIndex]}"} />}
           <RadioGroup
             value={choice}
             onChange={handleChange}

@@ -334,5 +334,24 @@ export const postRouter = createRouter()
       });
       return created;
     },
+  }).mutation("getHint", {
+    input: z.object({
+      quizId: z.number(),
+    }),
+    async resolve({ ctx: { prisma, session }, input }) {
+      const postFound = await prisma.post.findFirst({
+        where: {
+          quizId: input.quizId,
+        },
+        select: {
+          coverURL: true,
+        }
+      });
+
+      if (postFound == null) {
+        throw new Error("Concept or quiz not found in the DB.");
+      }
+      return postFound;
+    },
   });
 
