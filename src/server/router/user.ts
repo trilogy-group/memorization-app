@@ -18,10 +18,13 @@ export const userRouter = createRouter()
       console.log('add concept', input.conceptId);
       const user = await prisma.user.findFirst({
         where: {
-          id: session?.user?.id as string,
-          concepts: {
-            every: { id: input.conceptId }
-          }
+          AND: [
+            { id: session?.user?.id as string },
+            {
+              concepts: {
+                some: { id: input.conceptId }
+              }
+            }]
         },
       });
       console.log('user exists', user);

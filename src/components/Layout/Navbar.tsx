@@ -10,15 +10,24 @@ import { IoLogOutOutline } from "react-icons/io5";
 
 import ClickAwayListener from "../Shared/ClickAwayListener";
 
-import Autocomplete from '@mui/material/Autocomplete';
-import TextField from '@mui/material/TextField';
+import Autocomplete from "@mui/material/Autocomplete";
+import TextField from "@mui/material/TextField";
 import { trpc } from "@/utils/trpc";
+
+import Button from "@mui/material/Button";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
+import React from "react";
+import { useNavigate } from "react-router-dom";
 
 const Navbar: FC = () => {
   const [subjectValue, setSubjectValue] = useState<string[]>([]);
   const [chapterValue, setChapterValue] = useState<string[]>([]);
 
-  const [notifications, setNotifications] = useState<{ content: string[], status: number[] }>({ content: [], status: [] });
+  const [notifications, setNotifications] = useState<{
+    content: string[];
+    status: number[];
+  }>({ content: [], status: [] });
 
   const router = useRouter();
   const notificationMutation = trpc.useMutation("notification.for-you");
@@ -26,7 +35,6 @@ const Navbar: FC = () => {
   const { data: session, status } = useSession();
 
   const [isDropdownOpened, setIsDropdownOpened] = useState(false);
-
 
   const [notificationVisibility, setNotificationVisibility] = useState(false);
 
@@ -36,20 +44,25 @@ const Navbar: FC = () => {
       : ""
   );
 
-  useEffect(()=>{
-    notificationMutation.mutateAsync().then(notifs => {
+  useEffect(() => {
+    notificationMutation.mutateAsync().then((notifs) => {
       console.log(notifs);
-      setNotifications(notifs)});
+      setNotifications(notifs);
+    });
   }, []);
 
   const handleFormSubmit = (e: FormEvent) => {
     e.preventDefault();
 
     if (inputValue.trim()) {
-      router.push({ pathname: "/search", query: { q: subjectValue + " " + chapterValue + " " + inputValue.trim() } });
+      router.push({
+        pathname: "/search",
+        query: {
+          q: subjectValue + " " + chapterValue + " " + inputValue.trim(),
+        },
+      });
     }
   };
-
 
   const displayNotification = () => {
     const contentLst: string[] = notifications.content;
@@ -57,13 +70,28 @@ const Navbar: FC = () => {
 
     return contentLst.map((n, i) => {
       if (n == "Quiz") {
-        return <Link href={`/quizUltimate`} key={i}>Go to Quiz Page</Link>
+        return (
+          <Link href={`/quizUltimate`} key={i}>
+            Go to Quiz Page
+          </Link>
+        );
       } else {
-        return <span className="notification" key={i}>{n}</span>
+        return (
+          <span className="notification" key={i}>
+            {n}
+          </span>
+        );
       }
-    })
-  }
-
+    });
+  };
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
   return (
     <nav className="border-b sticky top-0 z-20 bg-white">
       <div className="flex justify-center mx-4">
@@ -96,17 +124,75 @@ const Navbar: FC = () => {
             </button>
           </form>
           <div className="flex items-center gap-3">
-            <div className="notificationArea border rounded" onClick={async () => { setNotificationVisibility(!notificationVisibility); }}>
-              <img src="/notificationBell.svg" className="notificationBell"></img>
-              <div className="notificationCounter">{notifications.content.length}</div>
-              {notificationVisibility && <div className="notifications" id="notifications">{displayNotification()}</div>}
+            <div
+              className="notificationArea border rounded"
+              onClick={async () => {
+                setNotificationVisibility(!notificationVisibility);
+              }}
+            >
+              <img
+                src="/notificationBell.svg"
+                className="notificationBell"
+              ></img>
+              <div className="notificationCounter">
+                {notifications.content.length}
+              </div>
+              {notificationVisibility && (
+                <div className="notifications" id="notifications">
+                  {displayNotification()}
+                </div>
+              )}
             </div>
-            <Link href={status === "authenticated" ? "/create-mnemonics" : "/sign-in"}>
-              <a className="border rounded flex items-center gap-2 h-9 px-3 border-gray-200 bg-white hover:bg-gray-100 transition">
-                <AiOutlinePlus className="w-5 h-5" />
-                <span>Create</span>
-              </a>
-            </Link>
+            <div>
+              <Button
+                aria-controls={open ? "basic-menu" : undefined}
+                aria-haspopup="true"
+                aria-expanded={open ? "true" : undefined}
+                onClick={handleClick}
+              >
+                <a className="border rounded flex items-center gap-2 h-9 px-3 border-gray-200 bg-white hover:bg-gray-100 transition">
+                  <AiOutlinePlus className="w-5 h-5" />
+                  <span>Create</span>
+                </a>
+              </Button>
+              <Menu
+                id="basic-menu"
+                anchorEl={anchorEl}
+                open={open}
+                onClose={handleClose}
+                MenuListProps={{
+                  "aria-labelledby": "basic-button",
+                }}
+              >
+                <MenuItem onClick={handleClose}>
+                  <Link
+                    href={
+                      status === "authenticated" ? "/postlstwords" : "/sign-in"
+                    }
+                  >
+                    Create a list of words
+                  </Link>
+                </MenuItem>
+                <MenuItem onClick={handleClose}>
+                  <Link
+                    href={
+                      status === "authenticated" ? "/postlstwords" : "/sign-in"
+                    }
+                  >
+                    Create a sequence
+                  </Link>
+                </MenuItem>
+                <MenuItem onClick={handleClose}>
+                  <Link
+                    href={
+                      status === "authenticated" ? "/postlstwords" : "/sign-in"
+                    }
+                  >
+                    Create a definition
+                  </Link>
+                </MenuItem>
+              </Menu>
+            </div>
             {status === "unauthenticated" ? (
               <Link href="/sign-in">
                 <a className="rounded h-9 px-6 bg-pink text-white flex items-center hover:brightness-105 transition">
@@ -129,10 +215,11 @@ const Navbar: FC = () => {
                       />
                     </button>
                     <div
-                      className={`absolute shadow-[rgb(0_0_0_/_12%)_0px_4px_16px] bg-white top-[120%] right-0 py-2 flex flex-col items-stretch [&>*]:whitespace-nowrap rounded-md transition-all z-50 ${isDropdownOpened
-                        ? "opacity-100 visible"
-                        : "opacity-0 invisible"
-                        }`}
+                      className={`absolute shadow-[rgb(0_0_0_/_12%)_0px_4px_16px] bg-white top-[120%] right-0 py-2 flex flex-col items-stretch [&>*]:whitespace-nowrap rounded-md transition-all z-50 ${
+                        isDropdownOpened
+                          ? "opacity-100 visible"
+                          : "opacity-0 invisible"
+                      }`}
                     >
                       {/* @ts-ignore */}
                       <Link href={`/user/${session?.user?.id}`}>
