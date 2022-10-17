@@ -7,14 +7,10 @@ import PostSection from "./PostSection";
 import { Quiz } from "@prisma/client";
 import QuizSection from "./QuizSection";
 import { FeedPostType } from "@/utils/text";
-//import { FeedItem } from "@/server/router/post";
 
 interface MainProps {
   origin: string;
 }
-
-
-
 
 const Main: FC<MainProps> = ({ origin }) => {
   const router = useRouter();

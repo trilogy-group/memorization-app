@@ -535,7 +535,22 @@ const Upload = ({
                   </div>
                 )}
 
-     
+                <div className="flex flex-wrap gap-3">
+                  <button
+                    disabled={isLoading}
+                    onClick={() => {
+                      if (inputRef.current?.value) inputRef.current.value = "";
+                      setCoverImageURL(null);
+                      setInputValue("");
+                      setVideoFile(null);
+                      setVideoURL(null);
+                      setImageFile(null);
+                      setImageURL(null);
+                    }}
+                    className="py-3 min-w-[170px] border border-gray-2 bg-white hover:bg-gray-100 transition"
+                  >
+                    Discard
+                  </button>
                   <button
                     onClick={async () => await handleUpload()}
                     disabled={
