@@ -1,34 +1,8 @@
 import React, { useState, useEffect, useRef, DragEventHandler } from "react";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import MenuBookIcon from "@mui/icons-material/MenuBook";
-import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
-import LocalActivityIcon from "@mui/icons-material/LocalActivity";
 
-import RefreshIcon from "@mui/icons-material/Refresh";
-
-import { TreeView, TreeItem } from "@mui/lab";
-import {
-  Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  styled,
-  TextField,
-  Autocomplete,
-} from "@mui/material";
+import { Dialog } from "@mui/material";
 
 import { trpc } from "../../utils/trpc";
-
-import {
-  Convert,
-  ContentTree,
-  Domain,
-  Skill,
-  Concept,
-  Question,
-} from "../../server/router/contentTreeInterface";
 
 import create from "zustand";
 import { devtools, persist } from "zustand/middleware";
@@ -37,6 +11,8 @@ import toast from "react-hot-toast";
 import { fetchWithProgress } from "@/utils/fetch";
 import Meta from "../Shared/Meta";
 import { BsFillCloudUploadFill } from "react-icons/bs";
+import * as AWS from "aws-sdk";
+
 
 
 enum fileDataType {
@@ -53,38 +29,9 @@ interface ConceptState {
   parentName: string;
 }
 
-const useConceptStore = create<ConceptState>()(
-  devtools(
-    persist(
-      (set) => ({
-        id: "",
-        name: "",
-        parentId: "",
-        parentName: "",
-      }),
-      {
-        name: "concept-storage",
-      }
-    )
-  )
-);
-
 interface ConceptStateList {
   concepts: ConceptState[];
-};
-
-const useConceptListStore = create<ConceptStateList>()(
-  devtools(
-    persist(
-      (set) => ({
-        concepts: [],
-      }),
-      {
-        name: "concept-list-storage",
-      }
-    )
-  )
-);
+}
 
 export type UploadProps = {
   open?: boolean;
@@ -110,6 +57,8 @@ const Upload = ({
   const uploadMutation = trpc.useMutation("post.createVideo");
   const uploadImgMutation = trpc.useMutation("post.createImg");
   const uploadToS3Mutation = trpc.useMutation("post.uploadToS3");
+  const createPresignedUrlMutation = trpc.useMutation("post.createPresignedUrl");
+
 
   const inputRef = useRef<HTMLInputElement | null>(null);
 
@@ -135,7 +84,7 @@ const Upload = ({
   }, [uploadMutation.error]);
 
   const handleUploadToS3 = async (file: string) => {
-    const res = await uploadToS3Mutation.mutateAsync({file: file});
+    const res = await uploadToS3Mutation.mutateAsync({ file: file });
     return res;
   };
 
@@ -173,8 +122,6 @@ const Upload = ({
       });
     });
   };
-  
-  
 
   const handleVideoFileChange = (file: File) => {
     if (!file.type.startsWith("video")) {
@@ -209,7 +156,7 @@ const Upload = ({
         position: "bottom-right",
       });
     });
-    console.log("Uploading")
+    console.log("Uploading");
     video.addEventListener("loadeddata", () => {
       setTimeout(() => {
         const canvas = document.createElement("canvas");
@@ -222,7 +169,7 @@ const Upload = ({
 
         ctx.drawImage(video, 0, 0);
         const url = canvas.toDataURL("image/png");
-        setCoverImageURL(url)
+        setCoverImageURL(url);
         document.body.removeChild(video);
       }, 300);
     });
@@ -253,8 +200,19 @@ const Upload = ({
     handleOpen();
   }, [open]);
 
+  const blobToFile = (theBlob: Blob, fileName: string): File => {
+    var b: any = theBlob;
+    //A Blob() is almost a File() - it's just missing the two properties below which we will add
+    b.lastModifiedDate = new Date();
+    b.name = fileName;
+
+    //Cast to a File() type
+    return theBlob as File;
+  };
+
   const handleImageUpload = async () => {
     //if (!coverImageURL || !inputValue.trim() || isLoading) return;
+
     setIsLoading(true);
 
     const toastID = toast.loading("Uploading...");
@@ -264,7 +222,17 @@ const Upload = ({
       if (mnemonicType !== "image") {
         const coverBlob = await (await fetch(coverImageURL || "")).blob();
 
-        const formData = new FormData();
+        const file = blobToFile(coverBlob, "cover.png");
+        //const res = await uploadFromUserToS3Mutation.mutateAsync({ file: file });
+        const res = { url, fields }: { url: string, fields: any } = await createPresignedUrlMutation.mutateAsync() as any;
+
+        console.log("cover res", res);
+
+        uploadedCover = res as string;
+
+        console.log("Uploaded cover: ", uploadedCover);
+
+        /* const formData = new FormData();
         formData.append("file", coverBlob, "cover.png");
         formData.append("content", "From webhook");
         uploadedCover = (
@@ -274,10 +242,10 @@ const Upload = ({
               body: formData,
             })
           ).json()
-        ).attachments[0].proxy_url;
+        ).attachments[0].proxy_url; */
       } else {
-        const s3Upload = await handleUploadToS3(coverImageURL || "")
-        console.log(s3Upload)
+        const s3Upload = await handleUploadToS3(coverImageURL || "");
+        console.log(s3Upload);
         uploadedCover = s3Upload as string;
       }
       toast.loading("Uploading metadata...", { id: toastID });
@@ -310,13 +278,7 @@ const Upload = ({
   };
 
   const handleVideoUpload = async () => {
-     if (
-      !coverImageURL ||
-      !videoFile ||
-      !videoURL ||
-      isLoading
-    )
-      return;
+    if (!coverImageURL || !videoFile || !videoURL || isLoading) return;
 
     setIsLoading(true);
 

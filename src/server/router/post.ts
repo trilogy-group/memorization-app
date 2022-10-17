@@ -38,6 +38,36 @@ function uploadToS3(fileName: string): Promise<any> {
   });
 }
 
+function makeid(length: number) {
+  var result           = '';
+  var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  var charactersLength = characters.length;
+  for ( var i = 0; i < length; i++ ) {
+    result += characters.charAt(Math.floor(Math.random() * 
+charactersLength));
+ }
+ return result;
+}
+
+function uploadFromUserToS3(file: File): Promise<any> {
+  const params = {
+    Bucket: BUCKET_NAME as string,
+    Key: file.name,
+    Body: file
+  };
+
+  return new Promise((resolve, reject) => {
+    s3bucket.upload(params, function(err: any, data: { Location: string; }) {
+      
+      if (err) {
+        return reject(err);
+      }
+      console.log(data.Location);
+      return resolve(data.Location);
+    });
+  });
+}
+
 enum contentType {
   image = 1,
   video = 2,
@@ -341,6 +371,26 @@ export const postRouter = createRouter()
         const Location: String = (await uploadToS3(input.file)) as string;
         return Location;
       },
-  });
+  }).mutation("createPresignedUrl", {
+    input: z.object({
+      fileName: z.string(),
+      }),
+      async resolve({ ctx: { prisma, session }, input }) {
+        
+        return new Promise ((resolve, reject) => {
+          const id = makeid(16)
+          s3bucket.createPresignedPost({
+            Fields: {
+              key: id,
+            },
+            Expires: 60, // seconds
+            Bucket: process.env.BUCKET_NAME,
+          }, (err, signed) => {
+            if (err) return err;
+          
+            });
+      })
+    }
+  })
 
 
