@@ -670,7 +670,7 @@ const CreateListOfWords: NextPage = () => {
                                 Accept
                               </Button>
                               <Button
-                                disabled={isLoadingImage[index]}
+                                disabled={isLoadingImage[index] || mnemonicImage[index] == null}
                                 onClick={async () => {
                                   await handleRecommeddedImage(index);
                                 }}
