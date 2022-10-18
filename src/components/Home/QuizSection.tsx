@@ -34,10 +34,14 @@ const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin }) => {
   const [attempted, setAttempted] = useState<boolean>(false);
   const [quizIndex, setQuizIndex] = useState<number>(0);
 
+  const [startButtonVisibility, setStartButtonVisibility] = useState<boolean>(true);
+
   var arrayHints = useRef<string[]>([]);
   var arrayEfactors = useRef<number[]>([]);
 
   var imgVisibility = useRef(false);
+
+  var quizStart = useRef(0);
 
   useEffect(() => {
     quiz.forEach(quiz => {
@@ -137,18 +141,20 @@ const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin }) => {
     const correctChoiceId = options?.map((op: Option) => {
       if (op.is_correct) return op.id;
     }) as string[];
+    let quizTimeTaken = performance.now() - quizStart.current;
+    let score: number;
 
     if (correctChoiceId.includes(choice)) {
-      console.log('Correct!');
+      score = getScoreBasedOnTimeTaken(true, quizTimeTaken);
       // TODO: change colour of the choices
     } else {
-      console.log('wrong, answer is ' + choice);
+      score = getScoreBasedOnTimeTaken(false, quizTimeTaken);
     }
 
     // Post result
     quizPostMutation.mutateAsync({
       quizId: quiz[quizIndex]?.id as number,
-      grade: correctChoiceId.includes(choice) ? 5 : 1,
+      grade: score,
     });
   };
 
@@ -161,36 +167,54 @@ const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin }) => {
       <div className={`h-200 flex flex-col items-stretch microQuiz ${(done) ? "hidden" : ""}`}>
         <div className="flex justify-center mx-2 flex-grow bg-white-1">
           <div className="w-full max-w-[1000px] p-8 bg-white my-4">
-            <div className="flex flex-col items-center justify-center">
-              {
-                done ? <></> : handleSingleQuiz(quiz[quizIndex] as Quiz)
-              }
-            </div>
             {
-              done ? <></> :
-                <div className="flex fljjex-wrap gap-3 justify-center">
-                  {attempted ? <></> :
+              startButtonVisibility &&
+              <div className="flex flex-col items-center justify-center">
+                <a className="relative inline-block text-lg group cursor-pointer" onClick={() => { setStartButtonVisibility(false); quizStart.current = performance.now(); }}>
+                  <span className="relative z-10 block px-5 py-3 overflow-hidden font-medium leading-tight text-gray-800 transition-colors duration-300 ease-out border-2 border-gray-900 rounded-lg group-hover:text-white">
+                    <span className="absolute inset-0 w-full h-full px-5 py-3 rounded-lg bg-gray-50"></span>
+                    <span className="absolute left-0 w-48 h-48 -ml-2 transition-all duration-300 origin-top-right -rotate-90 -translate-x-full translate-y-12 bg-gray-900 group-hover:-rotate-180 ease"></span>
+                    <span className="relative">Start Quiz</span>
+                  </span>
+                  <span className="absolute bottom-0 right-0 w-full h-12 -mb-1 -mr-1 transition-all duration-200 ease-linear bg-gray-900 rounded-lg group-hover:mb-0 group-hover:mr-0" data-rounded="rounded-lg"></span>
+                </a>
+              </div>
+            }
+            {
+              !startButtonVisibility &&
+              <div>
+                <div className="flex flex-col items-center justify-center">
+                  {
+                    done ? <></> : handleSingleQuiz(quiz[quizIndex] as Quiz)
+                  }
+                </div>
+                {
+                  done ? <></> :
+                    <div className="flex fljjex-wrap gap-3 justify-center">
+                      {attempted ? <></> :
+                        <button
+                          onClick={() => {
+                            handleCheckAnswer();
+                          }}
+                          className="py-3 min-w-[170px] border border-gray-2 bg-white hover:bg-gray-100 transition"
+                        >
+                          Check Answer
+                        </button>}
+                    </div>
+                }
+                {
+                  attempted ? <div className="flex fljjex-wrap gap-3 justify-center">
                     <button
                       onClick={() => {
-                        handleCheckAnswer();
+                        handleNextQuestion();
                       }}
                       className="py-3 min-w-[170px] border border-gray-2 bg-white hover:bg-gray-100 transition"
                     >
-                      Check Answer
-                    </button>}
-                </div>
-            }
-            {
-              attempted ? <div className="flex fljjex-wrap gap-3 justify-center">
-                <button
-                  onClick={() => {
-                    handleNextQuestion();
-                  }}
-                  className="py-3 min-w-[170px] border border-gray-2 bg-white hover:bg-gray-100 transition"
-                >
-                  Next Question
-                </button>
-              </div> : <></>
+                      Next Question
+                    </button>
+                  </div> : <></>
+                }
+              </div>
             }
           </div>
         </div>
