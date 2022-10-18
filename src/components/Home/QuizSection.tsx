@@ -105,7 +105,7 @@ const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin }) => {
       return <div className="flex">
         <FormControl component="fieldset">
           <FormLabel component="legend">{name}</FormLabel>
-          {imgVisibility.current && <img id="hintImage" style={{ width: "200", height: "200" }}
+          {imgVisibility.current && <img id="hintImage" style={{ width: "200", height: "200" }} className="h-96"
             src={(arrayHints.current[quizIndex] == null) ? "" : arrayHints.current[quizIndex] as string}
             alt={'Hint could not be loaded/displayed at the URL: ' + arrayHints.current[quizIndex] as string} />}
           <RadioGroup
@@ -157,7 +157,7 @@ const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin }) => {
 
   return (
     <>
-      <div className="min-h-screen flex flex-col items-stretch microQuiz">
+      <div className={`h-200 flex flex-col items-stretch microQuiz ${(done) ? "hidden" : ""}`}>
         <div className="flex justify-center mx-2 flex-grow bg-white-1">
           <div className="w-full max-w-[1000px] p-8 bg-white my-4">
             <div className="flex flex-col items-center justify-center">
