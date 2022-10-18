@@ -307,9 +307,9 @@ export const progressRouter = createRouter()
       });
 
       if (existingProgress == null) {
-        return null;
+        throw new Error("there is no existingProgress in DB (progress)");
       }
 
-      return existingProgress.efactor;
+      return existingProgress.efactor as number;
     }
   });

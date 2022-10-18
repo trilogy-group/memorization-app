@@ -27,12 +27,8 @@ const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin }) => {
   const session = useSession();
 
   const quizPostMutation = trpc.useMutation("progress.post-one-quiz-result");
-<<<<<<< HEAD
-  const quizGetHint = trpc.useMutation("post.getHint");
-  const quizGetEfactor = trpc.useMutation("progress.get-efactor");
-=======
   const quizHintMutation = trpc.useMutation("post.getHint");
->>>>>>> master
+  const quizEfactorMutation = trpc.useMutation("progress.get-efactor");
   const [choice, setChoice] = useState<string>("");
   const [done, setDone] = useState<boolean>(false);
   const [attempted, setAttempted] = useState<boolean>(false);
@@ -44,42 +40,23 @@ const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin }) => {
   var imgVisibility = useRef(false);
 
   useEffect(() => {
-<<<<<<< HEAD
-
     quiz.forEach(quiz => {
-      // getting hints (coverURLs) into arrayHints
-      quizGetHint
+      quizHintMutation
         .mutateAsync({
           quizId: quiz.id,
-        }).then(questionHint => {
-          console.log(questionHint.coverURL as string),
-            arrayHints.current.push(questionHint.coverURL)
-        }
-        )
-        .catch(err => toast(err));
-      // getting efactors into arrayEfactors
-      quizGetEfactor
-        .mutateAsync({
-          quizId: quiz.id,
-        }).then(questionEfactor => {
-          if (questionEfactor) {
-            console.log(questionEfactor),
-              arrayEfactors.current.push(questionEfactor);
-          }
-        }
-        )
-        .catch(err => toast(err));
-
-    });
-
-=======
-    quiz.forEach(quiz => quizHintMutation
-      .mutateAsync({
-        quizId: quiz.id,
-      }).then((q: string) => {
+        }).then((q: string) => {
           arrayHints.current.push(q);
-      }));
->>>>>>> master
+        });
+
+      quizEfactorMutation
+        .mutateAsync({
+          quizId: quiz.id,
+        }).then((questionEfactor: number) => {
+          arrayEfactors.current.push(questionEfactor);
+        }
+        );
+    }
+    );
   }, [])
 
   const forceUpdate = () => {
@@ -128,13 +105,9 @@ const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin }) => {
       return <div className="flex">
         <FormControl component="fieldset">
           <FormLabel component="legend">{name}</FormLabel>
-<<<<<<< HEAD
-          {imgVisibility.current && <img id="hintImage" style={{ width: "200", height: "200" }} src={(arrayHints.current[quizIndex] == null) ? "" : arrayHints.current[quizIndex] as string} alt={`Hint could not be loaded/displayed at the URL:  ${arrayHints.current[quizIndex]}`} />}
-=======
-          {hintImageVisibility && <img id="hintImage" style={{ width: "200", height: "200" }} 
-          src={(arrayHints.current[quizIndex] == null) ? "" : arrayHints.current[quizIndex] as string} 
-          alt={"Hint could not be loaded/displayed at the URL: ${arrayHints.current[quizIndex]}"} />}
->>>>>>> master
+          {imgVisibility.current && <img id="hintImage" style={{ width: "200", height: "200" }}
+            src={(arrayHints.current[quizIndex] == null) ? "" : arrayHints.current[quizIndex] as string}
+            alt={'Hint could not be loaded/displayed at the URL: ' + arrayHints.current[quizIndex] as string} />}
           <RadioGroup
             value={choice}
             onChange={handleChange}
