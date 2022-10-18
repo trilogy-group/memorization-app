@@ -46,6 +46,12 @@ interface ConceptState {
   parentName: string;
 }
 
+enum TabOptions {
+  Acronym = 1,
+  Image,
+  Story,
+}
+
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#fff",
   ...theme.typography.body2,
@@ -342,11 +348,12 @@ const CreateListOfWords: NextPage = () => {
       title: tableEntryValue.trim(),
     };
     wordList.push(tableEntryValue);
-    if (value === "1") {
+    const tab = Number(value);
+    if (tab === TabOptions.Acronym) {
       handleRecommeddedAcronymList();
       setAcronymGenerated(true);
       setStoryGenerated(false);
-    } else if (value === "3") {
+    } else if (tab === TabOptions.Story) {
       handleRecommeddedStoryList();
       setStoryGenerated(true);
       setAcronymGenerated(false);
@@ -358,14 +365,15 @@ const CreateListOfWords: NextPage = () => {
     const index = options.findIndex((item: any) => item.id === id);
     if (index > -1) {
       options.splice(index, 1);
-      wordList.splice(index, 1);
+      await wordList.splice(index, 1);
       setOptions((state) => [...state]);
     }
-    if (value === "1") {
+    const tab = Number(value);
+    if (tab === TabOptions.Acronym) {
       handleRecommeddedAcronymList();
       setAcronymGenerated(true);
       setStoryGenerated(false);
-    } else if (value === "3") {
+    } else if (tab === TabOptions.Story) {
       handleRecommeddedStoryList();
       setStoryGenerated(true);
       setAcronymGenerated(false);
