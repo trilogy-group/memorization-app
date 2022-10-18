@@ -334,7 +334,7 @@ const Post: NextPage<PostProps> = ({ post, href, title }) => {
               onChange={(e) => setInputValue(e.target.value)}
             />
             <button
-              disabled={postCommentMutation.isLoading || !inputValue.trim()}
+              disabled={postCommentMutation.isLoading || !inputValue.trim() || !session?.data?.user}
               type="submit"
               className={`transition ${postCommentMutation.isLoading || !inputValue.trim()
                   ? ""

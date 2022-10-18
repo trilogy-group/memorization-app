@@ -6,6 +6,48 @@ import { Convert, ContentTree } from "./contentTreeInterface";
 //
 //   const contentTree = Convert.toContentTree(json);
 
+import cacheData from "memory-cache";
+
+async function fetchWithCache() {
+  const apiKey = process.env.CURRICULUM_GRAPH_API_KEY || "";
+  const apiUrl = process.env.CURRICULUM_GRAPH_API_URL || "";
+  const value = cacheData.get(apiUrl);
+  if (value) {
+    return value;
+  } else {
+    const hours = 1;
+    try {
+      const data = await fetch(apiUrl, {
+        method: "POST",
+        headers: {
+          "x-api-key": apiKey,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          query:
+            "query domains($subjectId: String, $domainId: String) {\r\n  domains(subjectId: $subjectId, domainId: $domainId) {\r\n    id\r\n    name\r\n    skills {\r\n        id\r\n        name\r\n        concepts {\r\n            id\r\n            name\r\n            questions {\r\n                id\r\n                desc\r\n                type\r\n                options {\r\n                    id\r\n                    desc\r\n                    ordinal\r\n                    is_correct\r\n                }\r\n            }\r\n        }\r\n    }\r\n  }\r\n}",
+          variables: {
+            subjectId: "SUB2",
+          },
+        }),
+      })
+        .catch((e) => {
+          console.log(e);
+        })
+        .then((res) =>
+          res?.json?.().then((data: ContentTree) => {
+            console.log(data);
+            return data;
+          })
+        );
+      cacheData.put(apiUrl, data, hours * 1000 * 60 * 60);
+      return data;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+}
+
 export const contentTreeRouter = createRouter()
   .middleware(async ({ ctx, next }) => {
     if (!ctx.session) {
@@ -19,32 +61,10 @@ export const contentTreeRouter = createRouter()
     }),
 
     async resolve({ ctx: { session }, input }) {
-      const apiKey = process.env.CURRICULUM_GRAPH_API_KEY || "";
-      const apiUrl = process.env.CURRICULUM_GRAPH_API_URL || "";
       if (session?.user?.id) {
         try {
-          const data = await fetch(apiUrl, {
-            method: "POST",
-            headers: {
-              "x-api-key": apiKey,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              query:
-                "query domains($subjectId: String, $domainId: String) {\r\n  domains(subjectId: $subjectId, domainId: $domainId) {\r\n    id\r\n    name\r\n    skills {\r\n        id\r\n        name\r\n        concepts {\r\n            id\r\n            name\r\n            questions {\r\n                id\r\n                desc\r\n                type\r\n                options {\r\n                    id\r\n                    desc\r\n                    ordinal\r\n                    is_correct\r\n                }\r\n            }\r\n        }\r\n    }\r\n  }\r\n}",
-              variables: {
-                subjectId: "SUB2",
-              },
-            }),
-          })
-            .catch((e) => {
-              console.log(e);
-            })
-            .then((res) =>
-              res?.json?.().then((data: ContentTree) => {
-                return data;
-              })
-            );
+          const data = await fetchWithCache();
+
           return data;
         } catch (error) {
           console.log(error);
@@ -58,33 +78,9 @@ export const contentTreeRouter = createRouter()
     }),
 
     async resolve({ ctx: { session }, input }) {
-      const apiKey = process.env.CURRICULUM_GRAPH_API_KEY || "";
-      const apiUrl = process.env.CURRICULUM_GRAPH_API_URL || "";
       if (session?.user?.id) {
         try {
-          const data = await fetch(apiUrl, {
-            method: "POST",
-            headers: {
-              "x-api-key": apiKey,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              query:
-                "query domains($subjectId: String, $domainId: String) {\r\n  domains(subjectId: $subjectId, domainId: $domainId) {\r\n    id\r\n    name\r\n    skills {\r\n        id\r\n        name\r\n        concepts {\r\n            id\r\n            name\r\n            }\r\n    }\r\n  }\r\n}",
-              variables: {
-                subjectId: "SUB2",
-              },
-            }),
-          })
-            .catch((e) => {
-              console.log(e);
-            })
-            .then((res) =>
-              res?.json?.().then((data: ContentTree) => {
-                console.log(data);
-                return data;
-              })
-            );
+          const data = await fetchWithCache();
           return data;
         } catch (error) {
           console.log(error);

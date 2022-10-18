@@ -6,6 +6,7 @@ import type {
 } from "next";
 import { unstable_getServerSession as getServerSession } from "next-auth";
 import superjson from "superjson";
+import { useSession } from "next-auth/react";
 import { ToastContainer } from "react-toastify";
 import Main from "@/components/Home/Main";
 import Sidebar from "@/components/Home/Sidebar";
@@ -22,6 +23,7 @@ const Home: NextPage<HomeProps> = ({
   origin,
 }) => {
 
+  const session = useSession();
   return (
     <>
       <Meta
@@ -30,14 +32,18 @@ const Home: NextPage<HomeProps> = ({
         image="/favicon.png"
       />
       <Navbar />
-      
+
       <div className="flex justify-center mx-4">
         <div className="w-full max-w-[1150px] flex">
           <Sidebar
             leaderboardAccounts={leaderboardAccounts!}
             followingAccounts={followingAccounts!}
           />
-          <Main origin={origin!} />
+          {
+            (!session.data?.user) ?
+              <div className="flex items-center gap-2 px-3 py-2 bg-white hover:bg-gray-100 transition">
+                <p>Log in to see the content</p></div> : <Main origin={origin!} />
+          }
           <div id="notificationArea" className="w-1/6">
             <ToastContainer />
           </div>
