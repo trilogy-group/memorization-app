@@ -41,7 +41,8 @@ const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin }) => {
   var imgVisibility = useRef(false);
 
   if (quiz == null || quiz.length == 0) {
-    return <>No Quiz now</>;
+    // no quiz now
+    return <></>;
   }
 
   useEffect(() => {

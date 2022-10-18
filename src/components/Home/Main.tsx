@@ -88,22 +88,21 @@ const Main: FC<MainProps> = ({ origin }) => {
       {
         data?.pages.map((page, idx) => {
           return <div key={idx}>{
-            page.items.map(feedItem => {
+            page.items.map((feedItem, feedIdx ) => {
               if (feedItem.type === 'Post') {
                 return <PostSection
                   post={feedItem?.post as FeedPostType}
-                  key={feedItem?.post?.id}
+                  key={feedIdx}
                   refetch={refetch}
                   origin={origin}
                 />
               } else {
+                console.log(feedItem?.quizzes![0]?.idInConcept as string);
                 return <QuizSection
                   quiz={feedItem.quizzes as Quiz[]}
                   refetch={refetch}
                   origin={origin}
-                  //key={v4()}
-                  // TODO: bug fix
-                  key={feedItem?.quizzes[0]?.idInConcept as string}
+                  key={feedIdx}
                 />
               }
             })
