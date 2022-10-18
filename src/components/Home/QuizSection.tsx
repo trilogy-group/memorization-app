@@ -182,39 +182,40 @@ const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin }) => {
                 <span className="absolute bottom-0 right-0 w-full h-12 -mb-1 -mr-1 transition-all duration-200 ease-linear bg-gray-900 rounded-lg group-hover:mb-0 group-hover:mr-0" data-rounded="rounded-lg"></span>
               </a>
             </div>}
-            {quizContentVisibility && <div id="quizContent">
-              <div className="flex flex-col items-center justify-center">
+            {quizContentVisibility &&
+              <div id="quizContent">
+                <div className="flex flex-col items-center justify-center">
+                  {
+                    done ? <></> : handleSingleQuiz(quiz[quizIndex] as Quiz)
+                  }
+                </div>
                 {
-                  done ? <></> : handleSingleQuiz(quiz[quizIndex] as Quiz)
+                  done ? <></> :
+                    <div className="flex fljjex-wrap gap-3 justify-center">
+                      {attempted ? <></> :
+                        <button
+                          onClick={() => {
+                            handleCheckAnswer();
+                          }}
+                          className="py-3 min-w-[170px] border border-gray-2 bg-white hover:bg-gray-100 transition"
+                        >
+                          Check Answer
+                        </button>}
+                    </div>
                 }
-              </div>
-              {
-                done ? <></> :
-                  <div className="flex fljjex-wrap gap-3 justify-center">
-                    {attempted ? <></> :
-                      <button
-                        onClick={() => {
-                          handleCheckAnswer();
-                        }}
-                        className="py-3 min-w-[170px] border border-gray-2 bg-white hover:bg-gray-100 transition"
-                      >
-                        Check Answer
-                      </button>}
-                  </div>
-              }
-              {
-                attempted ? <div className="flex fljjex-wrap gap-3 justify-center">
-                  <button
-                    onClick={() => {
-                      handleNextQuestion();
-                    }}
-                    className="py-3 min-w-[170px] border border-gray-2 bg-white hover:bg-gray-100 transition"
-                  >
-                    Next Question
-                  </button>
-                </div> : <></>
-              }
-            </div>}
+                {
+                  attempted ? <div className="flex fljjex-wrap gap-3 justify-center">
+                    <button
+                      onClick={() => {
+                        handleNextQuestion();
+                      }}
+                      className="py-3 min-w-[170px] border border-gray-2 bg-white hover:bg-gray-100 transition"
+                    >
+                      Next Question
+                    </button>
+                  </div> : <></>
+                }
+              </div>}
           </div>
         </div>
       </div>
