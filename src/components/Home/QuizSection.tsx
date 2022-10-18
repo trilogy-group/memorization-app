@@ -5,7 +5,6 @@ import React from "react";
 import { useSession } from "next-auth/react";
 import { FormControl, FormControlLabel, FormHelperText, FormLabel, Radio, RadioGroup } from "@mui/material";
 import { QuizType, Option } from "@/utils/text";
-import toast from "react-hot-toast";
 
 
 interface QuizSectionProps {
@@ -28,8 +27,7 @@ const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin }) => {
   const session = useSession();
 
   const quizPostMutation = trpc.useMutation("progress.post-one-quiz-result");
-  const quizGetHint = trpc.useMutation("post.getHint");
-  const quizGetEfactor = trpc.useMutation("progress.get-efactor");
+  const quizHintMutation = trpc.useMutation("post.getHint");
   const [choice, setChoice] = useState<string>("");
   const [done, setDone] = useState<boolean>(false);
   const [attempted, setAttempted] = useState<boolean>(false);
@@ -46,38 +44,13 @@ const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin }) => {
 
   var quizStart = useRef(0);
 
-  if (quiz == null || quiz.length == 0) {
-    return <>No Quiz now</>;
-  }
-
   useEffect(() => {
-
-    quiz.forEach(quiz => {
-      // getting hints (coverURLs) into arrayHints
-      quizGetHint
-        .mutateAsync({
-          quizId: quiz.id,
-        }).then(questionHint => {
-          console.log(questionHint.coverURL as string),
-            arrayHints.current.push(questionHint.coverURL)
-        }
-        )
-        .catch(err => toast(err));
-      // getting efactors into arrayEfactors
-      quizGetEfactor
-        .mutateAsync({
-          quizId: quiz.id,
-        }).then(questionEfactor => {
-          if (questionEfactor) {
-            console.log(questionEfactor),
-              arrayEfactors.current.push(questionEfactor);
-          }
-        }
-        )
-        .catch(err => toast(err));
-
-    });
-
+    quiz.forEach(quiz => quizHintMutation
+      .mutateAsync({
+        quizId: quiz.id,
+      }).then((q: string) => {
+        arrayHints.current.push(q);
+      }));
   }, [])
 
   const forceUpdate = () => {
@@ -126,7 +99,9 @@ const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin }) => {
       return <div className="flex">
         <FormControl component="fieldset">
           <FormLabel component="legend">{name}</FormLabel>
-          {imgVisibility.current && <img id="hintImage" style={{ width: "200", height: "200" }} src={(arrayHints.current[quizIndex] == null) ? "" : arrayHints.current[quizIndex] as string} alt={`Hint could not be loaded/displayed at the URL:  ${arrayHints.current[quizIndex]}`} />}
+          {imgVisibility.current && <img id="hintImage" style={{ width: "200", height: "200" }}
+            src={(arrayHints.current[quizIndex] == null) ? "" : arrayHints.current[quizIndex] as string}
+            alt={"Hint could not be loaded/displayed at the URL: ${arrayHints.current[quizIndex]}"} />}
           <RadioGroup
             value={choice}
             onChange={handleChange}
@@ -168,6 +143,7 @@ const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin }) => {
       score = getScoreBasedOnTimeTaken(false, quizTimeTaken);
       console.log(score);
     }
+
     // Post result
     quizPostMutation.mutateAsync({
       quizId: quiz[quizIndex]?.id as number,
