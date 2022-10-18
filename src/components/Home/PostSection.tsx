@@ -80,6 +80,10 @@ const PostSection: FC<PostSectionProps> = ({ post, refetch, origin }) => {
   };
 
   const handleGotIt = () => {
+    if (!session.data?.user) {
+      toast("You need to log in");
+      return;
+    }
     progressMutation.mutateAsync({
       postId: post.id
     });
