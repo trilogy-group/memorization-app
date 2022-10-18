@@ -127,7 +127,7 @@ const Sidebar: FC<SidebarProps> = ({
         </Link>
       </div>
 
-      {leaderboardAccounts.length > 0 && (
+      {leaderboardAccounts.length > 0 && session.data?.user && (
         <div className="flex flex-col items-stretch gap-3 py-4 border-b">
           <p className="text-sm hidden lg:block">Leaderboard</p>
           {leaderboardAccounts.map((account, index) => (
@@ -198,29 +198,6 @@ const Sidebar: FC<SidebarProps> = ({
         </div>
       )}
 
-      <div className="[&_p]:cursor-pointer [&_p:hover]:underline text-xs leading-[1.2] mt-5 text-zinc-400 flex-col items-stretch gap-4 hidden lg:flex">
-        <div className="flex flex-wrap gap-2">
-          <p>About</p>
-          <p>Newsroom</p>
-          <p>Store</p>
-          <p>Contact</p>
-          <p>Careers</p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <p>Advertise</p>
-          <p>Developers</p>
-          <p>Transparency</p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <p>Help</p>
-          <p>Safety</p>
-          <p>Terms</p>
-          <p>Privacy</p>
-          <p>Creator Portal</p>
-          <p>Community Guidelines</p>
-        </div>
-        <span>© 2022 EdTok</span>
-      </div>
     </div>
   );
 };
