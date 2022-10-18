@@ -37,9 +37,7 @@ import DeleteIcon from "@mui/icons-material/DeleteOutlined";
 import Navigation from "../components/navigation/navigation";
 import Upload from "../components/upload/upload";
 
-import { nanoid } from 'nanoid'
-
-
+import { nanoid } from "nanoid";
 
 interface ConceptState {
   id: string;
@@ -343,7 +341,6 @@ const CreateListOfWords: NextPage = () => {
       id: nanoid(),
       title: tableEntryValue.trim(),
     };
-    console.log(item.id)
     wordList.push(tableEntryValue);
     if (value === "1") {
       handleRecommeddedAcronymList();
@@ -354,9 +351,8 @@ const CreateListOfWords: NextPage = () => {
       setStoryGenerated(true);
       setAcronymGenerated(false);
     }
-    setOptions((state):any => [...state, item]);
+    setOptions((state): any => [...state, item]);
     return;
-    
   };
   const handleDelete = async (id: string) => {
     const index = options.findIndex((item: any) => item.id === id);
@@ -408,16 +404,6 @@ const CreateListOfWords: NextPage = () => {
                         parentId: string,
                         parentName: string
                       ): void {
-                        console.log(
-                          "Id: " +
-                            nodeId +
-                            " Name: " +
-                            nodeName +
-                            " ParentId: " +
-                            parentId +
-                            " ParentName: " +
-                            parentName
-                        );
                         setNodeId(nodeId);
                         setNodeName(nodeName);
                         setParentId(parentId);
@@ -523,7 +509,6 @@ const CreateListOfWords: NextPage = () => {
                               <button
                                 onClick={() => {
                                   handleDelete(option.id);
-                                  //handleRemoveFromSequence(index);
                                 }}
                                 className={`flex justify-center items-center gap-2 py-3 min-w-[20px] hover:brightness-90 transition text-white bg-red-1 disabled:text-gray-400 disabled:bg-gray-200`}
                                 style={{ borderRadius: 5, padding: 5 }}
