@@ -1,11 +1,12 @@
 import { useRouter } from "next/router";
 import { FC, useEffect, useRef } from "react";
 import { useInView } from "react-intersection-observer";
-
 import { trpc } from "@/utils/trpc";
 
 import PostSection from "./PostSection";
-import { useMutation } from "react-query";
+import { Quiz } from "@prisma/client";
+import QuizSection from "./QuizSection";
+import { FeedPostType } from "@/utils/text";
 
 interface MainProps {
   origin: string;
@@ -17,17 +18,13 @@ const Main: FC<MainProps> = ({ origin }) => {
   const { data, fetchNextPage, isFetchingNextPage, hasNextPage, refetch } =
     trpc.useInfiniteQuery(
       [
-        Boolean(Number(router.query.following))
-          ? "post.following"
-          : "post.for-you",
+        "post.for-you",
         {},
       ],
       {
         getNextPageParam: (lastPage) => lastPage.nextSkip,
       }
     );
-  const quizMutation = useMutation("progress.get-one-quiz");
-  // null check
 
   const observer = useRef<IntersectionObserver | null>(null);
 
@@ -77,8 +74,8 @@ const Main: FC<MainProps> = ({ origin }) => {
   }, [data?.pages.length, Boolean(Number(router.query.following))]);
 
   let { ref, inView } = useInView({
-    /* Optional options */
   });
+
 
   useEffect(() => {
     if (inView && !isFetchingNextPage && hasNextPage) {
@@ -86,27 +83,36 @@ const Main: FC<MainProps> = ({ origin }) => {
     }
   }, [inView])
 
-  
-  if (data?.pages.length === 0 || data?.pages[0]?.items.length === 0)
-    return (
-      <div className="flex-grow text-center my-4">There is no post yet</div>
-    );
-
   return (
-    <div className="flex-grow">
-      {data?.pages.map((page) =>
-        page.items.map((post) => (
-          <PostSection
-            post={post}
-            key={post.id}
-            refetch={refetch}
-            origin={origin}
-          />
-        ))
-      )}
+    <div className="flex-grow"><>
+      {
+        data?.pages.map((page, idx) => {
+          return <div key={idx}>{
+            page.items.map((feedItem, feedIdx ) => {
+              if (feedItem.type === 'Post') {
+                return <PostSection
+                  post={feedItem?.post as FeedPostType}
+                  key={feedIdx}
+                  refetch={refetch}
+                  origin={origin}
+                />
+              } else {
+                if (!feedItem?.quizzes || feedItem?.quizzes.length == 0)
+                  return <></>
+                return <QuizSection
+                  quiz={feedItem.quizzes as Quiz[]}
+                  refetch={refetch}
+                  origin={origin}
+                  key={feedIdx}
+                />
+              }
+            })
+          }</div>
+        })
+      }
 
       {/* At the bottom to detect infinite scroll */}
-      <div ref={ref}></div>
+      <div ref={ref}></div></>
     </div>
   );
 };

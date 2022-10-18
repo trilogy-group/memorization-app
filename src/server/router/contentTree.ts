@@ -17,30 +17,26 @@ export const contentTreeRouter = createRouter()
     input: z.object({
       description: z.string(),
     }),
-    
+
     async resolve({ ctx: { session }, input }) {
       const apiKey = process.env.CURRICULUM_GRAPH_API_KEY || "";
       const apiUrl = process.env.CURRICULUM_GRAPH_API_URL || "";
       if (session?.user?.id) {
         try {
-           
-          const data = await fetch(
-            apiUrl,
-            {
-              method: "POST",
-              headers: {
-                "x-api-key": apiKey,
-                "Content-Type": "application/json",
+          const data = await fetch(apiUrl, {
+            method: "POST",
+            headers: {
+              "x-api-key": apiKey,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              query:
+                "query domains($subjectId: String, $domainId: String) {\r\n  domains(subjectId: $subjectId, domainId: $domainId) {\r\n    id\r\n    name\r\n    skills {\r\n        id\r\n        name\r\n        concepts {\r\n            id\r\n            name\r\n            questions {\r\n                id\r\n                desc\r\n                type\r\n                options {\r\n                    id\r\n                    desc\r\n                    ordinal\r\n                    is_correct\r\n                }\r\n            }\r\n        }\r\n    }\r\n  }\r\n}",
+              variables: {
+                subjectId: "SUB2",
               },
-              body: JSON.stringify({
-                query:
-                  "query domains($subjectId: String, $domainId: String) {\r\n  domains(subjectId: $subjectId, domainId: $domainId) {\r\n    id\r\n    name\r\n    skills {\r\n        id\r\n        name\r\n        concepts {\r\n            id\r\n            name\r\n            questions {\r\n                id\r\n                desc\r\n                type\r\n                options {\r\n                    id\r\n                    desc\r\n                    ordinal\r\n                    is_correct\r\n                }\r\n            }\r\n        }\r\n    }\r\n  }\r\n}",
-                variables: {
-                  subjectId: "SUB2",
-                },
-              }),
-            }
-          )
+            }),
+          })
             .catch((e) => {
               console.log(e);
             })
@@ -49,8 +45,50 @@ export const contentTreeRouter = createRouter()
                 return data;
               })
             );
-        return data
-        } catch (error) {console.log(error)}
+          return data;
+        } catch (error) {
+          console.log(error);
+        }
+      }
+    },
+  })
+  .mutation("contentTreeNoQ", {
+    input: z.object({
+      description: z.string(),
+    }),
+
+    async resolve({ ctx: { session }, input }) {
+      const apiKey = process.env.CURRICULUM_GRAPH_API_KEY || "";
+      const apiUrl = process.env.CURRICULUM_GRAPH_API_URL || "";
+      if (session?.user?.id) {
+        try {
+          const data = await fetch(apiUrl, {
+            method: "POST",
+            headers: {
+              "x-api-key": apiKey,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              query:
+                "query domains($subjectId: String, $domainId: String) {\r\n  domains(subjectId: $subjectId, domainId: $domainId) {\r\n    id\r\n    name\r\n    skills {\r\n        id\r\n        name\r\n        concepts {\r\n            id\r\n            name\r\n            }\r\n    }\r\n  }\r\n}",
+              variables: {
+                subjectId: "SUB2",
+              },
+            }),
+          })
+            .catch((e) => {
+              console.log(e);
+            })
+            .then((res) =>
+              res?.json?.().then((data: ContentTree) => {
+                console.log(data);
+                return data;
+              })
+            );
+          return data;
+        } catch (error) {
+          console.log(error);
+        }
       }
     },
   });
