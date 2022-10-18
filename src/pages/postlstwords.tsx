@@ -484,16 +484,6 @@ const CreateListOfWords: NextPage = () => {
                       <ul id="answer"></ul>
                     </div>
                   </div>
-                  <div className="flex flex-wrap gap-3">
-                    <p className="text-2xl font-bold">
-                      I want to upload my own
-                    </p>
-                    <Link href={"/upload"}>
-                      <a className="border rounded flex items-center gap-2 h-9 px-3 border-gray-200 bg-white hover:bg-gray-100 transition">
-                        <span>Videos</span>
-                      </a>
-                    </Link>
-                  </div>
                   <div>
                     <button
                       onClick={async () => await handleUpload()}
@@ -680,7 +670,7 @@ const CreateListOfWords: NextPage = () => {
                                 Accept
                               </Button>
                               <Button
-                                disabled={isLoadingImage[index]}
+                                disabled={isLoadingImage[index] || mnemonicImage[index] == null}
                                 onClick={async () => {
                                   await handleRecommeddedImage(index);
                                 }}
@@ -788,7 +778,7 @@ const CreateListOfWords: NextPage = () => {
 
                             <Button
                               className="disabled:text-gray-400 disabled:bg-gray-200`"
-                              disabled={!acronymGenerated || isLoadingMnemonic}
+                              disabled={!acronymGenerated }
                               onClick={async () => {
                                 setSelectedMnemonicType("");
                                 setMnemonicType("");
@@ -857,7 +847,7 @@ const CreateListOfWords: NextPage = () => {
 
                             <Button
                               className="disabled:text-gray-400 disabled:bg-gray-200`"
-                              disabled={!storyGenerated || isLoadingMnemonic}
+                              disabled={!storyGenerated }
                               onClick={async () => {
                                 setSelectedMnemonicType("");
                                 setMnemonicType("");
