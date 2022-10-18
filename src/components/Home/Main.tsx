@@ -97,7 +97,8 @@ const Main: FC<MainProps> = ({ origin }) => {
                   origin={origin}
                 />
               } else {
-                console.log(feedItem?.quizzes![0]?.idInConcept as string);
+                if (!feedItem?.quizzes || feedItem?.quizzes.length == 0)
+                  return <></>
                 return <QuizSection
                   quiz={feedItem.quizzes as Quiz[]}
                   refetch={refetch}
