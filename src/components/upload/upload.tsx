@@ -38,6 +38,7 @@ import { fetchWithProgress } from "@/utils/fetch";
 import Meta from "../Shared/Meta";
 import { BsFillCloudUploadFill } from "react-icons/bs";
 
+
 enum fileDataType {
   video,
   image,
@@ -70,7 +71,7 @@ const useConceptStore = create<ConceptState>()(
 
 interface ConceptStateList {
   concepts: ConceptState[];
-}
+};
 
 const useConceptListStore = create<ConceptStateList>()(
   devtools(
@@ -108,6 +109,7 @@ const Upload = ({
 
   const uploadMutation = trpc.useMutation("post.createVideo");
   const uploadImgMutation = trpc.useMutation("post.createImg");
+  const uploadToS3Mutation = trpc.useMutation("post.uploadToS3");
 
   const inputRef = useRef<HTMLInputElement | null>(null);
 
@@ -131,6 +133,11 @@ const Upload = ({
       });
     }
   }, [uploadMutation.error]);
+
+  const handleUploadToS3 = async (file: string) => {
+    const res = await uploadToS3Mutation.mutateAsync({file: file});
+    return res;
+  };
 
   const handleImageFileChange = (file: File) => {
     const url = URL.createObjectURL(file);
@@ -166,6 +173,8 @@ const Upload = ({
       });
     });
   };
+  
+  
 
   const handleVideoFileChange = (file: File) => {
     if (!file.type.startsWith("video")) {
@@ -200,7 +209,7 @@ const Upload = ({
         position: "bottom-right",
       });
     });
-
+    console.log("Uploading")
     video.addEventListener("loadeddata", () => {
       setTimeout(() => {
         const canvas = document.createElement("canvas");
@@ -212,8 +221,8 @@ const Upload = ({
         setVideoHeight(video.videoHeight);
 
         ctx.drawImage(video, 0, 0);
-        setCoverImageURL(canvas.toDataURL("image/png"));
-
+        const url = canvas.toDataURL("image/png");
+        setCoverImageURL(url)
         document.body.removeChild(video);
       }, 300);
     });
@@ -231,12 +240,11 @@ const Upload = ({
   };
 
   const handleOpen = async () => {
-    console.log("handleOpen " + imageUrl + " " + mnemonicType);
     if (open) {
       if (mnemonicType === "image") {
         setCoverImageURL(imageUrl);
       } else {
-        setCoverImageURL(null);
+        //setCoverImageURL(null);
       }
     }
   };
@@ -253,7 +261,6 @@ const Upload = ({
 
     try {
       var uploadedCover: string;
-      console.log("uploading cover");
       if (mnemonicType !== "image") {
         const coverBlob = await (await fetch(coverImageURL || "")).blob();
 
@@ -269,7 +276,9 @@ const Upload = ({
           ).json()
         ).attachments[0].proxy_url;
       } else {
-        uploadedCover = coverImageURL || "";
+        const s3Upload = await handleUploadToS3(coverImageURL || "")
+        console.log(s3Upload)
+        uploadedCover = s3Upload as string;
       }
       toast.loading("Uploading metadata...", { id: toastID });
 
@@ -301,11 +310,10 @@ const Upload = ({
   };
 
   const handleVideoUpload = async () => {
-    if (
+     if (
       !coverImageURL ||
       !videoFile ||
       !videoURL ||
-      !inputValue.trim() ||
       isLoading
     )
       return;
@@ -330,7 +338,6 @@ const Upload = ({
       ).url;
 
       toast.loading("Uploading cover image...", { id: toastID });
-
       const coverBlob = await (await fetch(coverImageURL)).blob();
 
       const formData = new FormData();
@@ -368,7 +375,6 @@ const Upload = ({
         conceptId: conceptId,
         quizId: questionId,
       });
-      console.log("Concept ID: ", conceptId + " Question ID: ", questionId);
       toast.loading("Mnemonics Created! Points +1", { id: toastID });
       await new Promise((r) => setTimeout(r, 800));
 

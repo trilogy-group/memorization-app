@@ -33,11 +33,9 @@ export type SuperMemoGrade = 0 | 1 | 2 | 3 | 4 | 5;
 export const getRepetition = (
   item: SuperMemoItem,
   grade: SuperMemoGrade,
-): Promise<SuperMemoItem> => {
+) => {
   const newitem = supermemo(item, grade);
-  return new Promise(async () => {
-    return newitem
-  });
+  return newitem;
 };
 
 export const newRepetition = (

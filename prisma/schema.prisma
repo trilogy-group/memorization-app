@@ -105,7 +105,7 @@ model Post {
     user          User           @relation(fields: [userId], references: [id])
 
     quizId  Int
-    quizzes Quiz  @relation(fields: [quizId], references: [id])
+    quizzes Quiz   @relation(fields: [quizId], references: [id])
     Feed    Feed[]
 
     @@fulltext([caption])
@@ -194,6 +194,7 @@ model Concept {
     users     User[]
     skillId   String
     skill     Skill     @relation(fields: [skillId], references: [id])
+    Feed      Feed[]
 
     @@fulltext([name])
 }
@@ -214,13 +215,15 @@ model Quiz {
 }
 
 model Feed {
-    postId String
-    post   Post    @relation(fields: [postId], references: [id])
-    userId String
-    user   User    @relation(fields: [userId], references: [id])
-    quizId Int
-    quiz   Quiz    @relation(fields: [quizId], references: [id])
-    viewed Boolean
+    postId    String
+    post      Post    @relation(fields: [postId], references: [id])
+    userId    String
+    user      User    @relation(fields: [userId], references: [id])
+    quizId    Int
+    quiz      Quiz    @relation(fields: [quizId], references: [id])
+    conceptId String
+    concept   Concept @relation(fields: [conceptId], references: [id])
+    viewed    Boolean
 
     @@id([postId, userId], name: "feed_identifier")
     @@unique([postId, userId])

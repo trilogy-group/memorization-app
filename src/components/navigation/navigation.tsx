@@ -103,7 +103,6 @@ function DataTreeView({
   questions,
   multiselect,
 }: DataTreeViewProps) {
-
   const getTreeQuestionsFromData = (
     treeItems: Question[],
     concept: Concept
@@ -168,7 +167,6 @@ function DataTreeView({
               });
               const concepts2 = useConceptListStore.getState().concepts;
               //print each concept2
-              
             }}
           />
         );
@@ -241,10 +239,29 @@ const Navigation = ({
   const [isLoading, setIsLoading] = useState(false);
 
   const getContentTreeMutation = trpc.useMutation("getContentTree.contentTree");
+  const getContentTreeNoQMutation = trpc.useMutation(
+    "getContentTree.contentTreeNoQ"
+  );
 
   const handleContentTree = async () => {
-    const created: ContentTree | undefined =
-      await getContentTreeMutation.mutateAsync(
+    if (questions === true) {
+      const created: ContentTree | undefined =
+        await getContentTreeMutation.mutateAsync(
+          {
+            description: "test",
+          },
+          {
+            onSuccess: (data) => {
+              setContentTree2(data);
+              setIsLoading(false);
+            },
+            onError: (error) => {
+              console.log("error", error);
+            },
+          }
+        );
+    } else {
+      await getContentTreeNoQMutation.mutateAsync(
         {
           description: "test",
         },
@@ -258,6 +275,7 @@ const Navigation = ({
           },
         }
       );
+    }
   };
   const id = useConceptStore((state) => state.id);
   const name = useConceptStore((state) => state.name);
@@ -315,7 +333,7 @@ const Navigation = ({
           Cancel
         </Button>
         <Button
-          disabled={false}/* {id === ""} */
+          disabled={false} /* {id === ""} */
           className="disabled:text-gray-400 disabled:bg-gray-200`"
           /* disabled={!acronymGenerated || isLoadingAcronym[index]} */
           variant="outlined"
@@ -329,12 +347,7 @@ const Navigation = ({
             if (multiselect) {
               addNodeListToWorkspace(getConcepts());
             } else {
-              addNodeToWorkspace(
-                id,
-                name,
-                parentId,
-                parentName
-              );
+              addNodeToWorkspace(id, name, parentId, parentName);
             }
             /* addNodeToWorkspace(id, name, parentId, parentName);
             addNodeListToWorkspace(concepts); */
