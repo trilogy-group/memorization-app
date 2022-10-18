@@ -96,12 +96,10 @@ const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin }) => {
     const name = quiz.name;
     const options: Option[] = JSON.parse(quiz.options);
     const currentQuestionsEfactor = arrayEfactors.current[quizIndex];
-    correctAnswerId.current = options?.map((op: Option) => {
-      if (op.is_correct)
-        return op.id;
-    }) as unknown as string;
-    // the array of correct answers; but I need only the first because the rest are undefined
-    correctAnswerId.current = correctAnswerId.current[0] as string;
+    const correctChoiceId = options?.map((op: Option) => {
+      if (op.is_correct) return op.id;
+    }) as string[];
+    correctAnswerId.current = correctChoiceId.filter(option => option !== undefined)[0] as string;
     if (currentQuestionsEfactor) {
       if (currentQuestionsEfactor > 2) {
         hintImageVisibility.current = false;
