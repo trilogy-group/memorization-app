@@ -32,6 +32,7 @@ import Button from "@mui/material/Button";
 
 import RefreshIcon from "@mui/icons-material/Refresh";
 import BackIcon from "@mui/icons-material/ArrowBackIosNew";
+import DeleteIcon from "@mui/icons-material/DeleteOutlined";
 
 import Navigation from "../components/navigation/navigation";
 import Upload from "../components/upload/upload";
@@ -526,7 +527,7 @@ const CreateListOfWords: NextPage = () => {
                                 className={`flex justify-center items-center gap-2 py-3 min-w-[20px] hover:brightness-90 transition text-white bg-red-1 disabled:text-gray-400 disabled:bg-gray-200`}
                                 style={{ borderRadius: 5, padding: 5 }}
                               >
-                                Delete
+                                <DeleteIcon />
                               </button>
                             </li>
                           );
