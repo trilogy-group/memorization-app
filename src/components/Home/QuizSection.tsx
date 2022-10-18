@@ -35,7 +35,6 @@ const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin }) => {
   const [quizIndex, setQuizIndex] = useState<number>(0);
 
   const [startButtonVisibility, setStartButtonVisibility] = useState<boolean>(true);
-  const [quizContentVisibility, setQuizContentVisibility] = useState<boolean>(false);
 
   var correctAnswerId = useRef<string>("");
 
@@ -87,8 +86,6 @@ const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin }) => {
     } else {
       if (timeTaken < 5000) {
         return 2;
-      } else if (timeTaken < 7000) {
-        return 1;
       } else {
         return 1;
       }
