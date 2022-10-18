@@ -216,7 +216,7 @@ const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin }) => {
                       }}
                       className="py-3 min-w-[170px] border border-gray-2 bg-white hover:bg-gray-100 transition"
                     >
-                      Next Question
+                      {(quizIndex == quiz.length - 1) ? <span>Finish Quiz</span> : <span>Next Question</span>}
                     </button>
                   </div> : <></>
                 }
