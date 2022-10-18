@@ -5,7 +5,6 @@ import React from "react";
 import { useSession } from "next-auth/react";
 import { FormControl, FormControlLabel, FormHelperText, FormLabel, Radio, RadioGroup } from "@mui/material";
 import { QuizType, Option } from "@/utils/text";
-import toast from "react-hot-toast";
 
 
 interface QuizSectionProps {
@@ -43,9 +42,7 @@ const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin }) => {
         quizId: quiz.id,
       }).then((q: string) => {
           arrayHints.current.push(q);
-      }
-      )
-      .catch(err => toast(err)));
+      }));
   }, [])
 
   const forceUpdate = () => {

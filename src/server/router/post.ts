@@ -131,7 +131,7 @@ export const postRouter = createRouter()
       // quizzes for the viewed feeds
       // TODO: implement skip, fix viewed reset bugs
       quizzes = await prisma.quiz.findMany({
-        skip: skip == 0?0:Number.MAX_SAFE_INTEGER,
+        skip: skip == 0 ? 0 : Number.MAX_SAFE_INTEGER,
         where: {
           progress: {
             some: {
