@@ -27,9 +27,9 @@ function uploadToS3(fileName: string): Promise<any> {
   };
 
   return new Promise((resolve, reject) => {
-    s3bucket.upload(params, function(err: any, data: { Location: string; }) {
+    s3bucket.upload(params, function (err: any, data: { Location: string; }) {
       readStream.destroy();
-      
+
       if (err) {
         return reject(err);
       }
@@ -131,7 +131,7 @@ export const postRouter = createRouter()
       // quizzes for the viewed feeds
       // TODO: implement skip, fix viewed reset bugs
       quizzes = await prisma.quiz.findMany({
-        skip: skip == 0?0:Number.MAX_SAFE_INTEGER,
+        skip: skip == 0 ? 0 : Number.MAX_SAFE_INTEGER,
         where: {
           progress: {
             some: {
@@ -373,11 +373,30 @@ export const postRouter = createRouter()
   .mutation("uploadToS3", {
     input: z.object({
       file: z.string(),
-      }),
-      async resolve({ ctx: { prisma, session }, input }) {
-        const Location: String = (await uploadToS3(input.file)) as string;
-        return Location;
-      },
+    }),
+    async resolve({ ctx: { prisma, session }, input }) {
+      const Location: String = (await uploadToS3(input.file)) as string;
+      return Location;
+    },
+  }).mutation("getHint", {
+    input: z.object({
+      quizId: z.number(),
+    }),
+    async resolve({ ctx: { prisma, session }, input }) {
+      const hintFound = await prisma.post.findFirst({
+        where: {
+          quizId: input.quizId,
+        },
+        select: {
+          coverURL: true,
+        }
+      });
+
+      if (hintFound == null) {
+        throw new Error("Concept or quiz not found in the DB.");
+      }
+      return hintFound.coverURL as string;
+    },
   });
 
 
