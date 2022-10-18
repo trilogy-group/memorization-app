@@ -7,6 +7,7 @@ import { FC, FormEvent, useState } from "react";
 import { AiOutlinePlus } from "react-icons/ai";
 import { BiSearch, BiUser } from "react-icons/bi";
 import { IoLogOutOutline } from "react-icons/io5";
+import toast from "react-hot-toast";
 
 import ClickAwayListener from "../Shared/ClickAwayListener";
 
@@ -124,25 +125,29 @@ const Navbar: FC = () => {
             </button>
           </form>
           <div className="flex items-center gap-3">
-            <div
-              className="notificationArea border rounded"
-              onClick={async () => {
-                setNotificationVisibility(!notificationVisibility);
-              }}
-            >
-              <img
-                src="/notificationBell.svg"
-                className="notificationBell"
-              ></img>
-              <div className="notificationCounter">
-                {notifications.content.length}
-              </div>
-              {notificationVisibility && (
-                <div className="notifications" id="notifications">
-                  {displayNotification()}
+            {/* @ts-ignore */}
+            {
+              !session?.user ? <></> :
+                <div
+                  className="notificationArea border rounded"
+                  onClick={async () => {
+                    setNotificationVisibility(!notificationVisibility);
+                  }}
+                >
+                  <img
+                    src="/notificationBell.svg"
+                    className="notificationBell"
+                  ></img>
+                  <div className="notificationCounter">
+                    {notifications.content.length}
+                  </div>
+                  {notificationVisibility && (
+                    <div className="notifications" id="notifications">
+                      {displayNotification()}
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
+            }
             <div>
               <Button
                 aria-controls={open ? "basic-menu" : undefined}
@@ -215,11 +220,10 @@ const Navbar: FC = () => {
                       />
                     </button>
                     <div
-                      className={`absolute shadow-[rgb(0_0_0_/_12%)_0px_4px_16px] bg-white top-[120%] right-0 py-2 flex flex-col items-stretch [&>*]:whitespace-nowrap rounded-md transition-all z-50 ${
-                        isDropdownOpened
-                          ? "opacity-100 visible"
-                          : "opacity-0 invisible"
-                      }`}
+                      className={`absolute shadow-[rgb(0_0_0_/_12%)_0px_4px_16px] bg-white top-[120%] right-0 py-2 flex flex-col items-stretch [&>*]:whitespace-nowrap rounded-md transition-all z-50 ${isDropdownOpened
+                        ? "opacity-100 visible"
+                        : "opacity-0 invisible"
+                        }`}
                     >
                       {/* @ts-ignore */}
                       <Link href={`/user/${session?.user?.id}`}>
