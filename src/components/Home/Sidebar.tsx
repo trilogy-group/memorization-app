@@ -7,6 +7,7 @@ import { FC } from "react";
 import { AiFillHome, AiOutlineHome, AiOutlinePlusCircle } from "react-icons/ai";
 import { BsFillCheckCircleFill } from "react-icons/bs";
 import { RiUserShared2Fill, RiUserShared2Line } from "react-icons/ri";
+import toast from "react-hot-toast";
 
 import { formatAccountName } from "@/utils/text";
 
@@ -68,13 +69,13 @@ const Sidebar: FC<SidebarProps> = ({
           ): void {
             console.log(
               "Id: " +
-                nodeId +
-                " Name: " +
-                nodeName +
-                " ParentId: " +
-                parentId +
-                " ParentName: " +
-                parentName
+              nodeId +
+              " Name: " +
+              nodeName +
+              " ParentId: " +
+              parentId +
+              " ParentName: " +
+              parentName
             );
           }}
           addNodeListToWorkspace={function (concepts: ConceptState[]): void {
@@ -83,11 +84,10 @@ const Sidebar: FC<SidebarProps> = ({
         />
         <Link href="/">
           <a
-            className={`flex items-center gap-2 ${
-              !router.query.following
+            className={`flex items-center gap-2 ${!router.query.following
                 ? "fill-pink text-pink"
                 : "fill-black text-black"
-            }`}
+              }`}
           >
             {!router.query.following ? <AiFillHome /> : <AiOutlineHome />}
             <span className="hidden lg:inline">For You</span>
@@ -96,6 +96,10 @@ const Sidebar: FC<SidebarProps> = ({
         <Link href="/">
           <a
             onClick={() => {
+              if (!session.data?.user) {
+                toast("You need to login");
+                return ;
+              }
               console.log(open);
               setOpen(true);
               console.log(open);
@@ -108,11 +112,10 @@ const Sidebar: FC<SidebarProps> = ({
         </Link>
         <Link href={session.data?.user ? "/?following=1" : "/sign-in"}>
           <a
-            className={`flex items-center gap-2 ${
-              router.query.following
+            className={`flex items-center gap-2 ${router.query.following
                 ? "fill-pink text-pink"
                 : "fill-black text-black"
-            }`}
+              }`}
           >
             {router.query.following ? (
               <RiUserShared2Fill />

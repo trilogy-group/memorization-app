@@ -88,7 +88,7 @@ const Main: FC<MainProps> = ({ origin }) => {
       {
         data?.pages.map((page, idx) => {
           return <div key={idx}>{
-            page.items.map((feedItem, feedIdx ) => {
+            page.items.map((feedItem, feedIdx) => {
               if (feedItem.type === 'Post') {
                 return <PostSection
                   post={feedItem?.post as FeedPostType}
