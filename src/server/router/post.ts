@@ -131,7 +131,7 @@ export const postRouter = createRouter()
       // quizzes for the viewed feeds
       // TODO: implement skip, fix viewed reset bugs
       quizzes = await prisma.quiz.findMany({
-        skip: skip == 0?0:Number.MAX_SAFE_INTEGER,
+        skip: skip == 0 ? 0 : Number.MAX_SAFE_INTEGER,
         where: {
           progress: {
             some: {
@@ -383,7 +383,7 @@ export const postRouter = createRouter()
       quizId: z.number(),
     }),
     async resolve({ ctx: { prisma, session }, input }) {
-      const postFound = await prisma.post.findFirst({
+      const hintFound = await prisma.post.findFirst({
         where: {
           quizId: input.quizId,
         },
@@ -392,10 +392,10 @@ export const postRouter = createRouter()
         }
       });
 
-      if (postFound == null) {
+      if (hintFound == null) {
         throw new Error("Concept or quiz not found in the DB.");
       }
-      return postFound;
+      return hintFound.coverURL as string;
     },
   });
 

@@ -5,7 +5,6 @@ import React from "react";
 import { useSession } from "next-auth/react";
 import { FormControl, FormControlLabel, FormHelperText, FormLabel, Radio, RadioGroup } from "@mui/material";
 import { QuizType, Option } from "@/utils/text";
-import toast from "react-hot-toast";
 
 
 interface QuizSectionProps {
@@ -28,8 +27,12 @@ const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin }) => {
   const session = useSession();
 
   const quizPostMutation = trpc.useMutation("progress.post-one-quiz-result");
+<<<<<<< HEAD
   const quizGetHint = trpc.useMutation("post.getHint");
   const quizGetEfactor = trpc.useMutation("progress.get-efactor");
+=======
+  const quizHintMutation = trpc.useMutation("post.getHint");
+>>>>>>> master
   const [choice, setChoice] = useState<string>("");
   const [done, setDone] = useState<boolean>(false);
   const [attempted, setAttempted] = useState<boolean>(false);
@@ -40,12 +43,8 @@ const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin }) => {
 
   var imgVisibility = useRef(false);
 
-  if (quiz == null || quiz.length == 0) {
-    // no quiz now
-    return <></>;
-  }
-
   useEffect(() => {
+<<<<<<< HEAD
 
     quiz.forEach(quiz => {
       // getting hints (coverURLs) into arrayHints
@@ -73,6 +72,14 @@ const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin }) => {
 
     });
 
+=======
+    quiz.forEach(quiz => quizHintMutation
+      .mutateAsync({
+        quizId: quiz.id,
+      }).then((q: string) => {
+          arrayHints.current.push(q);
+      }));
+>>>>>>> master
   }, [])
 
   const forceUpdate = () => {
@@ -121,7 +128,13 @@ const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin }) => {
       return <div className="flex">
         <FormControl component="fieldset">
           <FormLabel component="legend">{name}</FormLabel>
+<<<<<<< HEAD
           {imgVisibility.current && <img id="hintImage" style={{ width: "200", height: "200" }} src={(arrayHints.current[quizIndex] == null) ? "" : arrayHints.current[quizIndex] as string} alt={`Hint could not be loaded/displayed at the URL:  ${arrayHints.current[quizIndex]}`} />}
+=======
+          {hintImageVisibility && <img id="hintImage" style={{ width: "200", height: "200" }} 
+          src={(arrayHints.current[quizIndex] == null) ? "" : arrayHints.current[quizIndex] as string} 
+          alt={"Hint could not be loaded/displayed at the URL: ${arrayHints.current[quizIndex]}"} />}
+>>>>>>> master
           <RadioGroup
             value={choice}
             onChange={handleChange}
@@ -150,12 +163,14 @@ const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin }) => {
     const correctChoiceId = options?.map((op: Option) => {
       if (op.is_correct) return op.id;
     }) as string[];
+
     if (correctChoiceId.includes(choice)) {
       console.log('Correct!');
       // TODO: change colour of the choices
     } else {
       console.log('wrong, answer is ' + choice);
     }
+
     // Post result
     quizPostMutation.mutateAsync({
       quizId: quiz[quizIndex]?.id as number,
