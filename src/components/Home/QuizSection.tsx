@@ -28,6 +28,7 @@ const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin }) => {
 
   const quizPostMutation = trpc.useMutation("progress.post-one-quiz-result");
   const quizHintMutation = trpc.useMutation("post.getHint");
+  const quizEfactorMutation = trpc.useMutation("progress.get-efactor");
   const [choice, setChoice] = useState<string>("");
   const [done, setDone] = useState<boolean>(false);
   const [attempted, setAttempted] = useState<boolean>(false);
@@ -45,12 +46,23 @@ const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin }) => {
   var quizStart = useRef(0);
 
   useEffect(() => {
-    quiz.forEach(quiz => quizHintMutation
-      .mutateAsync({
-        quizId: quiz.id,
-      }).then((q: string) => {
-        arrayHints.current.push(q);
-      }));
+    quiz.forEach(quiz => {
+      quizHintMutation
+        .mutateAsync({
+          quizId: quiz.id,
+        }).then((q: string) => {
+          arrayHints.current.push(q);
+        });
+
+      quizEfactorMutation
+        .mutateAsync({
+          quizId: quiz.id,
+        }).then((questionEfactor: number) => {
+          arrayEfactors.current.push(questionEfactor);
+        }
+        );
+    }
+    );
   }, [])
 
   const forceUpdate = () => {
@@ -99,9 +111,9 @@ const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin }) => {
       return <div className="flex">
         <FormControl component="fieldset">
           <FormLabel component="legend">{name}</FormLabel>
-          {imgVisibility.current && <img id="hintImage" style={{ width: "200", height: "200" }}
+          {imgVisibility.current && <img id="hintImage" style={{ width: "200", height: "200" }} className="h-96"
             src={(arrayHints.current[quizIndex] == null) ? "" : arrayHints.current[quizIndex] as string}
-            alt={"Hint could not be loaded/displayed at the URL: ${arrayHints.current[quizIndex]}"} />}
+            alt={'Hint could not be loaded/displayed at the URL: ' + arrayHints.current[quizIndex] as string} />}
           <RadioGroup
             value={choice}
             onChange={handleChange}
@@ -157,7 +169,7 @@ const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin }) => {
 
   return (
     <>
-      <div className="min-h-screen flex flex-col items-stretch microQuiz">
+      <div className={`h-200 flex flex-col items-stretch microQuiz ${(done) ? "hidden" : ""}`}>
         <div className="flex justify-center mx-2 flex-grow bg-white-1">
           <div className="w-full max-w-[1000px] p-8 bg-white my-4">
             {startButtonVisibility && <div className="flex flex-col items-center justify-center">
