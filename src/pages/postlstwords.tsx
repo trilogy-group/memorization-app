@@ -37,7 +37,8 @@ import DeleteIcon from "@mui/icons-material/DeleteOutlined";
 import Navigation from "../components/navigation/navigation";
 import Upload from "../components/upload/upload";
 
-import { v4 as uuidv4 } from 'uuid';
+import { nanoid } from 'nanoid'
+
 
 
 interface ConceptState {
@@ -339,7 +340,7 @@ const CreateListOfWords: NextPage = () => {
 
   const handleAddToSequence = async () => {
     let item = {
-      id: uuidv4(),
+      id: nanoid(),
       title: tableEntryValue.trim(),
     };
     console.log(item.id)
