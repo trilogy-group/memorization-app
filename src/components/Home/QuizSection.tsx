@@ -28,21 +28,35 @@ const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin }) => {
 
   const quizPostMutation = trpc.useMutation("progress.post-one-quiz-result");
   const quizHintMutation = trpc.useMutation("post.getHint");
+  const quizEfactorMutation = trpc.useMutation("progress.get-efactor");
   const [choice, setChoice] = useState<string>("");
   const [done, setDone] = useState<boolean>(false);
   const [attempted, setAttempted] = useState<boolean>(false);
   const [quizIndex, setQuizIndex] = useState<number>(0);
-  const [hintImageVisibility, setHintImageVisibility] = useState(true);
 
   var arrayHints = useRef<string[]>([]);
+  var arrayEfactors = useRef<number[]>([]);
+
+  var imgVisibility = useRef(false);
 
   useEffect(() => {
-    quiz.forEach(quiz => quizHintMutation
-      .mutateAsync({
-        quizId: quiz.id,
-      }).then((q: string) => {
+    quiz.forEach(quiz => {
+      quizHintMutation
+        .mutateAsync({
+          quizId: quiz.id,
+        }).then((q: string) => {
           arrayHints.current.push(q);
-      }));
+        });
+
+      quizEfactorMutation
+        .mutateAsync({
+          quizId: quiz.id,
+        }).then((questionEfactor: number) => {
+          arrayEfactors.current.push(questionEfactor);
+        }
+        );
+    }
+    );
   }, [])
 
   const forceUpdate = () => {
@@ -77,14 +91,24 @@ const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin }) => {
   const handleSingleQuiz = (quiz: Quiz) => {
     const name = quiz.name;
     const options: Option[] = JSON.parse(quiz.options);
+    const currentQuestionsEfactor = arrayEfactors.current[quizIndex];
+
+    // hints are shown if efactor is low
+    if (currentQuestionsEfactor) {
+      if (currentQuestionsEfactor > 2) {
+        imgVisibility.current = false;
+      } else {
+        imgVisibility.current = true;
+      }
+    }
 
     if (quiz.type == QuizType.MCQ) {
       return <div className="flex">
         <FormControl component="fieldset">
           <FormLabel component="legend">{name}</FormLabel>
-          {hintImageVisibility && <img id="hintImage" style={{ width: "200", height: "200" }} 
-          src={(arrayHints.current[quizIndex] == null) ? "" : arrayHints.current[quizIndex] as string} 
-          alt={"Hint could not be loaded/displayed at the URL: ${arrayHints.current[quizIndex]}"} />}
+          {imgVisibility.current && <img id="hintImage" style={{ width: "200", height: "200" }} className="h-96"
+            src={(arrayHints.current[quizIndex] == null) ? "" : arrayHints.current[quizIndex] as string}
+            alt={'Hint could not be loaded/displayed at the URL: ' + arrayHints.current[quizIndex] as string} />}
           <RadioGroup
             value={choice}
             onChange={handleChange}
@@ -134,7 +158,7 @@ const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin }) => {
 
   return (
     <>
-      <div className="min-h-screen flex flex-col items-stretch microQuiz">
+      <div className={`h-200 flex flex-col items-stretch microQuiz ${(done) ? "hidden" : ""}`}>
         <div className="flex justify-center mx-2 flex-grow bg-white-1">
           <div className="w-full max-w-[1000px] p-8 bg-white my-4">
             <div className="flex flex-col items-center justify-center">
