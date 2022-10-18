@@ -99,6 +99,7 @@ const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin }) => {
     const options: Option[] = JSON.parse(quiz.options);
     const currentQuestionsEfactor = arrayEfactors.current[quizIndex];
 
+    // hints are shown if efactor is low
     if (currentQuestionsEfactor) {
       if (currentQuestionsEfactor > 2) {
         imgVisibility.current = false;
