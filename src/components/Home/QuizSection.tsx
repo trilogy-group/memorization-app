@@ -156,12 +156,6 @@ const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin }) => {
       grade: score,
     });
 
-    /*
-    if (quizIndex == quiz.length - 1) {
-      console.log("the quiz index is ", quizIndex);
-      setQuizContentVisibility(false);
-    }
-    */
   };
 
   const handleNextQuestion = async () => {

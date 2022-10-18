@@ -290,26 +290,4 @@ export const progressRouter = createRouter()
 
       return;
     },
-  }).mutation("get-efactor", {
-    input: z.object({
-      quizId: z.number(),
-    }),
-    // get quizzes based on progress
-    async resolve({ ctx: { prisma, session }, input }) {
-      const existingProgress = await prisma.progress.findFirst({
-        where: {
-          userId: session?.user?.id!,
-          quizId: input.quizId,
-        },
-        select: {
-          efactor: true,
-        }
-      });
-
-      if (existingProgress == null) {
-        return null;
-      }
-
-      return existingProgress.efactor;
-    }
   });
