@@ -36,6 +36,9 @@ import BackIcon from "@mui/icons-material/ArrowBackIosNew";
 import Navigation from "../components/navigation/navigation";
 import Upload from "../components/upload/upload";
 
+import { v4 as uuidv4 } from 'uuid';
+
+
 interface ConceptState {
   id: string;
   name: string;
@@ -113,6 +116,8 @@ const CreateListOfWords: NextPage = () => {
   const [acronymGenerated, setAcronymGenerated] = useState(false);
   const [selectedMnemonic, setSelectedMnemonic] = useState(false);
   const [selectedMnemonicType, setSelectedMnemonicType] = useState("");
+
+  const [options, setOptions] = useState([]);
 
   const [open, setOpen] = useState(false);
 
@@ -332,27 +337,42 @@ const CreateListOfWords: NextPage = () => {
   };
 
   const handleAddToSequence = async () => {
-    var entry = document.createElement("li");
-    entry.innerHTML = tableEntryValue.trim();
-    entry.className =
-      "border rounded flex items-center gap-2 h-9 px-3 border-gray-200 bg-white hover:bg-gray-100 transition";
-    const answer = document.getElementById("answer");
-    if (answer != null) {
-      answer.appendChild(entry);
-      wordList.push(tableEntryValue);
-      if (value === "1") {
-        handleRecommeddedAcronymList();
-        setAcronymGenerated(true);
-        setStoryGenerated(false);
-      } else if (value === "3") {
-        handleRecommeddedStoryList();
-        setStoryGenerated(true);
-        setAcronymGenerated(false);
-      }
-      setTableEntryValue("");
-    } else {
-      throw new Error("Missing element 'answer' table");
+    let item = {
+      id: uuidv4(),
+      title: tableEntryValue.trim(),
+    };
+    console.log(item.id)
+    wordList.push(tableEntryValue);
+    if (value === "1") {
+      handleRecommeddedAcronymList();
+      setAcronymGenerated(true);
+      setStoryGenerated(false);
+    } else if (value === "3") {
+      handleRecommeddedStoryList();
+      setStoryGenerated(true);
+      setAcronymGenerated(false);
     }
+    setOptions((state):any => [...state, item]);
+    return;
+    
+  };
+  const handleDelete = async (id: string) => {
+    const index = options.findIndex((item: any) => item.id === id);
+    if (index > -1) {
+      options.splice(index, 1);
+      wordList.splice(index, 1);
+      setOptions((state) => [...state]);
+    }
+    if (value === "1") {
+      handleRecommeddedAcronymList();
+      setAcronymGenerated(true);
+      setStoryGenerated(false);
+    } else if (value === "3") {
+      handleRecommeddedStoryList();
+      setStoryGenerated(true);
+      setAcronymGenerated(false);
+    }
+    return;
   };
 
   // TODO: connect list of words answer with the curricular graph
@@ -369,8 +389,8 @@ const CreateListOfWords: NextPage = () => {
         <div className="flex justify-center mx-2 flex-grow place-items-center">
           <div className="w-full max-w-[1000px] p-1 bg-white my-1">
             <div className="flex items-start mt-10 gap-4">
-              <div className="grid grid-cols-2 gap-11 p-2 w-[100%] h-[75%] mt-5 mb-2">
-                <div className="col-span-1 h-full w-full">
+              <div className="grid grid-cols-2 gap-11 p-2 w-[100%] mt-5 mb-2">
+                <div className="col-span-1 w-full">
                   <h1 className="text-2xl font-bold">
                     Memorize a list of words{" "}
                     <Navigation
@@ -456,7 +476,7 @@ const CreateListOfWords: NextPage = () => {
                       }}
                     />
                   </div>
-                  <div className="col-span-1 h-[35%] w-full">
+                  <div className="col-span-1 w-full">
                     <p>Input below:</p>
                     <input
                       type="text"
@@ -471,6 +491,7 @@ const CreateListOfWords: NextPage = () => {
                       <button
                         onClick={async () => {
                           await handleAddToSequence();
+                          setTableEntryValue("");
                         }}
                         disabled={!tableEntryValue.trim()}
                         className={`flex justify-center items-center gap-2 py-3 min-w-[20px] hover:brightness-90 transition text-white bg-red-1 disabled:text-gray-400 disabled:bg-gray-200`}
@@ -480,8 +501,37 @@ const CreateListOfWords: NextPage = () => {
                         Add entry
                       </button>
                     </div>
-                    <div style={{ margin: 10, height: 390 }}>
-                      <ul id="answer"></ul>
+                    <div style={{ margin: 10 }}>
+                      <ul id="answer">
+                        {options.map((option: any, index) => {
+                          return (
+                            <li
+                              key={index}
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "space-between",
+                                padding: 10,
+                                border: "1px solid #ccc",
+                                borderRadius: 5,
+                                marginBottom: 5,
+                              }}
+                            >
+                              <p>{option.title}</p>
+                              <button
+                                onClick={() => {
+                                  handleDelete(option.id);
+                                  //handleRemoveFromSequence(index);
+                                }}
+                                className={`flex justify-center items-center gap-2 py-3 min-w-[20px] hover:brightness-90 transition text-white bg-red-1 disabled:text-gray-400 disabled:bg-gray-200`}
+                                style={{ borderRadius: 5, padding: 5 }}
+                              >
+                                Delete
+                              </button>
+                            </li>
+                          );
+                        })}
+                      </ul>
                     </div>
                   </div>
                   <div>
@@ -649,7 +699,10 @@ const CreateListOfWords: NextPage = () => {
                                 )}
                               </Item>
                               <Button
-                                disabled={isLoadingImage[index] || mnemonicImage[index] == null}
+                                disabled={
+                                  isLoadingImage[index] ||
+                                  mnemonicImage[index] == null
+                                }
                                 variant="outlined"
                                 color="success"
                                 style={{
@@ -670,7 +723,10 @@ const CreateListOfWords: NextPage = () => {
                                 Accept
                               </Button>
                               <Button
-                                disabled={isLoadingImage[index] || mnemonicImage[index] == null}
+                                disabled={
+                                  isLoadingImage[index] ||
+                                  mnemonicImage[index] == null
+                                }
                                 onClick={async () => {
                                   await handleRecommeddedImage(index);
                                 }}
@@ -762,9 +818,21 @@ const CreateListOfWords: NextPage = () => {
                           disabled={true}
                           aria-label="lab API tabs example"
                         >
-                          <Tab label="Acronyms" value="1" disabled={selectedMnemonic}/>
-                          <Tab label="Images" value="2" disabled={selectedMnemonic}/>
-                          <Tab label="Storys" value="3" disabled={selectedMnemonic}/>
+                          <Tab
+                            label="Acronyms"
+                            value="1"
+                            disabled={selectedMnemonic}
+                          />
+                          <Tab
+                            label="Images"
+                            value="2"
+                            disabled={selectedMnemonic}
+                          />
+                          <Tab
+                            label="Storys"
+                            value="3"
+                            disabled={selectedMnemonic}
+                          />
                         </TabList>
                       </Box>
                       <TabPanel value="1">
@@ -778,7 +846,7 @@ const CreateListOfWords: NextPage = () => {
 
                             <Button
                               className="disabled:text-gray-400 disabled:bg-gray-200`"
-                              disabled={!acronymGenerated }
+                              disabled={!acronymGenerated}
                               onClick={async () => {
                                 setSelectedMnemonicType("");
                                 setMnemonicType("");
@@ -847,7 +915,7 @@ const CreateListOfWords: NextPage = () => {
 
                             <Button
                               className="disabled:text-gray-400 disabled:bg-gray-200`"
-                              disabled={!storyGenerated }
+                              disabled={!storyGenerated}
                               onClick={async () => {
                                 setSelectedMnemonicType("");
                                 setMnemonicType("");
