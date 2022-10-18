@@ -1,11 +1,11 @@
 import { User } from "@nextui-org/react";
-import { Quiz } from "@prisma/client";
+import { Post, Quiz } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
+import moment from "moment";
 import { z } from "zod";
 import { getRepetition, newRepetition, SuperMemoItem, SuperMemoGrade } from "../../utils/spacedRepetition";
 
 import { createRouter } from "./context";
-
 
 export type ProgressWhereUniqueInput = {
   postId?: string | null,
@@ -85,24 +85,30 @@ export const progressRouter = createRouter()
       if (post == null) {
         throw new Error("Post not found!");
       }
-      const id = post.quizId;
       const grade = 5;
 
-      if (id == null) {
+      if (post.quizId == null) {
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
       }
 
       // create progress entry if not existing
       const repetitionItem = newRepetition(grade);
-      const progressCreated = await prisma.progress.create({
-        data: {
+      const progressCreated = await prisma.progress.upsert({
+        where: {
+          progress_identifier: {
+            userId: session?.user?.id as string,
+            quizId: post.quizId
+          }
+        },
+        update: {},
+        create: {
           // TODO: do not add interval in nextEvaluate estimate for demo purposes
           nextEvaluate: new Date(),
           efactor: repetitionItem.efactor,
           interval: repetitionItem.interval,
           userId: session?.user?.id!,
-          quizId: id,
-        }
+          quizId: post.quizId,
+        },
       });
       // Do not update the spaced repetition item if it's an existing item
       // Update the feeds to set viewed as true
@@ -127,55 +133,42 @@ export const progressRouter = createRouter()
       grade: z.number().gt(0),
     }),
     async resolve({ ctx: { prisma, session }, input }) {
-      let grade: SuperMemoGrade = Number(input.grade || "") % 5 as SuperMemoGrade; // 0 ~ 5, type SuperMemoItems
+      let grade: SuperMemoGrade = (input.grade) as SuperMemoGrade; // 0 ~ 5, type SuperMemoItems
 
-      // if this quiz has already in progress
       const existingProgress = await prisma.progress.findFirst({
         where: {
           userId: session?.user?.id!,
           quizId: input.quizId,
         }
       });
+      if (existingProgress == null) {
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+      }
 
-      // create progress entry if not existing
-      var progressCreated;
-      if (!existingProgress) {
-        progressCreated = await prisma.progress.create({
-          data: {
-            // TODO: add interval to nextEvaluate. Now quizzes are always pending for demo
-            nextEvaluate: new Date(),
-            efactor: 2.5,
-            interval: 1,
+      // update the spaced repetition item if it's an existing item
+      let item: SuperMemoItem = {
+        interval: existingProgress.interval,
+        repetition: existingProgress.repetition,
+        efactor: existingProgress.efactor,
+      };
+      const repetitionItem = getRepetition(item, grade);
+
+      var progress = await prisma.progress.update({
+        where: {
+          progress_identifier: {
             userId: session?.user?.id!,
             quizId: input.quizId,
           }
-        });
-      }
-      else {
-        // update the spaced repetition item if it's an existing item
-        let item: SuperMemoItem = {
-          interval: existingProgress.interval,
-          repetition: existingProgress.repetition,
-          efactor: existingProgress.efactor,
-        };
-        const repetitionItem = await getRepetition(item, grade);
-        progressCreated = await prisma.progress.update({
-          where: {
-            progress_identifier: {
-              userId: session?.user?.id!,
-              quizId: input.quizId,
-            }
-          },
-          data: {
-            // TODO: add interval to the next evaluate time
-            nextEvaluate: new Date(),
-            efactor: repetitionItem.efactor,
-            interval: repetitionItem.interval,
-            repetition: repetitionItem.repetition
-          }
-        });
-      }
-      if (progressCreated == null) {
+        },
+        data: {
+          // TODO: add interval to the next evaluate time
+          nextEvaluate: moment(new Date()).add(1, 'm').toDate(),
+          efactor: repetitionItem.efactor,
+          interval: repetitionItem.interval,
+          repetition: repetitionItem.repetition
+        }
+      });
+      if (progress == null) {
         throw new Error("Database update error, spaced repetition failed");
       }
 
@@ -209,33 +202,90 @@ export const progressRouter = createRouter()
             }
           }
         });
+        const concept = await prisma.concept.findFirst({
+          where: {
+            quizzes: {
+              some: {
+                id: input.quizId,
+              }
+            }
+          }
+        });
+
+        if (concept == null) {
+          throw new Error('Cannot find concept based on the quizId. Internal server error');
+        }
 
         for (const post of postsSuggested) {
-          const feedsCreated = await prisma.feed.create({
-            data: {
+         const feedsCreated = await prisma.feed.upsert({
+            where: {
+              postId_userId: {
+                postId: post.id,
+                userId: session?.user?.id as string,
+              }
+            },
+            update: {
+              quizId: post.quizId,
+              viewed: false,
+              conceptId: concept?.id as string,
+            },
+            create: {
               postId: post.id,
               userId: session?.user?.id as string,
               quizId: post.quizId,
               viewed: false,
+              conceptId: concept?.id as string,
             }
           });
+
           if (feedsCreated == null) {
             throw new Error("Cannot create Feeds in DB");
           }
         }
         for (const post of postsLiked) {
-          const feedsLikedUpdated = await prisma.feed.update({
+          const feedsLikedUpdated = await prisma.feed.upsert({
             where: {
-              feed_identifier: {
+              postId_userId: {
+                postId: post.id,
                 userId: session?.user?.id as string,
-                postId: post.id
               }
             },
-            data: {
+            update: {
+              quizId: post.quizId,
               viewed: false,
+              conceptId: concept?.id as string,
+            },
+            create: {
+              postId: post.id,
+              userId: session?.user?.id as string,
+              quizId: post.quizId,
+              viewed: false,
+              conceptId: concept?.id as string,
             }
           });
+          if (feedsLikedUpdated == null) {
+            throw new Error("Cannot create Feeds in DB");
+          }
         }
+      } else {
+        // Quiz correct -> posts will not appear in the feeds
+        // delete feeds for the quiz, the feeds will be generated if they fail a quiz again
+        const relatedPosts = await prisma.post.findMany({
+          where: {
+            quizId: input.quizId
+          },
+          select: {
+            id: true
+          }
+        });
+        await prisma.feed.deleteMany({
+          where: {
+            userId: session?.user?.id as string,
+            postId: {
+              in: relatedPosts.map((p: any) => { return p.id; })
+            }
+          }
+        });
       }
 
       return;

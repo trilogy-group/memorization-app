@@ -1,4 +1,5 @@
-import { Follow, Like } from "@prisma/client";
+import { FeedItem } from "@/utils/text";
+import { Follow, Like, Quiz, Post } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
@@ -45,6 +46,7 @@ enum contentType {
   unknown = 4,
 }
 
+
 export const postRouter = createRouter()
   .query("for-you", {
     input: z.object({
@@ -52,20 +54,22 @@ export const postRouter = createRouter()
     }),
     resolve: async ({ ctx: { prisma, session }, input }) => {
       const skip = input.cursor || 0;
+      // TODO: add cursor and skip for quiz
+      // TODO: Change two queries into one
       const feedItems = await prisma.feed.findMany({
         where: {
           userId: session?.user?.id as string,
+          viewed: false,
         },
         select: {
           postId: true,
         }
       });
-      console.log(feedItems);
 
-      const feedPostIdArr = feedItems.map((feed)=>feed.postId);
+      const feedPostIdArr = feedItems.map((feed) => feed.postId);
 
       const items = await prisma.post.findMany({
-        take: 4,
+        take: 2,
         skip,
         include: {
           user: true,
@@ -78,11 +82,7 @@ export const postRouter = createRouter()
           }
         },
         where: {
-          Feed: {
-            some: {
-              postId: {in: feedPostIdArr}
-            }
-          }
+          id: { in: feedPostIdArr }
         }
       });
 
@@ -108,21 +108,63 @@ export const postRouter = createRouter()
         ]);
       }
 
-      console.log("cursor", input.cursor);
-      console.log("items.length", items.length);
-      for (const i of items) {
-          console.log("items", i.caption);
-      }
-      console.log("skip", skip);
+      /*for (const i of items) {
+        console.log("items", i.caption);
+      }*/
+      // TODO: Implement skip for quizzes
 
-      return {
-        items: items.map((item) => ({
+      // get the quizzes
+      let quizzes: Quiz[];
+      let coverURLs_or_mnemonicTexts: string[] = [];
+      let efactors: number[] = [];
+
+      const viewedFeeds = await prisma.feed.findMany({
+        where: {
+          userId: session?.user?.id as string,
+          viewed: true,
+        },
+        select: {
+          quizId: true
+        }
+      });
+
+      // quizzes for the viewed feeds
+      // TODO: implement skip, fix viewed reset bugs
+      quizzes = await prisma.quiz.findMany({
+        skip: skip == 0?0:Number.MAX_SAFE_INTEGER,
+        where: {
+          progress: {
+            some: {
+              userId: session?.user?.id as string,
+              nextEvaluate: {
+                lt: new Date()
+              }
+            }
+          },
+          //id: { in: viewedFeeds.map((f) => { return f.quizId; }) }
+        },
+      });
+      // TODO: test - if the last quiz was correct, then the posts will not be shown, the quiz will still appear
+      // TODO: if feeds are incomplete, do not add the quiz
+
+      const posts = items.map((item) => {
+        return {
           ...item,
           likedByMe: likes.some((like) => like.postId === item.id),
           followedByMe: followings.some(
             (following) => following.followingId === item.userId
-          ),
-        })),
+          )
+        }
+      });
+
+      const results: FeedItem[] = []
+      posts.forEach((post) => {
+        results.push({ type: "Post", post: post })
+      })
+      results.push({ type: 'Quiz', quizzes: quizzes })
+
+      return {
+        items: results,
         nextSkip: items.length === 0 ? null : skip + items.length,
       };
     },
@@ -206,17 +248,12 @@ export const postRouter = createRouter()
       conceptId: z.string(),
       quizId: z.string(),
     }),
+    // TODO: test whether quizFound works properly
     async resolve({ ctx: { prisma, session }, input }) {
-      console.log("conceptid", input.conceptId);
-      console.log("idInconcept", input.quizId);
       const quizFound = await prisma.quiz.findFirst({
         where: {
-          AND: [
-          {concepts: {
-            id: input.conceptId,
-          }},
-          {idInConcept: input.quizId as string,
-          }]
+          conceptId: input.conceptId,
+          idInConcept: input.quizId as string,
         }
       });
 

@@ -15,7 +15,6 @@ export const userRouter = createRouter()
       conceptId: z.string(),
     }),
     async resolve({ ctx: { prisma, session }, input }) {
-      console.log('add concept', input.conceptId);
       const user = await prisma.user.findFirst({
         where: {
           AND: [
@@ -27,10 +26,10 @@ export const userRouter = createRouter()
             }]
         },
       });
-      console.log('user exists', user);
       // If the concept exists, take no action
+      // TODO: apply proper logging
       if (user != null) {
-        console.log("concept exists");
+        console.log("concept exists", input.conceptId);
         return;
       } else {
         console.log('add concept for the user');
@@ -60,6 +59,7 @@ export const userRouter = createRouter()
           userId: session?.user?.id as string,
           quizId: post.quizId,
           viewed: false,
+          conceptId: input.conceptId,
         }))
       });
       return feedsCreated;
