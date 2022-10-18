@@ -226,7 +226,7 @@ const CreateDefinition: NextPage = () => {
     setOpenUpload(true); // TODO: connect to the mnemonics generation backend
   };
 
-  const handleAddToSequence = async () => {
+  const handleDefinitionInput = async () => {
     const answer = document.getElementById("answer");
     if (answer != null) {
       definitionInput = tableEntryValue;
@@ -355,7 +355,7 @@ const CreateDefinition: NextPage = () => {
                     <div className="grid grid-cols-2">
                       <button
                         onClick={async () => {
-                          await handleAddToSequence();
+                          await handleDefinitionInput();
                         }}
                         disabled={!tableEntryValue.trim()}
                         className={`flex justify-center items-center gap-2 py-3 min-w-[20px] hover:brightness-90 transition text-white bg-red-1 disabled:text-gray-400 disabled:bg-gray-200`}
