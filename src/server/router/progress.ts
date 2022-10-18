@@ -294,7 +294,7 @@ export const progressRouter = createRouter()
     input: z.object({
       quizId: z.number(),
     }),
-    // get quizzes based on progress
+    // get efactor based on quizId
     async resolve({ ctx: { prisma, session }, input }) {
       const existingProgress = await prisma.progress.findFirst({
         where: {
