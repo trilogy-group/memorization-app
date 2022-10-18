@@ -41,7 +41,7 @@ const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin }) => {
   var arrayHints = useRef<string[]>([]);
   var arrayEfactors = useRef<number[]>([]);
 
-  var imgVisibility = useRef(false);
+  var hintImageVisibility = useRef(false);
 
   var quizStart = useRef(0);
 
@@ -104,9 +104,9 @@ const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin }) => {
     correctAnswerId.current = correctAnswerId.current[0] as string;
     if (currentQuestionsEfactor) {
       if (currentQuestionsEfactor > 2) {
-        imgVisibility.current = false;
+        hintImageVisibility.current = false;
       } else {
-        imgVisibility.current = true;
+        hintImageVisibility.current = true;
       }
     }
 
@@ -114,7 +114,7 @@ const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin }) => {
       return <div className="flex">
         <FormControl component="fieldset">
           <FormLabel component="legend">{name}</FormLabel>
-          {imgVisibility.current && <img id="hintImage" style={{ width: "200", height: "200" }} className="h-96"
+          {hintImageVisibility.current && <img id="hintImage" style={{ width: "200", height: "200" }} className="h-96"
             src={(arrayHints.current[quizIndex] == null) ? "" : arrayHints.current[quizIndex] as string}
             alt={'Hint could not be loaded/displayed at the URL: ' + arrayHints.current[quizIndex] as string} />}
           <RadioGroup
@@ -122,8 +122,9 @@ const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin }) => {
             onChange={handleChange}
           >
             {options?.map((op, idx) => {
-              return <FormControlLabel value={op.id} key={idx} control={<Radio />} label={op.desc} className={`bg-opacity-70 ${(choice == op.id) && (op.id != correctAnswerId.current) && attempted ? "bg-red-600" : (op.id == correctAnswerId.current) && attempted ? "bg-lime-500" : ""}`} onChange={e => { console.log("the op.id ", op.id) }
-              } />
+              return <FormControlLabel value={op.id} key={idx} control={<Radio />} label={op.desc}
+                className={`bg-opacity-70 ${(choice == op.id) && (op.id != correctAnswerId.current) && attempted ? "bg-red-600"
+                  : (op.id == correctAnswerId.current) && attempted ? "bg-lime-500" : ""}`} />
             })}
           </RadioGroup>
         </FormControl>
@@ -137,7 +138,6 @@ const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin }) => {
 
   const handleChange = (e: any) => {
     setChoice(e.target.value as string);
-    console.log("the correct id ", correctAnswerId.current);
   };
 
   const handleCheckAnswer = async () => {
@@ -162,7 +162,6 @@ const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin }) => {
       quizId: quiz[quizIndex]?.id as number,
       grade: score,
     });
-
   };
 
   const handleNextQuestion = async () => {
