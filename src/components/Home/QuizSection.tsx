@@ -36,10 +36,12 @@ const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin }) => {
 
   const [startButtonVisibility, setStartButtonVisibility] = useState<boolean>(true);
 
+  var correctAnswerId = useRef<string>("");
+
   var arrayHints = useRef<string[]>([]);
   var arrayEfactors = useRef<number[]>([]);
 
-  var imgVisibility = useRef(false);
+  var hintImageVisibility = useRef(false);
 
   var quizStart = useRef(0);
 
@@ -84,10 +86,8 @@ const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin }) => {
     } else {
       if (timeTaken < 5000) {
         return 2;
-      } else if (timeTaken < 7000) {
-        return 1;
       } else {
-        return 0;
+        return 1;
       }
     }
   }
@@ -96,13 +96,15 @@ const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin }) => {
     const name = quiz.name;
     const options: Option[] = JSON.parse(quiz.options);
     const currentQuestionsEfactor = arrayEfactors.current[quizIndex];
-
-    // hints are shown if efactor is low
+    const correctChoiceId = options?.map((op: Option) => {
+      if (op.is_correct) return op.id;
+    }) as string[];
+    correctAnswerId.current = correctChoiceId.filter(option => option !== undefined)[0] as string;
     if (currentQuestionsEfactor) {
       if (currentQuestionsEfactor > 2) {
-        imgVisibility.current = false;
+        hintImageVisibility.current = false;
       } else {
-        imgVisibility.current = true;
+        hintImageVisibility.current = true;
       }
     }
 
@@ -110,7 +112,7 @@ const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin }) => {
       return <div className="flex">
         <FormControl component="fieldset">
           <FormLabel component="legend">{name}</FormLabel>
-          {imgVisibility.current && <img id="hintImage" style={{ width: "200", height: "200" }} className="h-96"
+          {hintImageVisibility.current && <img id="hintImage" style={{ width: "200", height: "200" }} className="h-96"
             src={(arrayHints.current[quizIndex] == null) ? "" : arrayHints.current[quizIndex] as string}
             alt={'Hint could not be loaded/displayed at the URL: ' + arrayHints.current[quizIndex] as string} />}
           <RadioGroup
@@ -118,7 +120,9 @@ const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin }) => {
             onChange={handleChange}
           >
             {options?.map((op, idx) => {
-              return <FormControlLabel value={op.id} key={idx} control={<Radio />} label={op.desc} />;
+              return <FormControlLabel value={op.id} key={idx} control={<Radio />} label={op.desc}
+                className={`bg-opacity-70 ${(choice === op.id) && (op.id !== correctAnswerId.current) && attempted ? "bg-red-600"
+                  : (op.id === correctAnswerId.current) && attempted ? "bg-lime-500" : ""}`} />
             })}
           </RadioGroup>
         </FormControl>
@@ -210,7 +214,7 @@ const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin }) => {
                       }}
                       className="py-3 min-w-[170px] border border-gray-2 bg-white hover:bg-gray-100 transition"
                     >
-                      Next Question
+                      {(quizIndex == quiz.length - 1) ? <span>Finish Quiz</span> : <span>Next Question</span>}
                     </button>
                   </div> : <></>
                 }
