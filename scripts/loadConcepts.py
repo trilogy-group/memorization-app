@@ -11,10 +11,10 @@ port = 3306
 login_session = {}
 connect_pool=[]
 log_filename = 'conceptstore_log.txt'
-
+QuestionId = 1
 cmd =  ['bash', 'get_concepts.sh']
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 
 
 def connectDB():
@@ -34,8 +34,10 @@ def get_connect():
 def get_cg_tree():
     logging.info(cmd)
 
-    p = subprocess.run(cmd, capture_output=True)
-    cg_tree = json.loads(p.stdout)
+    #p = subprocess.run(cmd, capture_output=True)
+    #cg_tree = json.loads(p.stdout)
+    f = open('data.txt', 'r')
+    cg_tree = json.load(f)
 
     domains_lst = cg_tree['data']['domains']
     return domains_lst
@@ -44,9 +46,13 @@ def get_cg_tree():
 def insert_question(conceptId, question, db, c):
     # Only for MCQ
     # Ignore question id due to duplications in data source
-    cmd = "INSERT IGNORE INTO Quiz (idInConcept, name, type, options, conceptId) VALUES ('"+question['id']+"', '" + question['desc'].replace('\'', '\\\'').replace('\"', '\\\"') + "', '" + question['type'] + "', '" + str(question['options']).replace('\'', '\\\'').replace('\"', '\\\"') + "', '"+ conceptId +"');"
+    #cmd = "INSERT IGNORE INTO Quiz (idInConcept, name, type, options, conceptId) VALUES ('"+question['id']+"', '" + MySQLdb.escape_string(question['desc']) + "', '" + question['type'] + "', '" + str(question['options']).replace('\'', '\\\'').replace('\"', '\\\"') + "', '"+ conceptId +"');"
+    global QuestionId
+    cmd = "INSERT IGNORE INTO Quiz  (id, idInConcept, name, type, options, conceptId) VALUES (%s, %s, %s, %s, %s, %s )"
+    val = (QuestionId, str(question['id']), str(question['desc']), str(question['type']), json.dumps(question['options']), str(conceptId),)
+    QuestionId += 1
     logging.debug(cmd)
-    c.execute(cmd)
+    c.execute(cmd, val)
 
 def insert_concept(skillId, concept, db, c):
     cmd = "INSERT IGNORE INTO Concept (id, name, skillId) VALUES ('" + concept['id'] + "', '" + concept['name'].replace('\'', '\\\'').replace('\"', '\\\"') + "', '" + skillId + "');"

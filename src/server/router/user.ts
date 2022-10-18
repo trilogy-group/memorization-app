@@ -15,11 +15,31 @@ export const userRouter = createRouter()
       conceptId: z.string(),
     }),
     async resolve({ ctx: { prisma, session }, input }) {
+      const user = await prisma.user.findFirst({
+        where: {
+          AND: [
+            { id: session?.user?.id as string },
+            {
+              concepts: {
+                some: { id: input.conceptId }
+              }
+            }]
+        },
+      });
+      // If the concept exists, take no action
+      // TODO: apply proper logging
+      if (user != null) {
+        console.log("concept exists", input.conceptId);
+        return;
+      } else {
+        console.log('add concept for the user');
+      }
+      // The concept is new, add the relation, and the feed
       await prisma.user.update({
         where: { id: session?.user?.id as string },
         data: {
-          concepts: { 
-            connect: {id: input.conceptId}
+          concepts: {
+            connect: { id: input.conceptId }
           },
         },
       });
@@ -39,6 +59,7 @@ export const userRouter = createRouter()
           userId: session?.user?.id as string,
           quizId: post.quizId,
           viewed: false,
+          conceptId: input.conceptId,
         }))
       });
       return feedsCreated;
@@ -55,6 +76,6 @@ export const userRouter = createRouter()
           points: { increment: input.score },
         },
       });
-      return ;
+      return;
     },
   });

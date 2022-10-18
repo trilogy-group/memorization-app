@@ -385,7 +385,6 @@ export const getServerSideProps = async ({
         },
       },
     });
-
     let likedByMe = false;
     let followedByMe = false;
 

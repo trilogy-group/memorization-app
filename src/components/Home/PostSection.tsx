@@ -16,6 +16,7 @@ import { formatAccountName } from "@/utils/text";
 import { trpc } from "@/utils/trpc";
 
 import VideoPlayer from "./VideoPlayer";
+import { Button } from "@mui/material";
 
 interface PostSectionProps {
   post: Post & {
@@ -37,6 +38,7 @@ const PostSection: FC<PostSectionProps> = ({ post, refetch, origin }) => {
   const likeMutation = trpc.useMutation("like.toggle");
   const notificationMutation = trpc.useMutation("notification.createLike");
   const followMutation = trpc.useMutation("follow.toggle");
+  const progressMutation = trpc.useMutation("progress.post-got-it");
 
   const [isCurrentlyLiked, setIsCurrentlyLiked] = useState(post.likedByMe);
   const [isCurrentlyFollowed, setIsCurrentlyFollowed] = useState<
@@ -77,6 +79,16 @@ const PostSection: FC<PostSectionProps> = ({ post, refetch, origin }) => {
     }
   };
 
+  const handleGotIt = () => {
+    if (!session.data?.user) {
+      toast("You need to log in");
+      return;
+    }
+    progressMutation.mutateAsync({
+      postId: post.id
+    });
+  }
+
   const toggleFollow = () => {
     if (!session.data?.user) {
       toast("You need to log in");
@@ -105,7 +117,7 @@ const PostSection: FC<PostSectionProps> = ({ post, refetch, origin }) => {
   };
 
   return (
-    <div key={post.id} className="flex items-start p-2 lg:p-4 gap-3">
+    <div  className="flex items-start p-2 lg:p-4 gap-3 full-screen">
       <Link href={`/user/${post.user.id}`}>
         <a className="flex-shrink-0 rounded-full">
           <Image
@@ -163,6 +175,9 @@ const PostSection: FC<PostSectionProps> = ({ post, refetch, origin }) => {
               ></VideoPlayer>
             </a>
           </Link>
+          <div className="flex flex-col gap-1 lg:gap-2">
+            <Button onClick={() => handleGotIt()} variant="outlined">Got it</Button>
+          </div>
           <div className="flex flex-col gap-1 lg:gap-2">
             <button
               onClick={() => toggleLike()}
@@ -242,7 +257,7 @@ const PostSection: FC<PostSectionProps> = ({ post, refetch, origin }) => {
           </div>
         </div>
       </div>
-    </div>
+    </div >
   );
 };
 
