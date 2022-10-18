@@ -408,24 +408,28 @@ const CreateListOfWords: NextPage = () => {
                         throw new Error("Function not implemented.");
                       }}
                     />
-                    {mnemonicType === "image" && (<Upload
-                      open={openUpload}
-                      onClose={() => setOpenUpload(false)}
-                      conceptId={parentId}
-                      questionId={nodeId}
-                      caption={inputPromptValue}
-                      mnemonicType={mnemonicType}
-                      imageUrl={selectedMnemonicType}
-                    />)} 
-                    {mnemonicType !== "image" && (<Upload
-                      open={openUpload}
-                      onClose={() => setOpenUpload(false)}
-                      conceptId={parentId}
-                      questionId={nodeId}
-                      caption={selectedMnemonicType}
-                      mnemonicType={mnemonicType}
-                      imageUrl={""}
-                    />)}
+                    {mnemonicType === "image" && (
+                      <Upload
+                        open={openUpload}
+                        onClose={() => setOpenUpload(false)}
+                        conceptId={parentId}
+                        questionId={nodeId}
+                        caption={inputPromptValue}
+                        mnemonicType={mnemonicType}
+                        imageUrl={selectedMnemonicType}
+                      />
+                    )}
+                    {mnemonicType !== "image" && (
+                      <Upload
+                        open={openUpload}
+                        onClose={() => setOpenUpload(false)}
+                        conceptId={parentId}
+                        questionId={nodeId}
+                        caption={selectedMnemonicType}
+                        mnemonicType={mnemonicType}
+                        imageUrl={""}
+                      />
+                    )}
                   </h1>
 
                   <div className="grid gap-1" style={{ marginBottom: 10 }}>
@@ -515,9 +519,21 @@ const CreateListOfWords: NextPage = () => {
                           onChange={handleChange}
                           aria-label="lab API tabs example"
                         >
-                          <Tab label="Acronyms" value="1" />
-                          <Tab label="Images" value="2" />
-                          <Tab label="Storys" value="3" />
+                          <Tab
+                            label="Acronyms"
+                            value="1"
+                            disabled={selectedMnemonic}
+                          />
+                          <Tab
+                            label="Images"
+                            value="2"
+                            disabled={selectedMnemonic}
+                          />
+                          <Tab
+                            label="Storys"
+                            value="3"
+                            disabled={selectedMnemonic}
+                          />
                         </TabList>
                       </Box>
                       <TabPanel value="1">
@@ -552,9 +568,9 @@ const CreateListOfWords: NextPage = () => {
                                   margin: 5,
                                 }}
                                 onClick={async () => {
+                                  setSelectedMnemonic(true);
                                   setSelectedMnemonicType(acronym[index] || "");
                                   setMnemonicType("acronym");
-                                  setSelectedMnemonic(true);
                                 }}
                               >
                                 Accept
@@ -643,7 +659,7 @@ const CreateListOfWords: NextPage = () => {
                                 )}
                               </Item>
                               <Button
-                                disabled={isLoadingImage[index]}
+                                disabled={isLoadingImage[index] || mnemonicImage[index] == null}
                                 variant="outlined"
                                 color="success"
                                 style={{
@@ -652,11 +668,12 @@ const CreateListOfWords: NextPage = () => {
                                   margin: 5,
                                 }}
                                 onClick={async () => {
+                                  setSelectedMnemonic(true);
                                   setSelectedMnemonicType(
                                     mnemonicImage[index] || ""
                                   );
                                   setMnemonicType("image");
-                                  
+
                                   setSelectedMnemonic(true);
                                 }}
                               >
@@ -755,9 +772,9 @@ const CreateListOfWords: NextPage = () => {
                           disabled={true}
                           aria-label="lab API tabs example"
                         >
-                          <Tab label="Acronyms" value="1" />
-                          <Tab label="Images" value="2" />
-                          <Tab label="Storys" value="3" />
+                          <Tab label="Acronyms" value="1" disabled={selectedMnemonic}/>
+                          <Tab label="Images" value="2" disabled={selectedMnemonic}/>
+                          <Tab label="Storys" value="3" disabled={selectedMnemonic}/>
                         </TabList>
                       </Box>
                       <TabPanel value="1">
@@ -768,24 +785,7 @@ const CreateListOfWords: NextPage = () => {
                         >
                           <Grid xs={4} sm={6} md={12}>
                             <Item2>{selectedMnemonicType}</Item2>
-                            <Button
-                              className="disabled:text-gray-400 disabled:bg-gray-200`"
-                              disabled={!acronymGenerated || isLoadingMnemonic}
-                              variant="outlined"
-                              color="success"
-                              style={{
-                                bottom: 0,
-                                float: "left",
-                                margin: 5,
-                              }}
-                              onClick={async () => {
-                                //handleConfirmMnemonic();
-                                setSelectedMnemonic(true);
-                                setMnemonicType("acronym");
-                              }}
-                            >
-                              Accept
-                            </Button>
+
                             <Button
                               className="disabled:text-gray-400 disabled:bg-gray-200`"
                               disabled={!acronymGenerated || isLoadingMnemonic}
@@ -824,23 +824,7 @@ const CreateListOfWords: NextPage = () => {
                                 />
                               </div>
                             </Item2>
-                            <Button
-                              className="disabled:text-gray-400 disabled:bg-gray-200`"
-                              disabled={isLoadingMnemonic}
-                              variant="outlined"
-                              color="success"
-                              style={{
-                                bottom: 0,
-                                float: "left",
-                                margin: 5,
-                              }}
-                              onClick={async () => {
-                                //handleConfirmMnemonic();
-                                setSelectedMnemonic(true);
-                              }}
-                            >
-                              Accept
-                            </Button>
+
                             <Button
                               className="disabled:text-gray-400 disabled:bg-gray-200`"
                               onClick={async () => {
@@ -870,23 +854,7 @@ const CreateListOfWords: NextPage = () => {
                         >
                           <Grid xs={4} sm={6} md={12}>
                             <Item2>{selectedMnemonicType}</Item2>
-                            <Button
-                              className="disabled:text-gray-400 disabled:bg-gray-200`"
-                              disabled={!storyGenerated || isLoadingMnemonic}
-                              variant="outlined"
-                              color="success"
-                              style={{
-                                bottom: 0,
-                                float: "left",
-                                margin: 5,
-                              }}
-                              onClick={async () => {
-                                //handleConfirmMnemonic();
-                                setSelectedMnemonic(true);
-                              }}
-                            >
-                              Accept
-                            </Button>
+
                             <Button
                               className="disabled:text-gray-400 disabled:bg-gray-200`"
                               disabled={!storyGenerated || isLoadingMnemonic}
