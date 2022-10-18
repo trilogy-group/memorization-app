@@ -36,7 +36,6 @@ async function fetchWithCache() {
         })
         .then((res) =>
           res?.json?.().then((data: ContentTree) => {
-            console.log(data);
             return data;
           })
         );

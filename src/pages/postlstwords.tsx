@@ -778,7 +778,7 @@ const CreateListOfWords: NextPage = () => {
 
                             <Button
                               className="disabled:text-gray-400 disabled:bg-gray-200`"
-                              disabled={!acronymGenerated || isLoadingMnemonic}
+                              disabled={!acronymGenerated }
                               onClick={async () => {
                                 setSelectedMnemonicType("");
                                 setMnemonicType("");
@@ -847,7 +847,7 @@ const CreateListOfWords: NextPage = () => {
 
                             <Button
                               className="disabled:text-gray-400 disabled:bg-gray-200`"
-                              disabled={!storyGenerated || isLoadingMnemonic}
+                              disabled={!storyGenerated }
                               onClick={async () => {
                                 setSelectedMnemonicType("");
                                 setMnemonicType("");
