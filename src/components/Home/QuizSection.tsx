@@ -123,8 +123,8 @@ const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin }) => {
           >
             {options?.map((op, idx) => {
               return <FormControlLabel value={op.id} key={idx} control={<Radio />} label={op.desc}
-                className={`bg-opacity-70 ${(choice == op.id) && (op.id != correctAnswerId.current) && attempted ? "bg-red-600"
-                  : (op.id == correctAnswerId.current) && attempted ? "bg-lime-500" : ""}`} />
+                className={`bg-opacity-70 ${(choice === op.id) && (op.id !== correctAnswerId.current) && attempted ? "bg-red-600"
+                  : (op.id === correctAnswerId.current) && attempted ? "bg-lime-500" : ""}`} />
             })}
           </RadioGroup>
         </FormControl>
