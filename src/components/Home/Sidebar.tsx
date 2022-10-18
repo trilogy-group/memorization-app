@@ -127,7 +127,7 @@ const Sidebar: FC<SidebarProps> = ({
         </Link>
       </div>
 
-      {leaderboardAccounts.length > 0 && (
+      {leaderboardAccounts.length > 0 && session.data?.user && (
         <div className="flex flex-col items-stretch gap-3 py-4 border-b">
           <p className="text-sm hidden lg:block">Leaderboard</p>
           {leaderboardAccounts.map((account, index) => (
