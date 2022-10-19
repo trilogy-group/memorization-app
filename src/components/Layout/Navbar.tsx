@@ -110,7 +110,7 @@ const Navbar: FC = () => {
             className="relative w-[400px] h-[45px] hidden md:block"
           >
             <input
-              className="w-full h-full outline-none bg-gray-1 rounded-full pl-4 pr-14 border border-transparent focus:border-gray-400 transition"
+              className="w-full h-full outline-none bg-gray-1 rounded-full pl-4 pr-14 border border-transparent focus:border-gray-400"
               type="text"
               placeholder="Search by tags, e.g., #Spanish ..."
               value={inputValue}

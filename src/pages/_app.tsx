@@ -22,7 +22,6 @@ const MyApp: AppType = ({
         <link rel="shortcut icon" href="/favicon.png" type="image/x-icon" />
       </Head>
       <Toaster />
-      <NextNProgress color="#FE2C55" options={{ showSpinner: false }} />
       <SessionProvider session={session}>
         <VolumeContextProvider>
           <Component {...pageProps} />
