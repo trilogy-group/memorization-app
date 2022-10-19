@@ -484,6 +484,13 @@ const CreateListOfWords: NextPage = () => {
                       }}
                     />
                   </div>
+                  {correctAnswer != "" && (
+                    <div>
+                      <h3 className="text-lg font-bold">
+                        Answer: <span className="bg-lime-500">{correctAnswer}</span>
+                      </h3>
+                    </div>
+                  )}
                   <div className="col-span-1 w-full">
                     <p>Input below:</p>
                     <input
@@ -495,13 +502,6 @@ const CreateListOfWords: NextPage = () => {
                         setTableEntryValue(e.target.value);
                       }}
                     />
-                    {correctAnswer != "" && (
-                      <div>
-                        <h3 className="text-lg font-bold">
-                          Answer: <span className="bg-lime-500">{correctAnswer}</span>
-                        </h3>
-                      </div>
-                    )}
                     <div className="grid grid-cols-2">
                       <button
                         onClick={async () => {
