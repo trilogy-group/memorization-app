@@ -31,12 +31,14 @@ import {
 
 import create from "zustand";
 import { devtools, persist } from "zustand/middleware";
+import { Option } from "@/utils/text";
 
 interface ConceptState {
   id: string;
   name: string;
   parentId: string;
   parentName: string;
+  options: Option[];
 }
 
 const useConceptStore = create<ConceptState>()(
@@ -47,6 +49,7 @@ const useConceptStore = create<ConceptState>()(
         name: "",
         parentId: "",
         parentName: "",
+        options: [],
       }),
       {
         name: "concept-storage",
@@ -84,7 +87,8 @@ export type NavigationProps = {
     nodeId: string,
     nodeName: string,
     parentId: string,
-    parentName: string
+    parentName: string,
+    options: Option[]
   ) => void;
   addNodeListToWorkspace: (concepts: ConceptState[]) => void;
   nodes?: Domain[];
@@ -119,6 +123,7 @@ function DataTreeView({
               name: treeItemData.desc,
               parentId: concept.id,
               parentName: concept.name,
+              options: treeItemData.options
             });
           }}
         />
@@ -162,6 +167,7 @@ function DataTreeView({
                     name: treeItemData.name,
                     parentId: "",
                     parentName: "",
+                    options: []
                   },
                 ],
               });
@@ -281,6 +287,7 @@ const Navigation = ({
   const name = useConceptStore((state) => state.name);
   const parentId = useConceptStore((state) => state.parentId);
   const parentName = useConceptStore((state) => state.parentName);
+  const options = useConceptStore((state) => state.options);
   //const concepts = useConceptListStore((state) => state.concepts);
 
   function getConcepts() {
@@ -296,6 +303,7 @@ const Navigation = ({
         name: "",
         parentId: "",
         parentName: "",
+        options: [],
       });
       await handleContentTree();
       setIsLoading(false);
@@ -347,7 +355,7 @@ const Navigation = ({
             if (multiselect) {
               addNodeListToWorkspace(getConcepts());
             } else {
-              addNodeToWorkspace(id, name, parentId, parentName);
+              addNodeToWorkspace(id, name, parentId, parentName, options);
             }
             /* addNodeToWorkspace(id, name, parentId, parentName);
             addNodeListToWorkspace(concepts); */
