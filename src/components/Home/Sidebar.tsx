@@ -59,10 +59,6 @@ const Sidebar: FC<SidebarProps> = ({
       console.log('refetch from handling add concepts');
       // Force trigger refetch
       onTriggerRefetchChange(!triggerRefetch);
-      // Trigger refetch in the feeds
-      if (triggerRefetch) {
-        onTriggerRefetchChange(false);
-      }
     }
   };
 

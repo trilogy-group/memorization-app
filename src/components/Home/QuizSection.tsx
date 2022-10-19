@@ -72,10 +72,6 @@ const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin, triggerRefet
       setDone(true);
       // Force trigger refetch
       onTriggerRefetchChange(!triggerRefetch);
-      // Trigger refetch in the feeds
-      if (triggerRefetch) {
-        onTriggerRefetchChange(false);
-      }
     }
     setQuizIndex(quizIndex + 1);
     setAttempted(false);

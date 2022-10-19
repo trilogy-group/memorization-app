@@ -86,44 +86,44 @@ const Main: FC<MainProps> = ({ origin, triggerRefetch, onTriggerRefetchChange })
 
   useEffect(() => {
     router.push('/');
-  },[triggerRefetch])
+  }, [triggerRefetch])
 
-return (
-  <div className="flex-grow"><>
-    {
-      data?.pages.map((page, idx) => {
-        return <div key={idx}>{
-          page.items.map((feedItem, feedIdx) => {
-            if (feedItem.type === 'Post') {
-              return <PostSection
-                post={feedItem?.post as FeedPostType}
-                key={feedIdx}
-                refetch={refetch}
-                origin={origin}
-                triggerRefetch={triggerRefetch}
-                onTriggerRefetchChange={onTriggerRefetchChange}
-              />
-            } else {
-              if (!feedItem?.quizzes || feedItem?.quizzes.length == 0)
-                return <></>
-              return <QuizSection
-                quiz={feedItem.quizzes as Quiz[]}
-                refetch={refetch}
-                origin={origin}
-                key={feedIdx}
-                triggerRefetch={triggerRefetch}
-                onTriggerRefetchChange={onTriggerRefetchChange}
-              />
-            }
-          })
-        }</div>
-      })
-    }
+  return (
+    <div className="flex-grow"><>
+      {
+        data?.pages.map((page, idx) => {
+          return <div key={idx}>{
+            page.items.map((feedItem, feedIdx) => {
+              if (feedItem.type === 'Post') {
+                return <PostSection
+                  post={feedItem?.post as FeedPostType}
+                  key={feedIdx}
+                  refetch={refetch}
+                  origin={origin}
+                  triggerRefetch={triggerRefetch}
+                  onTriggerRefetchChange={onTriggerRefetchChange}
+                />
+              } else {
+                if (!feedItem?.quizzes || feedItem?.quizzes.length == 0)
+                  return <></>
+                return <QuizSection
+                  quiz={feedItem.quizzes as Quiz[]}
+                  refetch={refetch}
+                  origin={origin}
+                  key={feedIdx}
+                  triggerRefetch={triggerRefetch}
+                  onTriggerRefetchChange={onTriggerRefetchChange}
+                />
+              }
+            })
+          }</div>
+        })
+      }
 
-    {/* At the bottom to detect infinite scroll */}
-    <div ref={ref}></div></>
-  </div>
-);
+      {/* At the bottom to detect infinite scroll */}
+      <div ref={ref}></div></>
+    </div>
+  );
 };
 
 export default Main;
