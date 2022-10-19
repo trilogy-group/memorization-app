@@ -278,9 +278,7 @@ const PostSection: FC<PostSectionProps> = ({ post, refetch, origin }) => {
           </div>
         </div>
         <Stack direction="row" spacing={1}>
-          
           <Chip label={conceptValue} />
-          <Chip label="Chip Outlined" variant="outlined" />
         </Stack>
       </div>
     </div>
