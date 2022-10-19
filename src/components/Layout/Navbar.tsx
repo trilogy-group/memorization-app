@@ -181,7 +181,7 @@ const Navbar: FC = () => {
                 <MenuItem onClick={handleClose}>
                   <Link
                     href={
-                      status === "authenticated" ? "/postlstwords" : "/sign-in"
+                      status === "authenticated" ? "/postsequence" : "/sign-in"
                     }
                   >
                     Create a sequence
@@ -190,7 +190,7 @@ const Navbar: FC = () => {
                 <MenuItem onClick={handleClose}>
                   <Link
                     href={
-                      status === "authenticated" ? "/postlstwords" : "/sign-in"
+                      status === "authenticated" ? "/postdefinition" : "/sign-in"
                     }
                   >
                     Create a definition
