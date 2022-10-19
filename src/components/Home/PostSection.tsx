@@ -90,9 +90,6 @@ const PostSection: FC<PostSectionProps> = ({ post, refetch, origin, triggerRefet
       postId: post.id
     }).then(() => {
       // Trigger refetch in the feeds
-      //refetch().then(() => { });
-      // Force trigger refetch
-
       onTriggerRefetchChange(!triggerRefetch);
       if (triggerRefetch) {
         onTriggerRefetchChange(false);

@@ -16,7 +16,6 @@ interface MainProps {
 
 const Main: FC<MainProps> = ({ origin, triggerRefetch, onTriggerRefetchChange }) => {
   const router = useRouter();
-  const [forceUpdate, setForceUpdate] = useState<boolean>(false);
 
   const { data, fetchNextPage, isFetchingNextPage, hasNextPage, refetch } =
     trpc.useInfiniteQuery(
@@ -80,19 +79,12 @@ const Main: FC<MainProps> = ({ origin, triggerRefetch, onTriggerRefetchChange })
   });
 
   useEffect(() => {
-/*    console.log('inview changed, refetch next page');
-    console.log('inView', inView);
-    console.log('triggerRefetch', triggerRefetch);
-    console.log('isFetchingNextPage', isFetchingNextPage);
-    console.log('hasNextPage', hasNextPage);*/
-    //if ((inView || triggerRefetch) && !isFetchingNextPage && (hasNextPage || triggerRefetch)) {
     if (inView && !isFetchingNextPage && hasNextPage) {
       fetchNextPage();
     }
   }, [inView])
 
   useEffect(() => {
-    //setForceUpdate(!forceUpdate);
     router.push('/');
   },[triggerRefetch])
 
