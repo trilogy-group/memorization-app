@@ -488,7 +488,7 @@ const Upload = ({
                 type="file"
                 hidden
                 className="hidden"
-                accept="video/mp4,video/webm, audio/*"
+                accept="video/mp4,video/webm"
                 onChange={(e) => {
                   if (e.target.files?.[0]) {
                     handleFileChange(e.target.files[0]);
