@@ -7,6 +7,7 @@ import { FC, FormEvent, useState } from "react";
 import { AiOutlinePlus } from "react-icons/ai";
 import { BiSearch, BiUser } from "react-icons/bi";
 import { IoLogOutOutline } from "react-icons/io5";
+import toast from "react-hot-toast";
 
 import ClickAwayListener from "../Shared/ClickAwayListener";
 
@@ -126,25 +127,29 @@ const Navbar: FC = () => {
             </button>
           </form>
           <div className="flex items-center gap-3">
-            <div
-              className="notificationArea border rounded"
-              onClick={async () => {
-                setNotificationVisibility(!notificationVisibility);
-              }}
-            >
-              <img
-                src="/notificationBell.svg"
-                className="notificationBell"
-              ></img>
-              <div className="notificationCounter">
-                {notifications.content.length}
-              </div>
-              {notificationVisibility && (
-                <div className="notifications" id="notifications">
-                  {displayNotification()}
+            {/* @ts-ignore */}
+            {
+              !session?.user ? <></> :
+                <div
+                  className="notificationArea border rounded"
+                  onClick={async () => {
+                    setNotificationVisibility(!notificationVisibility);
+                  }}
+                >
+                  <img
+                    src="/notificationBell.svg"
+                    className="notificationBell"
+                  ></img>
+                  <div className="notificationCounter">
+                    {notifications.content.length}
+                  </div>
+                  {notificationVisibility && (
+                    <div className="notifications" id="notifications">
+                      {displayNotification()}
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
+            }
             <div>
               <Button
                 aria-controls={open ? "basic-menu" : undefined}

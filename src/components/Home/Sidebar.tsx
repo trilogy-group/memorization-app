@@ -7,6 +7,7 @@ import { FC } from "react";
 import { AiFillHome, AiOutlineHome, AiOutlinePlusCircle } from "react-icons/ai";
 import { BsFillCheckCircleFill } from "react-icons/bs";
 import { RiUserShared2Fill, RiUserShared2Line } from "react-icons/ri";
+import toast from "react-hot-toast";
 
 import { formatAccountName } from "@/utils/text";
 
@@ -68,13 +69,13 @@ const Sidebar: FC<SidebarProps> = ({
           ): void {
             console.log(
               "Id: " +
-                nodeId +
-                " Name: " +
-                nodeName +
-                " ParentId: " +
-                parentId +
-                " ParentName: " +
-                parentName
+              nodeId +
+              " Name: " +
+              nodeName +
+              " ParentId: " +
+              parentId +
+              " ParentName: " +
+              parentName
             );
           }}
           addNodeListToWorkspace={function (concepts: ConceptState[]): void {
@@ -83,11 +84,10 @@ const Sidebar: FC<SidebarProps> = ({
         />
         <Link href="/">
           <a
-            className={`flex items-center gap-2 ${
-              !router.query.following
+            className={`flex items-center gap-2 ${!router.query.following
                 ? "fill-pink text-pink"
                 : "fill-black text-black"
-            }`}
+              }`}
           >
             {!router.query.following ? <AiFillHome /> : <AiOutlineHome />}
             <span className="hidden lg:inline">For You</span>
@@ -96,6 +96,10 @@ const Sidebar: FC<SidebarProps> = ({
         <Link href="/">
           <a
             onClick={() => {
+              if (!session.data?.user) {
+                toast("You need to login");
+                return ;
+              }
               console.log(open);
               setOpen(true);
               console.log(open);
@@ -108,11 +112,10 @@ const Sidebar: FC<SidebarProps> = ({
         </Link>
         <Link href={session.data?.user ? "/?following=1" : "/sign-in"}>
           <a
-            className={`flex items-center gap-2 ${
-              router.query.following
+            className={`flex items-center gap-2 ${router.query.following
                 ? "fill-pink text-pink"
                 : "fill-black text-black"
-            }`}
+              }`}
           >
             {router.query.following ? (
               <RiUserShared2Fill />
@@ -124,7 +127,7 @@ const Sidebar: FC<SidebarProps> = ({
         </Link>
       </div>
 
-      {leaderboardAccounts.length > 0 && (
+      {leaderboardAccounts.length > 0 && session.data?.user && (
         <div className="flex flex-col items-stretch gap-3 py-4 border-b">
           <p className="text-sm hidden lg:block">Leaderboard</p>
           {leaderboardAccounts.map((account, index) => (
@@ -195,29 +198,6 @@ const Sidebar: FC<SidebarProps> = ({
         </div>
       )}
 
-      <div className="[&_p]:cursor-pointer [&_p:hover]:underline text-xs leading-[1.2] mt-5 text-zinc-400 flex-col items-stretch gap-4 hidden lg:flex">
-        <div className="flex flex-wrap gap-2">
-          <p>About</p>
-          <p>Newsroom</p>
-          <p>Store</p>
-          <p>Contact</p>
-          <p>Careers</p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <p>Advertise</p>
-          <p>Developers</p>
-          <p>Transparency</p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <p>Help</p>
-          <p>Safety</p>
-          <p>Terms</p>
-          <p>Privacy</p>
-          <p>Creator Portal</p>
-          <p>Community Guidelines</p>
-        </div>
-        <span>© 2022 EdTok</span>
-      </div>
     </div>
   );
 };
