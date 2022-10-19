@@ -1,8 +1,8 @@
-import { User, Post } from "@prisma/client";
+import { User, Post, Quiz } from "@prisma/client";
 import Image from "next/future/image";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
-import { FC, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { AiFillHeart, AiFillTwitterCircle } from "react-icons/ai";
 import { BiLink } from "react-icons/bi";
@@ -17,6 +17,9 @@ import { trpc } from "@/utils/trpc";
 
 import VideoPlayer from "./VideoPlayer";
 import { Button } from "@mui/material";
+
+import Chip from "@mui/material/Chip";
+import Stack from "@mui/material/Stack";
 
 interface PostSectionProps {
   post: Post & {
@@ -39,6 +42,7 @@ const PostSection: FC<PostSectionProps> = ({ post, refetch, origin }) => {
   const notificationMutation = trpc.useMutation("notification.createLike");
   const followMutation = trpc.useMutation("follow.toggle");
   const progressMutation = trpc.useMutation("progress.post-got-it");
+  const getConceptMutation = trpc.useMutation("post.getConcept");
 
   const [isCurrentlyLiked, setIsCurrentlyLiked] = useState(post.likedByMe);
   const [isCurrentlyFollowed, setIsCurrentlyFollowed] = useState<
@@ -46,6 +50,15 @@ const PostSection: FC<PostSectionProps> = ({ post, refetch, origin }) => {
   >(undefined);
 
   const videoURL = `${origin}/post/${post.id}`;
+
+  //Get quiz of post
+  const quiz = post.quizId as number;
+  const [conceptValue, setConceptValue] = useState("");
+  const [loadConcept, setLoadConcept] = useState(false);
+  const concept = async () => {
+    const myString = await getConceptMutation.mutateAsync({ quizId: quiz });
+    setConceptValue(myString);
+  };
 
   const toggleLike = () => {
     if (!session.data?.user) {
@@ -85,9 +98,9 @@ const PostSection: FC<PostSectionProps> = ({ post, refetch, origin }) => {
       return;
     }
     progressMutation.mutateAsync({
-      postId: post.id
+      postId: post.id,
     });
-  }
+  };
 
   const toggleFollow = () => {
     if (!session.data?.user) {
@@ -116,8 +129,13 @@ const PostSection: FC<PostSectionProps> = ({ post, refetch, origin }) => {
     );
   };
 
+  useEffect(() => {
+    concept();
+    setLoadConcept(true);
+  }, [loadConcept]);
+
   return (
-    <div  className="flex items-start p-2 lg:p-4 gap-3 full-screen">
+    <div className="flex items-start p-2 lg:p-4 gap-3 full-screen">
       <Link href={`/user/${post.user.id}`}>
         <a className="flex-shrink-0 rounded-full">
           <Image
@@ -149,10 +167,11 @@ const PostSection: FC<PostSectionProps> = ({ post, refetch, origin }) => {
             <div className="flex-shrink-0">
               <button
                 onClick={() => toggleFollow()}
-                className={`py-1 px-3 rounded text-sm mt-2 ${isCurrentlyFollowed ?? post.followedByMe
-                  ? "border hover:bg-[#F8F8F8] transition"
-                  : "border border-pink text-pink hover:bg-[#FFF4F5] transition"
-                  }`}
+                className={`py-1 px-3 rounded text-sm mt-2 ${
+                  isCurrentlyFollowed ?? post.followedByMe
+                    ? "border hover:bg-[#F8F8F8] transition"
+                    : "border border-pink text-pink hover:bg-[#FFF4F5] transition"
+                }`}
               >
                 {isCurrentlyFollowed ?? post.followedByMe
                   ? "Following"
@@ -164,10 +183,11 @@ const PostSection: FC<PostSectionProps> = ({ post, refetch, origin }) => {
         <div className="flex items-end gap-5">
           <Link href={`/post/${post.id}`}>
             <a
-              className={`${post.videoHeight > post.videoWidth * 1.3
-                ? "md:h-[600px]"
-                : "flex-grow h-auto"
-                } block bg-[#3D3C3D] rounded-md overflow-hidden flex-grow h-auto md:flex-grow-0`}
+              className={`${
+                post.videoHeight > post.videoWidth * 1.3
+                  ? "md:h-[600px]"
+                  : "flex-grow h-auto"
+              } block bg-[#3D3C3D] rounded-md overflow-hidden flex-grow h-auto md:flex-grow-0`}
             >
               <VideoPlayer
                 src={post.videoURL}
@@ -176,7 +196,9 @@ const PostSection: FC<PostSectionProps> = ({ post, refetch, origin }) => {
             </a>
           </Link>
           <div className="flex flex-col gap-1 lg:gap-2">
-            <Button onClick={() => handleGotIt()} variant="outlined">Got it</Button>
+            <Button onClick={() => handleGotIt()} variant="outlined">
+              Got it
+            </Button>
           </div>
           <div className="flex flex-col gap-1 lg:gap-2">
             <button
@@ -184,8 +206,9 @@ const PostSection: FC<PostSectionProps> = ({ post, refetch, origin }) => {
               className="lg:w-12 lg:h-12 w-7 h-7 bg-[#F1F1F2] fill-black flex justify-center items-center rounded-full"
             >
               <AiFillHeart
-                className={`lg:w-7 lg:h-7 h-5 w-5 ${isCurrentlyLiked ? "fill-pink" : ""
-                  }`}
+                className={`lg:w-7 lg:h-7 h-5 w-5 ${
+                  isCurrentlyLiked ? "fill-pink" : ""
+                }`}
               />
             </button>
             <p className="text-center text-xs font-semibold">
@@ -230,9 +253,7 @@ const PostSection: FC<PostSectionProps> = ({ post, refetch, origin }) => {
                   className="flex items-center gap-2 px-3 py-2 bg-white hover:bg-gray-100 transition"
                   href={`http://www.reddit.com/submit?url=${encodeURIComponent(
                     videoURL
-                  )}&title=${encodeURIComponent(
-                    `${post.user.name} on EdTok`
-                  )}`}
+                  )}&title=${encodeURIComponent(`${post.user.name} on EdTok`)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -256,8 +277,13 @@ const PostSection: FC<PostSectionProps> = ({ post, refetch, origin }) => {
             </div>
           </div>
         </div>
+        <Stack direction="row" spacing={1}>
+          
+          <Chip label={conceptValue} />
+          <Chip label="Chip Outlined" variant="outlined" />
+        </Stack>
       </div>
-    </div >
+    </div>
   );
 };
 
