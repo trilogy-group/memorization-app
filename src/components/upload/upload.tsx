@@ -38,7 +38,6 @@ import { fetchWithProgress } from "@/utils/fetch";
 import Meta from "../Shared/Meta";
 import { BsFillCloudUploadFill } from "react-icons/bs";
 
-
 enum fileDataType {
   video,
   image,
@@ -71,7 +70,7 @@ const useConceptStore = create<ConceptState>()(
 
 interface ConceptStateList {
   concepts: ConceptState[];
-};
+}
 
 const useConceptListStore = create<ConceptStateList>()(
   devtools(
@@ -135,7 +134,7 @@ const Upload = ({
   }, [uploadMutation.error]);
 
   const handleUploadToS3 = async (file: string) => {
-    const res = await uploadToS3Mutation.mutateAsync({file: file});
+    const res = await uploadToS3Mutation.mutateAsync({ file: file });
     return res;
   };
 
@@ -173,8 +172,6 @@ const Upload = ({
       });
     });
   };
-  
-  
 
   const handleVideoFileChange = (file: File) => {
     if (!file.type.startsWith("video")) {
@@ -209,7 +206,7 @@ const Upload = ({
         position: "bottom-right",
       });
     });
-    console.log("Uploading")
+    console.log("Uploading");
     video.addEventListener("loadeddata", () => {
       setTimeout(() => {
         const canvas = document.createElement("canvas");
@@ -222,7 +219,7 @@ const Upload = ({
 
         ctx.drawImage(video, 0, 0);
         const url = canvas.toDataURL("image/png");
-        setCoverImageURL(url)
+        setCoverImageURL(url);
         document.body.removeChild(video);
       }, 300);
     });
@@ -276,8 +273,7 @@ const Upload = ({
           ).json()
         ).attachments[0].proxy_url;
       } else {
-        const s3Upload = await handleUploadToS3(coverImageURL || "")
-        console.log(s3Upload)
+        const s3Upload = await handleUploadToS3(coverImageURL || "");
         uploadedCover = s3Upload as string;
       }
       toast.loading("Uploading metadata...", { id: toastID });
@@ -310,13 +306,7 @@ const Upload = ({
   };
 
   const handleVideoUpload = async () => {
-     if (
-      !coverImageURL ||
-      !videoFile ||
-      !videoURL ||
-      isLoading
-    )
-      return;
+    if (!coverImageURL || !videoFile || !videoURL || isLoading) return;
 
     setIsLoading(true);
 
@@ -353,15 +343,21 @@ const Upload = ({
       );
       demo_response = await demo_response.json();
 
-      const uploadedCover = (
-        await (
-          await fetch(process.env.NEXT_PUBLIC_IMAGE_UPLOAD_URL!, {
-            method: "POST",
-            body: formData,
-          })
-        ).json()
-      ).attachments[0].proxy_url;
+      let uploadedCover: any = null;
 
+      if (mnemonicType === "image") {
+        const s3Upload = await handleUploadToS3(coverImageURL || "");
+        uploadedCover = s3Upload as string;
+      } else {
+        uploadedCover = (
+          await (
+            await fetch(process.env.NEXT_PUBLIC_IMAGE_UPLOAD_URL!, {
+              method: "POST",
+              body: formData,
+            })
+          ).json()
+        ).attachments[0].proxy_url;
+      }
       toast.loading("Uploading metadata...", { id: toastID });
 
       // Replace with concept from user input
@@ -394,18 +390,13 @@ const Upload = ({
   };
 
   const handleUpload = async () => {
-    if (mnemonicType === "image") {
+    /* if (fileType == fileDataType.image) {
       handleImageUpload();
+    } else */ 
+    if (fileType == fileDataType.video) {
+      handleVideoUpload();
     } else {
-      if (fileType == fileDataType.image) {
-        handleImageUpload();
-      } else if (fileType == fileDataType.video) {
-        handleVideoUpload();
-      } else {
-        throw new Error(
-          "Unknown file type. Only support video/image uploading."
-        );
-      }
+      throw new Error("Unknown file type. Only support video/image uploading.");
     }
   };
 
@@ -448,7 +439,7 @@ const Upload = ({
             </p>
 
             <div className="flex items-start mt-10 gap-4">
-              {mnemonicType !== "image" && (
+              {mnemonicType !== "imag" && (
                 <div className="flex flex-col items-center justify-center w-1/2">
                   {videoURL ? (
                     <video
@@ -479,7 +470,7 @@ const Upload = ({
                       </p>
 
                       <div className="flex flex-col items-center text-gray-400 my-4 gap-1 text-sm">
-                        <p>MP4, WebM, PNG, JPG ...</p>
+                        <p>MP4, WebM ...</p>
                         <p>Any resolution</p>
                         <p>Any duration</p>
                         <p>Less than 200MB</p>
@@ -497,7 +488,7 @@ const Upload = ({
                 type="file"
                 hidden
                 className="hidden"
-                accept="video/mp4,video/webm, image/*, audio/*"
+                accept="video/mp4,video/webm"
                 onChange={(e) => {
                   if (e.target.files?.[0]) {
                     handleFileChange(e.target.files[0]);
