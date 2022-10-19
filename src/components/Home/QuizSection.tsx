@@ -198,7 +198,7 @@ const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin }) => {
                     <div className="flex fljjex-wrap gap-3 justify-center ">
                       {attempted ? <></> :
                         <button
-                          disabled={choice == ""}
+                          disabled={choice === ""}
                           onClick={() => {
                             handleCheckAnswer();
                           }}
