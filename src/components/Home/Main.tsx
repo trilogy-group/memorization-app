@@ -1,5 +1,5 @@
 import { useRouter } from "next/router";
-import { FC, useEffect, useRef } from "react";
+import { Dispatch, FC, SetStateAction, useState, useEffect, useRef } from "react";
 import { useInView } from "react-intersection-observer";
 import { trpc } from "@/utils/trpc";
 
@@ -10,10 +10,13 @@ import { FeedPostType } from "@/utils/text";
 
 interface MainProps {
   origin: string;
+  triggerRefetch: boolean,
+  onTriggerRefetchChange: Dispatch<SetStateAction<boolean>>,
 }
 
-const Main: FC<MainProps> = ({ origin }) => {
+const Main: FC<MainProps> = ({ origin, triggerRefetch, onTriggerRefetchChange }) => {
   const router = useRouter();
+  const [forceUpdate, setForceUpdate] = useState<boolean>(false);
 
   const { data, fetchNextPage, isFetchingNextPage, hasNextPage, refetch } =
     trpc.useInfiniteQuery(
@@ -76,45 +79,59 @@ const Main: FC<MainProps> = ({ origin }) => {
   let { ref, inView } = useInView({
   });
 
-
   useEffect(() => {
+/*    console.log('inview changed, refetch next page');
+    console.log('inView', inView);
+    console.log('triggerRefetch', triggerRefetch);
+    console.log('isFetchingNextPage', isFetchingNextPage);
+    console.log('hasNextPage', hasNextPage);*/
+    //if ((inView || triggerRefetch) && !isFetchingNextPage && (hasNextPage || triggerRefetch)) {
     if (inView && !isFetchingNextPage && hasNextPage) {
       fetchNextPage();
     }
   }, [inView])
 
-  return (
-    <div className="flex-grow"><>
-      {
-        data?.pages.map((page, idx) => {
-          return <div key={idx}>{
-            page.items.map((feedItem, feedIdx) => {
-              if (feedItem.type === 'Post') {
-                return <PostSection
-                  post={feedItem?.post as FeedPostType}
-                  key={feedIdx}
-                  refetch={refetch}
-                  origin={origin}
-                />
-              } else {
-                if (!feedItem?.quizzes || feedItem?.quizzes.length == 0)
-                  return <></>
-                return <QuizSection
-                  quiz={feedItem.quizzes as Quiz[]}
-                  refetch={refetch}
-                  origin={origin}
-                  key={feedIdx}
-                />
-              }
-            })
-          }</div>
-        })
-      }
+  useEffect(() => {
+    //setForceUpdate(!forceUpdate);
+    router.push('/');
+  },[triggerRefetch])
 
-      {/* At the bottom to detect infinite scroll */}
-      <div ref={ref}></div></>
-    </div>
-  );
+return (
+  <div className="flex-grow"><>
+    {
+      data?.pages.map((page, idx) => {
+        return <div key={idx}>{
+          page.items.map((feedItem, feedIdx) => {
+            if (feedItem.type === 'Post') {
+              return <PostSection
+                post={feedItem?.post as FeedPostType}
+                key={feedIdx}
+                refetch={refetch}
+                origin={origin}
+                triggerRefetch={triggerRefetch}
+                onTriggerRefetchChange={onTriggerRefetchChange}
+              />
+            } else {
+              if (!feedItem?.quizzes || feedItem?.quizzes.length == 0)
+                return <></>
+              return <QuizSection
+                quiz={feedItem.quizzes as Quiz[]}
+                refetch={refetch}
+                origin={origin}
+                key={feedIdx}
+                triggerRefetch={triggerRefetch}
+                onTriggerRefetchChange={onTriggerRefetchChange}
+              />
+            }
+          })
+        }</div>
+      })
+    }
+
+    {/* At the bottom to detect infinite scroll */}
+    <div ref={ref}></div></>
+  </div>
+);
 };
 
 export default Main;

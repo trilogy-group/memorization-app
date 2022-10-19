@@ -2,7 +2,7 @@ import { User, Post } from "@prisma/client";
 import Image from "next/future/image";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
-import { FC, useState } from "react";
+import { Dispatch, FC, SetStateAction, useState } from "react";
 import toast from "react-hot-toast";
 import { AiFillHeart, AiFillTwitterCircle } from "react-icons/ai";
 import { BiLink } from "react-icons/bi";
@@ -30,9 +30,11 @@ interface PostSectionProps {
   };
   origin: string;
   refetch: Function;
+  triggerRefetch: boolean;
+  onTriggerRefetchChange: Dispatch<SetStateAction<boolean>>;
 }
 
-const PostSection: FC<PostSectionProps> = ({ post, refetch, origin }) => {
+const PostSection: FC<PostSectionProps> = ({ post, refetch, origin, triggerRefetch, onTriggerRefetchChange }) => {
   const session = useSession();
 
   const likeMutation = trpc.useMutation("like.toggle");
@@ -86,6 +88,15 @@ const PostSection: FC<PostSectionProps> = ({ post, refetch, origin }) => {
     }
     progressMutation.mutateAsync({
       postId: post.id
+    }).then(() => {
+      // Trigger refetch in the feeds
+      //refetch().then(() => { });
+      // Force trigger refetch
+
+      onTriggerRefetchChange(!triggerRefetch);
+      if (triggerRefetch) {
+        onTriggerRefetchChange(false);
+      }
     });
   }
 
@@ -117,7 +128,7 @@ const PostSection: FC<PostSectionProps> = ({ post, refetch, origin }) => {
   };
 
   return (
-    <div  className="flex items-start p-2 lg:p-4 gap-3 full-screen">
+    <div className="flex items-start p-2 lg:p-4 gap-3 full-screen">
       <Link href={`/user/${post.user.id}`}>
         <a className="flex-shrink-0 rounded-full">
           <Image
