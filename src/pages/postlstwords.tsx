@@ -667,6 +667,7 @@ const CreateListOfWords: NextPage = () => {
                             }}
                           />
                         )}
+                        {wordList.length > 0 && (
                         <button
                           onClick={async () => {
                             setIsLoadingMnemonic(true);
@@ -690,6 +691,7 @@ const CreateListOfWords: NextPage = () => {
                         >
                           Generate
                         </button>
+                        )}
                       </div>
                       {value == "2" && (
                         <Button
