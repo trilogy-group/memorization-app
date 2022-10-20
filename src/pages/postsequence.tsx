@@ -195,9 +195,9 @@ const CreateListOfWords: NextPage = () => {
   }, [uploadMutation.error]);
 
   const handleRecommeddedImage = async (index: Number, prompt: string) => {
-    let prevLoading = isLoadingAcronym;
-    prevLoading[Number(index)] = true;
-    setIsLoadingImage(prevLoading);
+    let newLoading = isLoadingImage;
+    newLoading[Number(index)] = true;
+    setIsLoadingImage(prevLoading => [...newLoading]);
     
     const featurePrompt = prompt + " " + features[Number(index)];
 
@@ -212,9 +212,9 @@ const CreateListOfWords: NextPage = () => {
     prevMnemonicImage[Number(index)] = s3ImageURL as string;
     setMnemonicImage(prevMnemonicImage);
 
-    prevLoading = isLoadingImage;
-    prevLoading[Number(index)] = false;
-    setIsLoadingImage(prevLoading);
+    newLoading = isLoadingImage;
+    newLoading[Number(index)] = false;
+    setIsLoadingImage(prevLoading => [...newLoading]);
   };
 
   const handleRecommenddedPrompt = async () => {

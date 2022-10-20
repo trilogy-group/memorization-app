@@ -129,6 +129,7 @@ const CreateListOfWords: NextPage = () => {
     false,
   ]);
 
+
   const [value, setValue] = useState("2");
   const [storyGenerated, setStoryGenerated] = useState(false);
   const [acronymGenerated, setAcronymGenerated] = useState(false);
@@ -185,26 +186,26 @@ const CreateListOfWords: NextPage = () => {
   }, [uploadMutation.error]);
 
   const handleRecommeddedImage = async (index: Number, prompt: string) => {
-    let prevLoading = isLoadingAcronym;
-    prevLoading[Number(index)] = true;
-    setIsLoadingImage(prevLoading);
+    let newLoading = isLoadingImage;
+    newLoading[Number(index)] = true;
+    setIsLoadingImage(prevLoading => [...newLoading]);
     
     const featurePrompt = prompt + " " + features[Number(index)];
 
     const created = await imgRecommendationMutation.mutateAsync({
       description: featurePrompt,
     });
+    const imageRoute = created?.filename as string;
+    const s3ImageURL = await handleUploadToS3(imageRoute)
+
     let prevMnemonicImage = mnemonicImage;
 
-    const imageRoute = created?.filename as string;
-    console.log(imageRoute);
-    const s3ImageURL = await handleUploadToS3(imageRoute)
     prevMnemonicImage[Number(index)] = s3ImageURL as string;
     setMnemonicImage(prevMnemonicImage);
 
-    prevLoading = isLoadingImage;
-    prevLoading[Number(index)] = false;
-    setIsLoadingImage(prevLoading);
+    newLoading = isLoadingImage;
+    newLoading[Number(index)] = false;
+    setIsLoadingImage(prevLoading => [...newLoading]);
   };
 
   const handleRecommenddedPrompt = async () => {
@@ -274,7 +275,8 @@ const CreateListOfWords: NextPage = () => {
 
 
   const handleRecommeddedStory = async (index: Number) => {
-    let prevLoading = isLoadingStory;
+    let prevLoading = [false, false, false, false];
+
     prevLoading[Number(index)] = true;
     setIsLoadingStory(prevLoading);
 
