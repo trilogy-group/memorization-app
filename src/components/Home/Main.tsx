@@ -88,6 +88,11 @@ const Main: FC<MainProps> = ({ origin, triggerRefetch, onTriggerRefetchChange })
     router.push('/');
   }, [triggerRefetch])
 
+  // refresh every 30s when post has reached the end and there is no pending quiz
+  setTimeout(function(){ if(!hasNextPage) {
+    router.push('/');
+  }}, 30000);
+
   return (
     <div className="flex-grow"><>
       {
