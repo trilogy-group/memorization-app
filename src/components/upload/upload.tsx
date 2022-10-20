@@ -139,38 +139,40 @@ const Upload = ({
   };
 
   const handleImageFileChange = (file: File) => {
-    const url = URL.createObjectURL(file);
-    setImageFile(file);
-    setImageURL(url);
-    setFileType(fileDataType.image);
+    if (mnemonicType !== "image") {
+      const url = URL.createObjectURL(file);
+      setImageFile(file);
+      setImageURL(url);
+      setFileType(fileDataType.image);
 
-    const image = document.createElement("img");
-    image.style.opacity = "0";
-    document.body.appendChild(image);
-    image.setAttribute("src", url);
+      const image = document.createElement("img");
+      image.style.opacity = "0";
+      document.body.appendChild(image);
+      image.setAttribute("src", url);
 
-    document.body.appendChild(image);
-    image.addEventListener("load", () => {
-      setTimeout(() => {
-        const canvas = document.createElement("canvas");
-        const ctx = canvas.getContext("2d")!;
+      document.body.appendChild(image);
+      image.addEventListener("load", () => {
+        setTimeout(() => {
+          const canvas = document.createElement("canvas");
+          const ctx = canvas.getContext("2d")!;
 
-        canvas.width = image.width;
-        canvas.height = image.height;
+          canvas.width = image.width;
+          canvas.height = image.height;
 
-        ctx.drawImage(image, 0, 0);
+          ctx.drawImage(image, 0, 0);
 
-        setCoverImageURL(canvas.toDataURL("image/png"));
-      }, 300);
-    });
-
-    image.addEventListener("error", (error) => {
-      console.log(error);
-      document.body.removeChild(image);
-      toast.error("Failed to load the image", {
-        position: "bottom-right",
+          setCoverImageURL(canvas.toDataURL("image/png"));
+        }, 300);
       });
-    });
+
+      image.addEventListener("error", (error) => {
+        console.log(error);
+        document.body.removeChild(image);
+        toast.error("Failed to load the image", {
+          position: "bottom-right",
+        });
+      });
+    }
   };
 
   const handleVideoFileChange = (file: File) => {
@@ -219,7 +221,9 @@ const Upload = ({
 
         ctx.drawImage(video, 0, 0);
         const url = canvas.toDataURL("image/png");
-        setCoverImageURL(url);
+        if (mnemonicType !== "image") {
+          setCoverImageURL(url);
+        }
         document.body.removeChild(video);
       }, 300);
     });
@@ -250,7 +254,7 @@ const Upload = ({
     handleOpen();
   }, [open]);
 
-  const handleImageUpload = async () => {
+  /* const handleImageUpload = async () => {
     //if (!coverImageURL || !inputValue.trim() || isLoading) return;
     setIsLoading(true);
 
@@ -303,7 +307,7 @@ const Upload = ({
 
       return;
     }
-  };
+  }; */
 
   const handleVideoUpload = async () => {
     if (!coverImageURL || !videoFile || !videoURL || isLoading) return;
@@ -346,8 +350,11 @@ const Upload = ({
       let uploadedCover: any = null;
 
       if (mnemonicType === "image") {
+        console.log("Mnemonic image");
         const s3Upload = await handleUploadToS3(coverImageURL || "");
+        setCoverImageURL(s3Upload as string);
         uploadedCover = s3Upload as string;
+        console.log(uploadedCover);
       } else {
         uploadedCover = (
           await (
@@ -392,7 +399,7 @@ const Upload = ({
   const handleUpload = async () => {
     /* if (fileType == fileDataType.image) {
       handleImageUpload();
-    } else */ 
+    } else */
     if (fileType == fileDataType.video) {
       handleVideoUpload();
     } else {
@@ -552,14 +559,10 @@ const Upload = ({
                     onClick={async () => await handleUpload()}
                     disabled={
                       /* !inputValue.trim() || */
-                      !(
+                      (
                         !videoURL ||
-                        !videoFile ||
-                        !coverImageURL ||
-                        !imageFile ||
-                        !imageURL
-                      ) &&
-                      (isLoading || mnemonicType === "image")
+                        !videoFile
+                      ) || isLoading
                     }
                     className={`flex justify-center items-center gap-2 py-3 min-w-[170px] hover:brightness-90 transition text-white bg-red-1 disabled:text-gray-400 disabled:bg-gray-200`}
                   >
