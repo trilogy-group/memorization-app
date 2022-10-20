@@ -93,7 +93,9 @@ const CreateListOfWords: NextPage = () => {
   const imgRecommendationMutation = trpc.useMutation("recommendImg.stabledif");
   const acroRecommendationMutation = trpc.useMutation("recommendAcro.acronym");
   const storyRecommendationMutation = trpc.useMutation("recommendStory.story");
-  const promptRecommendationMutation = trpc.useMutation("recommendStory.prompt");
+  const promptRecommendationMutation = trpc.useMutation(
+    "recommendStory.prompt"
+  );
 
   const [inputValue, setInputValue] = useState("");
   const [inputPromptValue, setInputPromptValue] = useState("");
@@ -145,16 +147,35 @@ const CreateListOfWords: NextPage = () => {
   const [mnemonicType, setMnemonicType] = useState("");
   const [correctAnswer, setCorrectAnswer] = useState("");
 
-  const handleChange = async (event: React.SyntheticEvent, newValue: string) => {
+  const [generating, setGenerating] = useState(false);
+
+  const handleChange = async (
+    event: React.SyntheticEvent,
+    newValue: string
+  ) => {
     setValue(newValue);
     const value = Number(newValue);
-    if (value === TabOptions.Story && !storyGenerated && wordList.length > 0) {
+    if (
+      value === TabOptions.Story &&
+      !storyGenerated &&
+      wordList.length > 0 &&
+      generating
+    ) {
       handleRecommeddedStoryList();
       setStoryGenerated(true);
-    } else if (value === TabOptions.Acronym && !acronymGenerated && wordList.length > 0) {
+    } else if (
+      value === TabOptions.Acronym &&
+      !acronymGenerated &&
+      wordList.length > 0 &&
+      generating
+    ) {
       handleRecommeddedAcronymList();
       setAcronymGenerated(true);
-    } else if (value === TabOptions.Image && !imageGenerated && wordList.length > 0) {
+    } else if (
+      value === TabOptions.Image &&
+      !imageGenerated &&
+      wordList.length > 0
+    ) {
       handleRecommenddedPrompt();
       setImageGenerated(true);
     }
@@ -202,16 +223,16 @@ const CreateListOfWords: NextPage = () => {
     const promptCreated = await promptRecommendationMutation.mutateAsync({
       description: promptWordList,
     });
-    setIsLoading(false)
-    const prompt = String(promptCreated?.result)
+    setIsLoading(false);
+    const prompt = String(promptCreated?.result);
     const sprompt = ltrim((prompt || "") as string);
     setInputPromptValue(sprompt);
     //await handleRecommeddedImageList(sprompt);
-  }
+  };
 
   function ltrim(str: string) {
-    if(!str) return str;
-    return str.replace(/^\s+/g, '');
+    if (!str) return str;
+    return str.replace(/^\s+/g, "");
   }
 
   const handleRecommeddedImageList = async (prompt: string) => {
@@ -396,12 +417,8 @@ const CreateListOfWords: NextPage = () => {
     setOpenUpload(true); // TODO: connect to the mnemonics generation backend
   };
 
-  const handleAddToSequence = async () => {
-    let item = {
-      id: nanoid(),
-      title: tableEntryValue.trim(),
-    };
-    wordList.push(tableEntryValue);
+  const handleGeneration = async () => {
+    setGenerating(true);
     const tab = Number(value);
     if (tab === TabOptions.Acronym) {
       handleRecommeddedAcronymList();
@@ -414,15 +431,26 @@ const CreateListOfWords: NextPage = () => {
       setAcronymGenerated(false);
       setImageGenerated(false);
     } else if (tab === TabOptions.Image) {
-      handleRecommenddedPrompt();   
+      handleRecommeddedImageList(inputPromptValue);
       setImageGenerated(true);
       setAcronymGenerated(false);
       setStoryGenerated(false);
     }
+  };
+
+  const handleAddToSequence = async () => {
+    setGenerating(false);
+    let item = {
+      id: nanoid(),
+      title: tableEntryValue.trim(),
+    };
+    wordList.push(tableEntryValue);
+    const tab = Number(value);
     setOptions((state): any => [...state, item]);
     return;
   };
   const handleDelete = async (id: string) => {
+    setGenerating(false);
     const index = options.findIndex((item: any) => item.id === id);
     if (index > -1) {
       options.splice(index, 1);
@@ -430,19 +458,9 @@ const CreateListOfWords: NextPage = () => {
       setOptions((state) => [...state]);
     }
     const tab = Number(value);
-    if (tab === TabOptions.Acronym) {
-      handleRecommeddedAcronymList();
-      setAcronymGenerated(true);
-      setStoryGenerated(false);
-    } else if (tab === TabOptions.Story) {
-      handleRecommeddedStoryList();
-      setStoryGenerated(true);
-      setAcronymGenerated(false);
-    }
     return;
   };
 
-  // TODO: connect list of words answer with the curricular graph
   return (
     <>
       <Meta
@@ -548,32 +566,33 @@ const CreateListOfWords: NextPage = () => {
                   {correctAnswer != "" && (
                     <div>
                       <h3 className="text-lg font-bold">
-                        Answer: 
-                      
-                      <Box
-                        component="div"
-                        sx={{
-                          display: "inline",
-                          p: 1,
-                          m: 5,
-                          bgcolor: (theme) =>
-                            theme.palette.mode === "dark" ? "#101010" : "#fff",
-                          color: (theme) =>
-                            theme.palette.mode === "dark"
-                              ? "grey.300"
-                              : "grey.800",
-                          border: "1px solid",
-                          borderColor: (theme) =>
-                            theme.palette.mode === "dark"
-                              ? "grey.800"
-                              : "grey.300",
-                          borderRadius: 2,
-                          fontSize: "0.875rem",
-                          fontWeight: "700",
-                        }}
-                      >
-                        {correctAnswer}
-                      </Box>
+                        Answer:
+                        <Box
+                          component="div"
+                          sx={{
+                            display: "inline",
+                            p: 1,
+                            m: 5,
+                            bgcolor: (theme) =>
+                              theme.palette.mode === "dark"
+                                ? "#101010"
+                                : "#fff",
+                            color: (theme) =>
+                              theme.palette.mode === "dark"
+                                ? "grey.300"
+                                : "grey.800",
+                            border: "1px solid",
+                            borderColor: (theme) =>
+                              theme.palette.mode === "dark"
+                                ? "grey.800"
+                                : "grey.300",
+                            borderRadius: 2,
+                            fontSize: "0.875rem",
+                            fontWeight: "700",
+                          }}
+                        >
+                          {correctAnswer}
+                        </Box>
                       </h3>
                     </div>
                   )}
@@ -602,7 +621,7 @@ const CreateListOfWords: NextPage = () => {
                         Add entry
                       </button>
                     </div>
-                    <div style={{ margin: 10 }}>
+                    <div className="my-8 min-h-[200px]">
                       <ul id="answer">
                         {options.map((option: any, index) => {
                           return (
@@ -632,8 +651,70 @@ const CreateListOfWords: NextPage = () => {
                           );
                         })}
                       </ul>
+                      <div>
+                        {value == "2" && (
+                          <TextareaAutosize
+                            aria-label="empty textarea"
+                            placeholder="Prompt for image generation"
+                            value={inputPromptValue}
+                            onChange={(e) => {
+                              setInputPromptValue(e.target.value);
+                            }}
+                            style={{
+                              width: "68%",
+                              marginBottom: 10,
+                              padding: 5,
+                            }}
+                          />
+                        )}
+                        <button
+                          onClick={async () => {
+                            setIsLoadingMnemonic(true);
+                            await handleGeneration();
+                            setIsLoadingMnemonic(false);
+                          }}
+                          disabled={
+                            (!inputPromptValue.trim() && value == "2") ||
+                            wordList.length == 0
+                          }
+                          className={`flex justify-center items-center gap-2 py-3 hover:brightness-90 transition text-white bg-red-1 disabled:text-gray-400 disabled:bg-gray-200`}
+                          style={{
+                            borderRadius: 10,
+                            padding: 5,
+                            width: "28%",
+                            height: 38,
+                            marginLeft: 10,
+                            marginTop: 10,
+                            float: "right",
+                          }}
+                        >
+                          Generate
+                        </button>
+                      </div>
+                      {value == "2" && (
+                        <Button
+                          className="disabled:text-gray-400 disabled:bg-gray-200`"
+                          disabled={wordList.length == 0 || isLoading}
+                          variant="outlined"
+                          color="success"
+                          style={{
+                            bottom: 0,
+                            float: "left",
+                            margin: 5,
+                          }}
+                          onClick={async () => {
+                            handleRecommenddedPrompt();
+                          }}
+                        >
+                          {isLoading && (
+                            <span className="w-4 h-4 border-2 border-gray-500 border-t-transparent rounded-full animate-spin"></span>
+                          )}
+                          Generate new prompt
+                        </Button>
+                      )}
                     </div>
                   </div>
+
                   <div>
                     <button
                       onClick={async () => await handleUpload()}
@@ -641,7 +722,14 @@ const CreateListOfWords: NextPage = () => {
                         isLoading || !selectedMnemonic || parentName === ""
                       }
                       className={`flex justify-center items-center gap-2 py-3 min-w-[170px] hover:brightness-90 transition text-white bg-red-1 disabled:text-gray-400 disabled:bg-gray-200`}
-                      style={{ borderRadius: 5, padding: 5 }}
+                      style={{
+                        borderRadius: 10,
+                        padding: 5,
+                        height: 38,
+                        marginTop: 10,
+                        marginLeft: 10,
+                        marginBottom: 10,
+                      }}
                     >
                       {isLoading && (
                         <span className="w-4 h-4 border-2 border-gray-500 border-t-transparent rounded-full animate-spin"></span>
@@ -739,35 +827,6 @@ const CreateListOfWords: NextPage = () => {
                         </Grid>
                       </TabPanel>
                       <TabPanel value="2">
-                        <div className="grid grid-cols-2">
-                          <TextareaAutosize
-                            aria-label="empty textarea"
-                            placeholder="Prompt for image generation"
-                            value={inputPromptValue}
-                            onChange={(e) => {
-                              setInputPromptValue(e.target.value);
-                            }}
-                            style={{ width: 200, marginBottom: 10, padding: 5 }}
-                          />
-                          <button
-                            onClick={async () => {
-                              setIsLoadingMnemonic(true);
-                              await handleRecommeddedImageList(inputPromptValue);
-                              setIsLoadingMnemonic(false);
-                            }}
-                            disabled={!inputPromptValue.trim()}
-                            className={`flex justify-center items-center gap-2 py-3 hover:brightness-90 transition text-white bg-red-1 disabled:text-gray-400 disabled:bg-gray-200`}
-                            style={{
-                              borderRadius: 10,
-                              padding: 5,
-                              width: 100,
-                              height: 38,
-                              marginLeft: 10,
-                            }}
-                          >
-                            Generate
-                          </button>
-                        </div>
                         <Grid
                           container
                           spacing={{ xs: 1, md: 1 }}
