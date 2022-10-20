@@ -111,17 +111,19 @@ export const postRouter = createRouter()
       // get the quizzes
       let quizzes: Quiz[];
 
-      const viewedFeeds = await prisma.feed.findMany({
+      const progress = await prisma.progress.findMany({
         where: {
-          userId: session?.user?.id as string,
-          viewed: true,
+          userId : session?.user?.id as string,
+          nextEvaluate: {
+            lt: new Date()
+          }
         },
         select: {
-          quizId: true
+          quizId: true,
         }
       });
 
-      const quizIdArr = viewedFeeds.map((feed) => feed.quizId);
+      const quizIdArr = progress.map((q) => q.quizId);
 
       // quizzes for the viewed feeds
       quizzes = await prisma.quiz.findMany({
