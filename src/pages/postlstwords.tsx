@@ -230,7 +230,6 @@ const CreateListOfWords: NextPage = () => {
       prevLoading[Number(i)] = true;
       setIsLoadingImage(prevLoading);
       const featurePrompt = prompt + " " + features[i];
-      console.log("Feature Prompt: ", featurePrompt);
 
       const imageCreated = await imgRecommendationMutation.mutateAsync({
         description: featurePrompt,
