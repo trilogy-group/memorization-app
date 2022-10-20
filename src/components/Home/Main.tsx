@@ -85,7 +85,7 @@ const Main: FC<MainProps> = ({ origin, triggerRefetch, onTriggerRefetchChange })
   }, [inView])
 
   useEffect(() => {
-    router.push('/');
+    router.push('/', undefined, { shallow: false });
   }, [triggerRefetch])
 
   // refresh every 30s when post has reached the end and there is no pending quiz
