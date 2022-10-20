@@ -15,6 +15,7 @@ import Meta from "@/components/Shared/Meta";
 import { prisma } from "@/server/db/client";
 import { appRouter } from "@/server/router";
 import { authOptions } from "./api/auth/[...nextauth]";
+import { useState } from "react";
 
 
 const Home: NextPage<HomeProps> = ({
@@ -24,6 +25,8 @@ const Home: NextPage<HomeProps> = ({
 }) => {
 
   const session = useSession();
+  const [triggerRefetch, setTriggerRefetch] = useState<boolean>(false);
+
   return (
     <>
       <Meta
@@ -38,11 +41,18 @@ const Home: NextPage<HomeProps> = ({
           <Sidebar
             leaderboardAccounts={leaderboardAccounts!}
             followingAccounts={followingAccounts!}
+            triggerRefetch={triggerRefetch}
+            onTriggerRefetchChange={setTriggerRefetch}
           />
           {
             (!session.data?.user) ?
               <div className="flex items-center gap-2 px-3 py-2 bg-white hover:bg-gray-100 transition">
-                <p>Log in to see the content</p></div> : <Main origin={origin!} />
+                <p>Log in to see the content</p></div> :
+              <Main
+                origin={origin!}
+                triggerRefetch={triggerRefetch}
+                onTriggerRefetchChange={setTriggerRefetch}
+              />
           }
           <div id="notificationArea" className="w-1/6">
             <ToastContainer />
