@@ -33,7 +33,6 @@ function uploadToS3(fileName: string): Promise<any> {
       if (err) {
         return reject(err);
       }
-      console.log(data.Location);
       return resolve(data.Location);
     });
   });
@@ -111,17 +110,19 @@ export const postRouter = createRouter()
       // get the quizzes
       let quizzes: Quiz[];
 
-      const viewedFeeds = await prisma.feed.findMany({
+      const progress = await prisma.progress.findMany({
         where: {
-          userId: session?.user?.id as string,
-          viewed: true,
+          userId : session?.user?.id as string,
+          nextEvaluate: {
+            lt: new Date()
+          }
         },
         select: {
-          quizId: true
+          quizId: true,
         }
       });
 
-      const quizIdArr = viewedFeeds.map((feed) => feed.quizId);
+      const quizIdArr = progress.map((q) => q.quizId);
 
       // quizzes for the viewed feeds
       quizzes = await prisma.quiz.findMany({
@@ -391,6 +392,24 @@ export const postRouter = createRouter()
       }
       return hintFound.coverURL as string;
     },
+  }).mutation("getConcept", {
+    input: z.object({
+      quizId: z.number(),
+    }),
+    async resolve({ ctx: { prisma, session }, input }) {
+      const conceptFound = await prisma.quiz.findFirst({
+        where: {
+          id: input.quizId,
+        },
+        select: {
+          concepts: true,
+        }
+      });
+      if (conceptFound == null) {
+        throw new Error("Concept or quiz not found in the DB.");
+      }
+      return conceptFound.concepts.name as string;
+    }
   });
 
 

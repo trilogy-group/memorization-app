@@ -1,8 +1,8 @@
-import { User, Post } from "@prisma/client";
+import { User, Post, Quiz } from "@prisma/client";
 import Image from "next/future/image";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
-import { Dispatch, FC, SetStateAction, useState } from "react";
+import { Dispatch, FC, useEffect, SetStateAction, useState } from "react";
 import toast from "react-hot-toast";
 import { AiFillHeart, AiFillTwitterCircle } from "react-icons/ai";
 import { BiLink } from "react-icons/bi";
@@ -17,6 +17,9 @@ import { trpc } from "@/utils/trpc";
 
 import VideoPlayer from "./VideoPlayer";
 import { Button } from "@mui/material";
+
+import Chip from "@mui/material/Chip";
+import Stack from "@mui/material/Stack";
 
 interface PostSectionProps {
   post: Post & {
@@ -41,6 +44,7 @@ const PostSection: FC<PostSectionProps> = ({ post, refetch, origin, triggerRefet
   const notificationMutation = trpc.useMutation("notification.createLike");
   const followMutation = trpc.useMutation("follow.toggle");
   const progressMutation = trpc.useMutation("progress.post-got-it");
+  const getConceptMutation = trpc.useMutation("post.getConcept");
 
   const [isCurrentlyLiked, setIsCurrentlyLiked] = useState(post.likedByMe);
   const [isCurrentlyFollowed, setIsCurrentlyFollowed] = useState<
@@ -48,6 +52,14 @@ const PostSection: FC<PostSectionProps> = ({ post, refetch, origin, triggerRefet
   >(undefined);
 
   const videoURL = `${origin}/post/${post.id}`;
+
+  //Get quiz of post
+  const [conceptValue, setConceptValue] = useState("");
+
+  const concept = async () => {
+    const myString = await getConceptMutation.mutateAsync({ quizId: post.quizId as number });
+    setConceptValue(myString);
+  };
 
   const toggleLike = () => {
     if (!session.data?.user) {
@@ -92,7 +104,7 @@ const PostSection: FC<PostSectionProps> = ({ post, refetch, origin, triggerRefet
       // Trigger refetch in the feeds
       onTriggerRefetchChange(!triggerRefetch);
     });
-  }
+  };
 
   const toggleFollow = () => {
     if (!session.data?.user) {
@@ -120,6 +132,10 @@ const PostSection: FC<PostSectionProps> = ({ post, refetch, origin, triggerRefet
         : !isCurrentlyFollowed
     );
   };
+
+  useEffect(() => {
+    concept().then(() => { ; });
+  }, []);
 
   return (
     <div className="flex items-start p-2 lg:p-4 gap-3 full-screen">
@@ -181,7 +197,9 @@ const PostSection: FC<PostSectionProps> = ({ post, refetch, origin, triggerRefet
             </a>
           </Link>
           <div className="flex flex-col gap-1 lg:gap-2">
-            <Button onClick={() => handleGotIt()} variant="outlined">Got it</Button>
+            <Button onClick={() => handleGotIt()} variant="outlined">
+              Got it
+            </Button>
           </div>
           <div className="flex flex-col gap-1 lg:gap-2">
             <button
@@ -235,9 +253,7 @@ const PostSection: FC<PostSectionProps> = ({ post, refetch, origin, triggerRefet
                   className="flex items-center gap-2 px-3 py-2 bg-white hover:bg-gray-100 transition"
                   href={`http://www.reddit.com/submit?url=${encodeURIComponent(
                     videoURL
-                  )}&title=${encodeURIComponent(
-                    `${post.user.name} on EdTok`
-                  )}`}
+                  )}&title=${encodeURIComponent(`${post.user.name} on EdTok`)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -261,8 +277,11 @@ const PostSection: FC<PostSectionProps> = ({ post, refetch, origin, triggerRefet
             </div>
           </div>
         </div>
+        <Stack direction="row" spacing={1}>
+          <Chip label={conceptValue} />
+        </Stack>
       </div>
-    </div >
+    </div>
   );
 };
 
