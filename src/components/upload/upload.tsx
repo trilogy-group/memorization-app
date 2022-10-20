@@ -208,7 +208,6 @@ const Upload = ({
         position: "bottom-right",
       });
     });
-    console.log("Uploading");
     video.addEventListener("loadeddata", () => {
       setTimeout(() => {
         const canvas = document.createElement("canvas");
@@ -331,31 +330,27 @@ const Upload = ({
         )
       ).url;
 
-      toast.loading("Uploading cover image...", { id: toastID });
-      const coverBlob = await (await fetch(coverImageURL)).blob();
-
-      const formData = new FormData();
-      formData.append("file", coverBlob, "cover.png");
-      formData.append("content", "From webhook");
-
-      let demo_response = await fetch(
-        process.env.NEXT_PUBLIC_IMAGE_UPLOAD_URL!,
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
-      demo_response = await demo_response.json();
-
       let uploadedCover: any = null;
 
       if (mnemonicType === "image") {
-        console.log("Mnemonic image");
-        const s3Upload = await handleUploadToS3(coverImageURL || "");
-        setCoverImageURL(s3Upload as string);
-        uploadedCover = s3Upload as string;
-        console.log(uploadedCover);
+        setCoverImageURL(imageUrl);
+        uploadedCover = imageUrl;
       } else {
+        toast.loading("Uploading cover image...", { id: toastID });
+        const coverBlob = await (await fetch(coverImageURL)).blob();
+
+        const formData = new FormData();
+        formData.append("file", coverBlob, "cover.png");
+        formData.append("content", "From webhook");
+
+        let demo_response = await fetch(
+          process.env.NEXT_PUBLIC_IMAGE_UPLOAD_URL!,
+          {
+            method: "POST",
+            body: formData,
+          }
+        );
+        demo_response = await demo_response.json();
         uploadedCover = (
           await (
             await fetch(process.env.NEXT_PUBLIC_IMAGE_UPLOAD_URL!, {
@@ -559,10 +554,7 @@ const Upload = ({
                     onClick={async () => await handleUpload()}
                     disabled={
                       /* !inputValue.trim() || */
-                      (
-                        !videoURL ||
-                        !videoFile
-                      ) || isLoading
+                      !videoURL || !videoFile || isLoading
                     }
                     className={`flex justify-center items-center gap-2 py-3 min-w-[170px] hover:brightness-90 transition text-white bg-red-1 disabled:text-gray-400 disabled:bg-gray-200`}
                   >

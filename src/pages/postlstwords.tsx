@@ -79,6 +79,9 @@ const CreateListOfWords: NextPage = () => {
 
   const uploadMutation = trpc.useMutation("post.createVideo");
 
+  const uploadImageMutation = trpc.useMutation("post.uploadToS3");
+
+
   const [mnemonicImage, setMnemonicImage] = useState<string[]>([
     "",
     "",
@@ -198,6 +201,7 @@ const CreateListOfWords: NextPage = () => {
       description: inputPromptValue,
     });
     let prevMnemonicImage = mnemonicImage;
+    
     prevMnemonicImage[Number(index)] = created?.filename;
     setMnemonicImage(prevMnemonicImage);
 
@@ -208,7 +212,6 @@ const CreateListOfWords: NextPage = () => {
 
   const handleRecommenddedPrompt = async () => {
     setIsLoading(true);
-    console.log("Query: ", wordList);
     var promptWordList = "";
 
     for (let i = 0; i < wordList.length; i++) {
@@ -235,6 +238,11 @@ const CreateListOfWords: NextPage = () => {
     return str.replace(/^\s+/g, "");
   }
 
+  const handleUploadToS3 = async (file: string) => {
+    const res = await uploadImageMutation.mutateAsync({ file: file });
+    return res;
+  };
+
   const handleRecommeddedImageList = async (prompt: string) => {
     const features = ["happy", "funny", "drawing", "scary"];
     let prevLoading = isLoadingImage;
@@ -252,17 +260,15 @@ const CreateListOfWords: NextPage = () => {
       setIsLoadingImage(prevLoading);
       const featurePrompt = prompt + " " + features[i];
 
-      const imageCreated = await imgRecommendationMutation.mutateAsync({
+      const imageName= await imgRecommendationMutation.mutateAsync({
         description: featurePrompt,
       });
-      prevMnemonicImage = mnemonicImage;
-      prevMnemonicImage[i] = imageCreated?.filename;
-      setMnemonicImage(prevMnemonicImage);
+      const imageRoute = imageName?.filename as string;
+      const s3ImageURL = await handleUploadToS3(imageRoute)
 
-      // console log mnemonicImage
-      for (let i = 0; i < mnemonicImage.length; i++) {
-        console.log(mnemonicImage[i]);
-      }
+      prevMnemonicImage = mnemonicImage;
+      prevMnemonicImage[i] = s3ImageURL as string;
+      setMnemonicImage(prevMnemonicImage);
 
       prevLoading = isLoadingImage;
       prevLoading[Number(i)] = false;
