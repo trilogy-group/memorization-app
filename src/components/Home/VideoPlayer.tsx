@@ -15,8 +15,8 @@ const Video: FC<HTMLProps<HTMLVideoElement>> = (props) => {
 
   const { isMuted, setIsMuted } = useContext(VolumeContext);
 
-  const standardPostWidth = 500;
-  const standardPostHeight = 300;
+  const standardPostWidth = 450;
+  const standardPostHeight = 280;
 
   useEffect(() => {
     if (isPaused) {
