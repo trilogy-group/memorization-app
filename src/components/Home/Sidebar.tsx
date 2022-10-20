@@ -3,7 +3,7 @@ import Link from "next/link";
 import Button from "@mui/material/Button";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
-import { FC } from "react";
+import { Dispatch, FC, SetStateAction } from "react";
 import { AiFillHome, AiOutlineHome, AiOutlinePlusCircle } from "react-icons/ai";
 import { BsFillCheckCircleFill } from "react-icons/bs";
 import { RiUserShared2Fill, RiUserShared2Line } from "react-icons/ri";
@@ -26,6 +26,8 @@ interface User {
 interface SidebarProps {
   leaderboardAccounts: User[];
   followingAccounts: User[];
+  triggerRefetch: boolean,
+  onTriggerRefetchChange: Dispatch<SetStateAction<boolean>>,
 }
 
 interface ConceptState {
@@ -38,6 +40,8 @@ interface ConceptState {
 const Sidebar: FC<SidebarProps> = ({
   leaderboardAccounts = [],
   followingAccounts = [],
+  triggerRefetch = false,
+  onTriggerRefetchChange = undefined,
 }) => {
   const router = useRouter();
   const session = useSession();
@@ -50,6 +54,11 @@ const Sidebar: FC<SidebarProps> = ({
       await addConceptMutation.mutateAsync({
         conceptId: concept[i]?.id || "",
       });
+    }
+    if (onTriggerRefetchChange) {
+      console.log('refetch from handling add concepts');
+      // Force trigger refetch
+      onTriggerRefetchChange(!triggerRefetch);
     }
   };
 
@@ -85,8 +94,8 @@ const Sidebar: FC<SidebarProps> = ({
         <Link href="/">
           <a
             className={`flex items-center gap-2 ${!router.query.following
-                ? "fill-pink text-pink"
-                : "fill-black text-black"
+              ? "fill-pink text-pink"
+              : "fill-black text-black"
               }`}
           >
             {!router.query.following ? <AiFillHome /> : <AiOutlineHome />}
@@ -98,7 +107,7 @@ const Sidebar: FC<SidebarProps> = ({
             onClick={() => {
               if (!session.data?.user) {
                 toast("You need to login");
-                return ;
+                return;
               }
               console.log(open);
               setOpen(true);
@@ -113,8 +122,8 @@ const Sidebar: FC<SidebarProps> = ({
         <Link href={session.data?.user ? "/?following=1" : "/sign-in"}>
           <a
             className={`flex items-center gap-2 ${router.query.following
-                ? "fill-pink text-pink"
-                : "fill-black text-black"
+              ? "fill-pink text-pink"
+              : "fill-black text-black"
               }`}
           >
             {router.query.following ? (

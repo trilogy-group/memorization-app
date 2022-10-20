@@ -1,5 +1,5 @@
 import { Quiz } from "@prisma/client";
-import { useEffect, useRef, useState, FC } from "react";
+import { Dispatch, SetStateAction, useEffect, useRef, useState, FC } from "react";
 import { trpc } from "@/utils/trpc";
 import React from "react";
 import { useSession } from "next-auth/react";
@@ -11,6 +11,8 @@ interface QuizSectionProps {
   quiz: Quiz[];
   origin: string;
   refetch: Function;
+  triggerRefetch: boolean;
+  onTriggerRefetchChange: Dispatch<SetStateAction<boolean>>;
 }
 
 /*
@@ -23,7 +25,7 @@ Quiz
     conceptId: string,
   }
 */
-const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin }) => {
+const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin, triggerRefetch, onTriggerRefetchChange }) => {
   const session = useSession();
 
   const quizPostMutation = trpc.useMutation("progress.post-one-quiz-result");
@@ -68,7 +70,10 @@ const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin }) => {
   const forceUpdate = () => {
     if (quizIndex == quiz.length - 1) {
       setDone(true);
+      // Force trigger refetch
+      onTriggerRefetchChange(!triggerRefetch);
     }
+    setChoice("");
     setQuizIndex(quizIndex + 1);
     setAttempted(false);
   }
@@ -194,13 +199,14 @@ const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin }) => {
                 </div>
                 {
                   done ? <></> :
-                    <div className="flex fljjex-wrap gap-3 justify-center">
+                    <div className="flex fljjex-wrap gap-3 justify-center ">
                       {attempted ? <></> :
                         <button
+                          disabled={choice === ""}
                           onClick={() => {
                             handleCheckAnswer();
                           }}
-                          className="py-3 min-w-[170px] border border-gray-2 bg-white hover:bg-gray-100 transition"
+                          className="py-3 min-w-[170px] border border-gray-2 bg-white hover:bg-gray-100 transition disabled:bg-gray-200"
                         >
                           Check Answer
                         </button>}
