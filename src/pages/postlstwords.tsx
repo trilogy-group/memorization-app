@@ -136,7 +136,6 @@ const CreateListOfWords: NextPage = () => {
   const [mnemonicType, setMnemonicType] = useState("");
   const [correctAnswer, setCorrectAnswer] = useState("");
 
-
   const handleChange = (event: React.SyntheticEvent, newValue: string) => {
     setValue(newValue);
     if (newValue === "3" && !storyGenerated && wordList.length > 0) {
@@ -260,9 +259,9 @@ const CreateListOfWords: NextPage = () => {
       setAcronym((prevAcronym) => [
         ...prevAcronym,
         "Remember " +
-        acronymLeters +
-        " with: " +
-        String(acronymCreated?.result),
+          acronymLeters +
+          " with: " +
+          String(acronymCreated?.result),
       ]);
       prevLoading = isLoadingAcronym;
       prevLoading[Number(i)] = false;
@@ -422,12 +421,16 @@ const CreateListOfWords: NextPage = () => {
                         setParentId(parentId);
                         setParentName(parentName);
                         setInputPostValue(nodeName);
-                        const correctChoiceDesc = questionOptions?.map((op: Option) => {
-                          if (op.is_correct) return op.desc;
-                        }) as string[];
-                        let correctOption = correctChoiceDesc.filter(option => option !== undefined)[0];
+                        const correctChoiceDesc = questionOptions?.map(
+                          (op: Option) => {
+                            if (op.is_correct) return op.desc;
+                          }
+                        ) as string[];
+                        let correctOption = correctChoiceDesc.filter(
+                          (option) => option !== undefined
+                        )[0];
                         if (correctOption) {
-                          setCorrectAnswer(correctOption)
+                          setCorrectAnswer(correctOption);
                         }
                       }}
                       addNodeListToWorkspace={function (
@@ -487,7 +490,32 @@ const CreateListOfWords: NextPage = () => {
                   {correctAnswer != "" && (
                     <div>
                       <h3 className="text-lg font-bold">
-                        Answer: <span className="bg-lime-500">{correctAnswer}</span>
+                        Answer: 
+                      
+                      <Box
+                        component="div"
+                        sx={{
+                          display: "inline",
+                          p: 1,
+                          m: 5,
+                          bgcolor: (theme) =>
+                            theme.palette.mode === "dark" ? "#101010" : "#fff",
+                          color: (theme) =>
+                            theme.palette.mode === "dark"
+                              ? "grey.300"
+                              : "grey.800",
+                          border: "1px solid",
+                          borderColor: (theme) =>
+                            theme.palette.mode === "dark"
+                              ? "grey.800"
+                              : "grey.300",
+                          borderRadius: 2,
+                          fontSize: "0.875rem",
+                          fontWeight: "700",
+                        }}
+                      >
+                        {correctAnswer}
+                      </Box>
                       </h3>
                     </div>
                   )}
