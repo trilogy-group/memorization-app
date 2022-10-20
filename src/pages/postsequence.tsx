@@ -151,6 +151,8 @@ const CreateListOfWords: NextPage = () => {
   const [correctAnswer, setCorrectAnswer] = useState("");
 
   const [generating, setGenerating] = useState(false);
+  
+  const features = ["happy", "funny", "drawing", "scary"];
 
   const handleChange = async (
     event: React.SyntheticEvent,
@@ -192,17 +194,22 @@ const CreateListOfWords: NextPage = () => {
     }
   }, [uploadMutation.error]);
 
-  const handleRecommeddedImage = async (index: Number) => {
+  const handleRecommeddedImage = async (index: Number, prompt: string) => {
     let prevLoading = isLoadingAcronym;
     prevLoading[Number(index)] = true;
     setIsLoadingImage(prevLoading);
+    
+    const featurePrompt = prompt + " " + features[Number(index)];
 
     const created = await imgRecommendationMutation.mutateAsync({
-      description: inputPromptValue,
+      description: featurePrompt,
     });
     let prevMnemonicImage = mnemonicImage;
-    
-    prevMnemonicImage[Number(index)] = created?.filename;
+
+    const imageRoute = created?.filename as string;
+    console.log(imageRoute);
+    const s3ImageURL = await handleUploadToS3(imageRoute)
+    prevMnemonicImage[Number(index)] = s3ImageURL as string;
     setMnemonicImage(prevMnemonicImage);
 
     prevLoading = isLoadingImage;
@@ -244,7 +251,6 @@ const CreateListOfWords: NextPage = () => {
   };
 
   const handleRecommeddedImageList = async (prompt: string) => {
-    const features = ["happy", "funny", "drawing", "scary"];
     let prevLoading = isLoadingImage;
     let prevMnemonicImage = mnemonicImage;
     for (let i = 0; i < 4; i++) {
@@ -895,7 +901,7 @@ const CreateListOfWords: NextPage = () => {
                                   mnemonicImage[index] == ""
                                 }
                                 onClick={async () => {
-                                  await handleRecommeddedImage(index);
+                                  await handleRecommeddedImage(index, inputPromptValue);
                                 }}
                                 variant="outlined"
                                 color="error"

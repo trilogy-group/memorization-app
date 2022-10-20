@@ -150,6 +150,8 @@ const CreateListOfWords: NextPage = () => {
 
   const [generating, setGenerating] = useState(false);
 
+  const features = ["happy", "funny", "drawing", "scary"];
+
   const handleChange = async (
     event: React.SyntheticEvent,
     newValue: string
@@ -182,17 +184,22 @@ const CreateListOfWords: NextPage = () => {
     }
   }, [uploadMutation.error]);
 
-  const handleRecommeddedImage = async (index: Number) => {
+  const handleRecommeddedImage = async (index: Number, prompt: string) => {
     let prevLoading = isLoadingAcronym;
     prevLoading[Number(index)] = true;
     setIsLoadingImage(prevLoading);
+    
+    const featurePrompt = prompt + " " + features[Number(index)];
 
     const created = await imgRecommendationMutation.mutateAsync({
-      description: inputPromptValue,
+      description: featurePrompt,
     });
     let prevMnemonicImage = mnemonicImage;
-    
-    prevMnemonicImage[Number(index)] = created?.filename;
+
+    const imageRoute = created?.filename as string;
+    console.log(imageRoute);
+    const s3ImageURL = await handleUploadToS3(imageRoute)
+    prevMnemonicImage[Number(index)] = s3ImageURL as string;
     setMnemonicImage(prevMnemonicImage);
 
     prevLoading = isLoadingImage;
@@ -234,7 +241,6 @@ const CreateListOfWords: NextPage = () => {
   };
 
   const handleRecommeddedImageList = async (prompt: string) => {
-    const features = ["happy", "funny", "drawing", "scary"];
     let prevLoading = isLoadingImage;
     let prevMnemonicImage = mnemonicImage;
     for (let i = 0; i < 4; i++) {
@@ -356,17 +362,6 @@ const CreateListOfWords: NextPage = () => {
     }
   };
 
-  const handleAddToSequence = async () => {
-    setGenerating(false);
-    let item = {
-      id: nanoid(),
-      title: tableEntryValue.trim(),
-    };
-    wordList.push(tableEntryValue);
-    const tab = Number(value);
-    setOptions((state): any => [...state, item]);
-    return;
-  };
   const handleDelete = async (id: string) => {
     setGenerating(false);
     const index = options.findIndex((item: any) => item.id === id);
@@ -533,7 +528,7 @@ const CreateListOfWords: NextPage = () => {
                             setIsLoadingMnemonic(false);
                           }}
                           disabled={
-                            (!inputPromptValue.trim() && value == "2") ||
+                            (!tableEntryValue.trim() && value == "2") ||
                             !tableEntryValue.trim()
                           }
                           className={`flex justify-center items-center gap-2 py-3 hover:brightness-90 transition text-white bg-red-1 disabled:text-gray-400 disabled:bg-gray-200`}
@@ -688,7 +683,7 @@ const CreateListOfWords: NextPage = () => {
                                   mnemonicImage[index] == ""
                                 }
                                 onClick={async () => {
-                                  await handleRecommeddedImage(index);
+                                  await handleRecommeddedImage(index, tableEntryValue);
                                 }}
                                 variant="outlined"
                                 color="error"
