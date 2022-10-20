@@ -274,16 +274,6 @@ const CreateDefinition: NextPage = () => {
                         parentName: string,
                         questionOptions: Option[]
                       ): void {
-                        console.log(
-                          "Id: " +
-                          nodeId +
-                          " Name: " +
-                          nodeName +
-                          " ParentId: " +
-                          parentId +
-                          " ParentName: " +
-                          parentName
-                        );
                         setNodeId(nodeId);
                         setNodeName(nodeName);
                         setParentId(parentId);
