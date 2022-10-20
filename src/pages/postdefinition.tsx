@@ -434,7 +434,7 @@ const CreateListOfWords: NextPage = () => {
                         onClose={() => setOpenUpload(false)}
                         conceptId={parentId}
                         questionId={nodeId}
-                        caption={inputPromptValue}
+                        caption={tableEntryValue}
                         mnemonicType={mnemonicType}
                         imageUrl={selectedMnemonicType}
                       />
