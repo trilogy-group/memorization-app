@@ -2,13 +2,13 @@
 
 FROM node:16.8.0 AS nextjs
 
-USER node
+USER root
 
 ADD . /app
 
 WORKDIR /app
 
-COPY --chown=node:node . ./
+COPY . ./
 
 RUN npm run build
 
