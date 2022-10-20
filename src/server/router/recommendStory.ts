@@ -41,6 +41,38 @@ export const storyRecommendationRouter = createRouter()
           }
         }
       },
+  }).mutation("prompt", {
+    input: z.object({
+        description: z.string(),
+      }),
+      async resolve({ ctx: { session }, input }) {
+        const { Configuration, OpenAIApi } = require("openai");
+        const wordList = input.description;
+        
+        if (session?.user?.id) {
+          try {
+            const { Configuration, OpenAIApi } = require("openai");
+
+            const configuration = new Configuration({
+            apiKey: process.env.OPENAI_API_KEY,
+            });
+            const openai = new OpenAIApi(configuration);
+            const completion = await openai.createCompletion({
+            max_tokens: 500,
+            model: "text-davinci-002",
+            //prompt: "Create an story to remember the words " + wordList + ": ",
+            prompt: "Describe an image that helps remember this: " + wordList.toUpperCase() + ": ",
+            });
+
+            var result = ""
+            result = completion.data.choices[0].text
+            return {
+              result
+            }
+          } catch (error) {
+          }
+        }
+      },
   });
   
   
