@@ -119,21 +119,6 @@ const Sidebar: FC<SidebarProps> = ({
             <span className="hidden lg:inline">Select content</span>
           </a>
         </Link>
-        <Link href={session.data?.user ? "/?following=1" : "/sign-in"}>
-          <a
-            className={`flex items-center gap-2 ${router.query.following
-              ? "fill-pink text-pink"
-              : "fill-black text-black"
-              }`}
-          >
-            {router.query.following ? (
-              <RiUserShared2Fill />
-            ) : (
-              <RiUserShared2Line />
-            )}
-            <span className="hidden lg:inline">Following</span>
-          </a>
-        </Link>
       </div>
 
       {leaderboardAccounts.length > 0 && session.data?.user && (
