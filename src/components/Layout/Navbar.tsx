@@ -71,14 +71,10 @@ const Navbar: FC = () => {
 
     return contentLst.map((n, i) => {
       if (n == "Quiz") {
-        return <div>
-          <Link href={`/quizUltimate`} key={i}>
-            Go to Quiz Page
-          </Link>
-          <hr></hr>
-        </div>;
+        // TODO: implement quiz notification
+        return <></>
       } else {
-        return <div>
+        return <div key={i}>
           <span className="notification" key={i}>
             {n}
           </span>
