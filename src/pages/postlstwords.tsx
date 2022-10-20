@@ -37,6 +37,8 @@ import DeleteIcon from "@mui/icons-material/DeleteOutlined";
 import Navigation from "../components/navigation/navigation";
 import Upload from "../components/upload/upload";
 
+import { Option } from "@/utils/text";
+
 import { nanoid } from "nanoid";
 
 interface ConceptState {
@@ -132,6 +134,7 @@ const CreateListOfWords: NextPage = () => {
   const [parentId, setParentId] = useState("");
   const [parentName, setParentName] = useState("");
   const [mnemonicType, setMnemonicType] = useState("");
+  const [correctAnswer, setCorrectAnswer] = useState("");
 
   const handleChange = (event: React.SyntheticEvent, newValue: string) => {
     setValue(newValue);
@@ -410,13 +413,25 @@ const CreateListOfWords: NextPage = () => {
                         nodeId: string,
                         nodeName: string,
                         parentId: string,
-                        parentName: string
+                        parentName: string,
+                        questionOptions: Option[]
                       ): void {
                         setNodeId(nodeId);
                         setNodeName(nodeName);
                         setParentId(parentId);
                         setParentName(parentName);
                         setInputPostValue(nodeName);
+                        const correctChoiceDesc = questionOptions?.map(
+                          (op: Option) => {
+                            if (op.is_correct) return op.desc;
+                          }
+                        ) as string[];
+                        let correctOption = correctChoiceDesc.filter(
+                          (option) => option !== undefined
+                        )[0];
+                        if (correctOption) {
+                          setCorrectAnswer(correctOption);
+                        }
                       }}
                       addNodeListToWorkspace={function (
                         concepts: ConceptState[]
@@ -472,6 +487,38 @@ const CreateListOfWords: NextPage = () => {
                       }}
                     />
                   </div>
+                  {correctAnswer != "" && (
+                    <div>
+                      <h3 className="text-lg font-bold">
+                        Answer: 
+                      
+                      <Box
+                        component="div"
+                        sx={{
+                          display: "inline",
+                          p: 1,
+                          m: 5,
+                          bgcolor: (theme) =>
+                            theme.palette.mode === "dark" ? "#101010" : "#fff",
+                          color: (theme) =>
+                            theme.palette.mode === "dark"
+                              ? "grey.300"
+                              : "grey.800",
+                          border: "1px solid",
+                          borderColor: (theme) =>
+                            theme.palette.mode === "dark"
+                              ? "grey.800"
+                              : "grey.300",
+                          borderRadius: 2,
+                          fontSize: "0.875rem",
+                          fontWeight: "700",
+                        }}
+                      >
+                        {correctAnswer}
+                      </Box>
+                      </h3>
+                    </div>
+                  )}
                   <div className="col-span-1 w-full">
                     <p>Input below:</p>
                     <input

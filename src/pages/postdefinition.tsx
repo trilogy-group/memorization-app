@@ -32,6 +32,8 @@ import BackIcon from "@mui/icons-material/ArrowBackIosNew";
 import Navigation from "../components/navigation/navigation";
 import Upload from "../components/upload/upload";
 
+import { Option } from "@/utils/text";
+
 interface ConceptState {
   id: string;
   name: string;
@@ -113,6 +115,7 @@ const CreateDefinition: NextPage = () => {
   const [parentId, setParentId] = useState("");
   const [parentName, setParentName] = useState("");
   const [mnemonicType, setMnemonicType] = useState("");
+  const [correctAnswer, setCorrectAnswer] = useState("");
 
   const handleChange = (event: React.SyntheticEvent, newValue: string) => {
     setValue(newValue);
@@ -268,7 +271,8 @@ const CreateDefinition: NextPage = () => {
                         nodeId: string,
                         nodeName: string,
                         parentId: string,
-                        parentName: string
+                        parentName: string,
+                        questionOptions: Option[]
                       ): void {
                         console.log(
                           "Id: " +
@@ -285,6 +289,13 @@ const CreateDefinition: NextPage = () => {
                         setParentId(parentId);
                         setParentName(parentName);
                         setInputPostValue(nodeName);
+                        const correctChoiceDesc = questionOptions?.map((op: Option) => {
+                          if (op.is_correct) return op.desc;
+                        }) as string[];
+                        let correctOption = correctChoiceDesc.filter(option => option !== undefined)[0];
+                        if (correctOption) {
+                          setCorrectAnswer(correctOption)
+                        }
                       }}
                       addNodeListToWorkspace={function (
                         concepts: ConceptState[]
@@ -340,6 +351,13 @@ const CreateDefinition: NextPage = () => {
                       }}
                     />
                   </div>
+                  {correctAnswer != "" && (
+                    <div>
+                      <h3 className="text-lg font-bold">
+                        Answer: <span className="bg-lime-500">{correctAnswer}</span>
+                      </h3>
+                    </div>
+                  )}
                   <div className="col-span-1 h-[35%] w-full">
                     <p>Input below:</p>
                     <div className="grid gap-1" style={{ marginBottom: 10 }}>
