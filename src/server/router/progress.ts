@@ -268,8 +268,9 @@ export const progressRouter = createRouter()
           }
         }
       } else {
-        // Quiz correct -> posts will not appear in the feeds
-        // delete feeds for the quiz, the feeds will be generated if they fail a quiz again
+        // Quiz correct -> posts should be filtered out in the feeds
+        // the quizzes will still be given by selecting from the progress table in regards to the evaluation time
+        // Here, we delete feeds for the quiz, the feeds will be populated only if they fail a quiz again
         const relatedPosts = await prisma.post.findMany({
           where: {
             quizId: input.quizId
