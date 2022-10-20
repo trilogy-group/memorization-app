@@ -72,9 +72,10 @@ const Item2 = styled(Paper)(({ theme }) => ({
   overflow: "hidden",
 }));
 
-const wordList: string[] = [];
 
 const CreateListOfWords: NextPage = () => {
+  const [wordList, setWordList] = useState<string[]>([]);
+
   const [openUpload, setOpenUpload] = useState(false);
 
   const uploadMutation = trpc.useMutation("post.createVideo");
@@ -456,7 +457,7 @@ const CreateListOfWords: NextPage = () => {
       id: nanoid(),
       title: tableEntryValue.trim(),
     };
-    wordList.push(tableEntryValue);
+    setWordList((prevWordList) => [...prevWordList, tableEntryValue]);
     const tab = Number(value);
     setOptions((state): any => [...state, item]);
     return;
@@ -466,7 +467,7 @@ const CreateListOfWords: NextPage = () => {
     const index = options.findIndex((item: any) => item.id === id);
     if (index > -1) {
       options.splice(index, 1);
-      await wordList.splice(index, 1);
+      setWordList((prevWordList) => {prevWordList.splice(index, 1); return prevWordList;});
       setOptions((state) => [...state]);
     }
     const tab = Number(value);
