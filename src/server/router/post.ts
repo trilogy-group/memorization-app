@@ -33,7 +33,6 @@ function uploadToS3(fileName: string): Promise<any> {
       if (err) {
         return reject(err);
       }
-      console.log(data.Location);
       return resolve(data.Location);
     });
   });
@@ -393,6 +392,24 @@ export const postRouter = createRouter()
       }
       return hintFound.coverURL as string;
     },
+  }).mutation("getConcept", {
+    input: z.object({
+      quizId: z.number(),
+    }),
+    async resolve({ ctx: { prisma, session }, input }) {
+      const conceptFound = await prisma.quiz.findFirst({
+        where: {
+          id: input.quizId,
+        },
+        select: {
+          concepts: true,
+        }
+      });
+      if (conceptFound == null) {
+        throw new Error("Concept or quiz not found in the DB.");
+      }
+      return conceptFound.concepts.name as string;
+    }
   });
 
 
