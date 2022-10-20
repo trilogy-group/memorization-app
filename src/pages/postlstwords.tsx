@@ -79,7 +79,13 @@ const CreateListOfWords: NextPage = () => {
 
   const uploadMutation = trpc.useMutation("post.createVideo");
 
-  const [mnemonicImage, setMnemonicImage] = useState<string[]>([]);
+  const [mnemonicImage, setMnemonicImage] = useState<string[]>([
+    "",
+    "",
+    "",
+    "",
+  ]);
+
   const [acronym, setAcronym] = useState<string[]>([]);
 
   const [story, setStory] = useState<string[]>([]);
@@ -87,6 +93,7 @@ const CreateListOfWords: NextPage = () => {
   const imgRecommendationMutation = trpc.useMutation("recommendImg.stabledif");
   const acroRecommendationMutation = trpc.useMutation("recommendAcro.acronym");
   const storyRecommendationMutation = trpc.useMutation("recommendStory.story");
+  const promptRecommendationMutation = trpc.useMutation("recommendStory.prompt");
 
   const [inputValue, setInputValue] = useState("");
   const [inputPromptValue, setInputPromptValue] = useState("");
@@ -122,6 +129,8 @@ const CreateListOfWords: NextPage = () => {
   const [value, setValue] = useState("1");
   const [storyGenerated, setStoryGenerated] = useState(false);
   const [acronymGenerated, setAcronymGenerated] = useState(false);
+  const [imageGenerated, setImageGenerated] = useState(false);
+
   const [selectedMnemonic, setSelectedMnemonic] = useState(false);
   const [selectedMnemonicType, setSelectedMnemonicType] = useState("");
 
@@ -136,14 +145,18 @@ const CreateListOfWords: NextPage = () => {
   const [mnemonicType, setMnemonicType] = useState("");
   const [correctAnswer, setCorrectAnswer] = useState("");
 
-  const handleChange = (event: React.SyntheticEvent, newValue: string) => {
+  const handleChange = async (event: React.SyntheticEvent, newValue: string) => {
     setValue(newValue);
-    if (newValue === "3" && !storyGenerated && wordList.length > 0) {
+    const value = Number(newValue);
+    if (value === TabOptions.Story && !storyGenerated && wordList.length > 0) {
       handleRecommeddedStoryList();
       setStoryGenerated(true);
-    } else if (newValue === "1" && !acronymGenerated && wordList.length > 0) {
+    } else if (value === TabOptions.Acronym && !acronymGenerated && wordList.length > 0) {
       handleRecommeddedAcronymList();
       setAcronymGenerated(true);
+    } else if (value === TabOptions.Image && !imageGenerated && wordList.length > 0) {
+      handleRecommenddedPrompt();
+      setImageGenerated(true);
     }
   };
 
@@ -172,25 +185,64 @@ const CreateListOfWords: NextPage = () => {
     setIsLoadingImage(prevLoading);
   };
 
-  const handleRecommeddedImageList = async () => {
+  const handleRecommenddedPrompt = async () => {
+    setIsLoading(true);
+    console.log("Query: ", wordList);
+    var promptWordList = "";
+
+    for (let i = 0; i < wordList.length; i++) {
+      if (wordList[i] != undefined) {
+        if (i == wordList.length - 1) {
+          promptWordList += wordList[i];
+        } else {
+          promptWordList += wordList[i] + ", ";
+        }
+      }
+    }
+    const promptCreated = await promptRecommendationMutation.mutateAsync({
+      description: promptWordList,
+    });
+    setIsLoading(false)
+    const prompt = String(promptCreated?.result)
+    const sprompt = ltrim((prompt || "") as string);
+    setInputPromptValue(sprompt);
+    //await handleRecommeddedImageList(sprompt);
+  }
+
+  function ltrim(str: string) {
+    if(!str) return str;
+    return str.replace(/^\s+/g, '');
+  }
+
+  const handleRecommeddedImageList = async (prompt: string) => {
+    const features = ["happy", "funny", "drawing", "scary"];
     let prevLoading = isLoadingImage;
+    let prevMnemonicImage = mnemonicImage;
     for (let i = 0; i < 4; i++) {
       prevLoading[i] = true;
       setIsLoadingImage(prevLoading);
+      prevMnemonicImage[i] = "";
+      setMnemonicImage(prevMnemonicImage);
     }
 
     for (let i = 0; i < 4; i++) {
       prevLoading = isLoadingImage;
       prevLoading[Number(i)] = true;
       setIsLoadingImage(prevLoading);
+      const featurePrompt = prompt + " " + features[i];
+      console.log("Feature Prompt: ", featurePrompt);
 
       const imageCreated = await imgRecommendationMutation.mutateAsync({
-        description: inputPromptValue,
+        description: featurePrompt,
       });
-      setMnemonicImage((mnemonicImage) => [
-        ...mnemonicImage,
-        imageCreated?.filename,
-      ]);
+      prevMnemonicImage = mnemonicImage;
+      prevMnemonicImage[i] = imageCreated?.filename;
+      setMnemonicImage(prevMnemonicImage);
+
+      // console log mnemonicImage
+      for (let i = 0; i < mnemonicImage.length; i++) {
+        console.log(mnemonicImage[i]);
+      }
 
       prevLoading = isLoadingImage;
       prevLoading[Number(i)] = false;
@@ -356,10 +408,17 @@ const CreateListOfWords: NextPage = () => {
       handleRecommeddedAcronymList();
       setAcronymGenerated(true);
       setStoryGenerated(false);
+      setImageGenerated(false);
     } else if (tab === TabOptions.Story) {
       handleRecommeddedStoryList();
       setStoryGenerated(true);
       setAcronymGenerated(false);
+      setImageGenerated(false);
+    } else if (tab === TabOptions.Image) {
+      handleRecommenddedPrompt();   
+      setImageGenerated(true);
+      setAcronymGenerated(false);
+      setStoryGenerated(false);
     }
     setOptions((state): any => [...state, item]);
     return;
@@ -694,7 +753,7 @@ const CreateListOfWords: NextPage = () => {
                           <button
                             onClick={async () => {
                               setIsLoadingMnemonic(true);
-                              await handleRecommeddedImageList();
+                              await handleRecommeddedImageList(inputPromptValue);
                               setIsLoadingMnemonic(false);
                             }}
                             disabled={!inputPromptValue.trim()}
@@ -743,7 +802,7 @@ const CreateListOfWords: NextPage = () => {
                               <Button
                                 disabled={
                                   isLoadingImage[index] ||
-                                  mnemonicImage[index] == null
+                                  mnemonicImage[index] == ""
                                 }
                                 variant="outlined"
                                 color="success"
@@ -767,7 +826,7 @@ const CreateListOfWords: NextPage = () => {
                               <Button
                                 disabled={
                                   isLoadingImage[index] ||
-                                  mnemonicImage[index] == null
+                                  mnemonicImage[index] == ""
                                 }
                                 onClick={async () => {
                                   await handleRecommeddedImage(index);
