@@ -71,17 +71,19 @@ const Navbar: FC = () => {
 
     return contentLst.map((n, i) => {
       if (n == "Quiz") {
-        return (
+        return <div>
           <Link href={`/quizUltimate`} key={i}>
             Go to Quiz Page
           </Link>
-        );
+          <hr></hr>
+        </div>;
       } else {
-        return (
+        return <div>
           <span className="notification" key={i}>
             {n}
           </span>
-        );
+          <hr></hr>
+        </div>;
       }
     });
   };
