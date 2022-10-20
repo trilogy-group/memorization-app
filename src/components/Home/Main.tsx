@@ -1,5 +1,5 @@
 import { useRouter } from "next/router";
-import { FC, useEffect, useRef } from "react";
+import { Dispatch, FC, SetStateAction, useState, useEffect, useRef } from "react";
 import { useInView } from "react-intersection-observer";
 import { trpc } from "@/utils/trpc";
 
@@ -10,9 +10,11 @@ import { FeedPostType } from "@/utils/text";
 
 interface MainProps {
   origin: string;
+  triggerRefetch: boolean,
+  onTriggerRefetchChange: Dispatch<SetStateAction<boolean>>,
 }
 
-const Main: FC<MainProps> = ({ origin }) => {
+const Main: FC<MainProps> = ({ origin, triggerRefetch, onTriggerRefetchChange }) => {
   const router = useRouter();
 
   const { data, fetchNextPage, isFetchingNextPage, hasNextPage, refetch } =
@@ -76,12 +78,20 @@ const Main: FC<MainProps> = ({ origin }) => {
   let { ref, inView } = useInView({
   });
 
-
   useEffect(() => {
     if (inView && !isFetchingNextPage && hasNextPage) {
       fetchNextPage();
     }
   }, [inView])
+
+  useEffect(() => {
+    router.push('/');
+  }, [triggerRefetch])
+
+  // refresh every 30s when post has reached the end and there is no pending quiz
+  if (data?.pages[0]?.items[0]?.type === 'Quiz' && data?.pages[0]?.items[0]?.quizzes?.length == 0) {
+    setTimeout(function () { router.push('/'); }, 30000);
+  }
 
   return (
     <div className="flex-grow"><>
@@ -95,6 +105,8 @@ const Main: FC<MainProps> = ({ origin }) => {
                   key={feedIdx}
                   refetch={refetch}
                   origin={origin}
+                  triggerRefetch={triggerRefetch}
+                  onTriggerRefetchChange={onTriggerRefetchChange}
                 />
               } else {
                 if (!feedItem?.quizzes || feedItem?.quizzes.length == 0)
@@ -104,6 +116,8 @@ const Main: FC<MainProps> = ({ origin }) => {
                   refetch={refetch}
                   origin={origin}
                   key={feedIdx}
+                  triggerRefetch={triggerRefetch}
+                  onTriggerRefetchChange={onTriggerRefetchChange}
                 />
               }
             })

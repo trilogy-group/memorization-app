@@ -37,6 +37,8 @@ import DeleteIcon from "@mui/icons-material/DeleteOutlined";
 import Navigation from "../components/navigation/navigation";
 import Upload from "../components/upload/upload";
 
+import { Option } from "@/utils/text";
+
 import { nanoid } from "nanoid";
 
 interface ConceptState {
@@ -132,6 +134,7 @@ const CreateListOfWords: NextPage = () => {
   const [parentId, setParentId] = useState("");
   const [parentName, setParentName] = useState("");
   const [mnemonicType, setMnemonicType] = useState("");
+  const [correctAnswer, setCorrectAnswer] = useState("");
 
   const handleChange = (event: React.SyntheticEvent, newValue: string) => {
     setValue(newValue);
@@ -256,9 +259,9 @@ const CreateListOfWords: NextPage = () => {
       setAcronym((prevAcronym) => [
         ...prevAcronym,
         "Remember " +
-          acronymLeters +
-          " with: " +
-          String(acronymCreated?.result),
+        acronymLeters +
+        " with: " +
+        String(acronymCreated?.result),
       ]);
       prevLoading = isLoadingAcronym;
       prevLoading[Number(i)] = false;
@@ -410,13 +413,21 @@ const CreateListOfWords: NextPage = () => {
                         nodeId: string,
                         nodeName: string,
                         parentId: string,
-                        parentName: string
+                        parentName: string,
+                        questionOptions: Option[]
                       ): void {
                         setNodeId(nodeId);
                         setNodeName(nodeName);
                         setParentId(parentId);
                         setParentName(parentName);
                         setInputPostValue(nodeName);
+                        const correctChoiceDesc = questionOptions?.map((op: Option) => {
+                          if (op.is_correct) return op.desc;
+                        }) as string[];
+                        let correctOption = correctChoiceDesc.filter(option => option !== undefined)[0];
+                        if (correctOption) {
+                          setCorrectAnswer(correctOption)
+                        }
                       }}
                       addNodeListToWorkspace={function (
                         concepts: ConceptState[]
@@ -472,6 +483,13 @@ const CreateListOfWords: NextPage = () => {
                       }}
                     />
                   </div>
+                  {correctAnswer != "" && (
+                    <div>
+                      <h3 className="text-lg font-bold">
+                        Answer: <span className="bg-lime-500">{correctAnswer}</span>
+                      </h3>
+                    </div>
+                  )}
                   <div className="col-span-1 w-full">
                     <p>Input below:</p>
                     <input
@@ -513,7 +531,7 @@ const CreateListOfWords: NextPage = () => {
                                 marginBottom: 5,
                               }}
                             >
-                              <p>{(index+1) + ".- " + option.title}</p>
+                              <p>{(index + 1) + ".- " + option.title}</p>
                               <button
                                 onClick={() => {
                                   handleDelete(option.id);

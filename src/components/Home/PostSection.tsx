@@ -2,7 +2,7 @@ import { User, Post, Quiz } from "@prisma/client";
 import Image from "next/future/image";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
-import { FC, useEffect, useState } from "react";
+import { Dispatch, FC, useEffect, SetStateAction, useState } from "react";
 import toast from "react-hot-toast";
 import { AiFillHeart, AiFillTwitterCircle } from "react-icons/ai";
 import { BiLink } from "react-icons/bi";
@@ -33,9 +33,11 @@ interface PostSectionProps {
   };
   origin: string;
   refetch: Function;
+  triggerRefetch: boolean;
+  onTriggerRefetchChange: Dispatch<SetStateAction<boolean>>;
 }
 
-const PostSection: FC<PostSectionProps> = ({ post, refetch, origin }) => {
+const PostSection: FC<PostSectionProps> = ({ post, refetch, origin, triggerRefetch, onTriggerRefetchChange }) => {
   const session = useSession();
 
   const likeMutation = trpc.useMutation("like.toggle");
@@ -97,7 +99,10 @@ const PostSection: FC<PostSectionProps> = ({ post, refetch, origin }) => {
       return;
     }
     progressMutation.mutateAsync({
-      postId: post.id,
+      postId: post.id
+    }).then(() => {
+      // Trigger refetch in the feeds
+      onTriggerRefetchChange(!triggerRefetch);
     });
   };
 

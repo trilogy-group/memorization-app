@@ -107,28 +107,24 @@ export const postRouter = createRouter()
         ]);
       }
 
-      /*for (const i of items) {
-        console.log("items", i.caption);
-      }*/
-      // TODO: Implement skip for quizzes
-
       // get the quizzes
       let quizzes: Quiz[];
-      let coverURLs_or_mnemonicTexts: string[] = [];
-      let efactors: number[] = [];
 
-      const viewedFeeds = await prisma.feed.findMany({
+      const progress = await prisma.progress.findMany({
         where: {
-          userId: session?.user?.id as string,
-          viewed: true,
+          userId : session?.user?.id as string,
+          nextEvaluate: {
+            lt: new Date()
+          }
         },
         select: {
-          quizId: true
+          quizId: true,
         }
       });
 
+      const quizIdArr = progress.map((q) => q.quizId);
+
       // quizzes for the viewed feeds
-      // TODO: implement skip, fix viewed reset bugs
       quizzes = await prisma.quiz.findMany({
         skip: skip == 0 ? 0 : Number.MAX_SAFE_INTEGER,
         where: {
@@ -141,9 +137,9 @@ export const postRouter = createRouter()
             }
           },
           //id: { in: viewedFeeds.map((f) => { return f.quizId; }) }
+          id: { in: quizIdArr }
         },
       });
-      // TODO: test - if the last quiz was correct, then the posts will not be shown, the quiz will still appear
       // TODO: if feeds are incomplete, do not add the quiz
 
       const posts = items.map((item) => {

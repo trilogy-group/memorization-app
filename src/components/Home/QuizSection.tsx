@@ -1,5 +1,5 @@
 import { Quiz } from "@prisma/client";
-import { useEffect, useRef, useState, FC } from "react";
+import { Dispatch, SetStateAction, useEffect, useRef, useState, FC } from "react";
 import { trpc } from "@/utils/trpc";
 import React from "react";
 import { useSession } from "next-auth/react";
@@ -11,6 +11,8 @@ interface QuizSectionProps {
   quiz: Quiz[];
   origin: string;
   refetch: Function;
+  triggerRefetch: boolean;
+  onTriggerRefetchChange: Dispatch<SetStateAction<boolean>>;
 }
 
 /*
@@ -23,7 +25,7 @@ Quiz
     conceptId: string,
   }
 */
-const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin }) => {
+const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin, triggerRefetch, onTriggerRefetchChange }) => {
   const session = useSession();
 
   const quizPostMutation = trpc.useMutation("progress.post-one-quiz-result");
@@ -68,6 +70,8 @@ const QuizSection: FC<QuizSectionProps> = ({ quiz, refetch, origin }) => {
   const forceUpdate = () => {
     if (quizIndex == quiz.length - 1) {
       setDone(true);
+      // Force trigger refetch
+      onTriggerRefetchChange(!triggerRefetch);
     }
     setChoice("");
     setQuizIndex(quizIndex + 1);
