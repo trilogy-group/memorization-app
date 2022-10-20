@@ -2,6 +2,7 @@ import type { GetServerSideProps, NextPage } from "next";
 import { Textarea } from "@nextui-org/react";
 import Link from "next/link";
 
+import { AiOutlinePlus } from "react-icons/ai";
 
 import { unstable_getServerSession as getServerSession } from "next-auth";
 import { useEffect, useState } from "react";
@@ -12,6 +13,9 @@ import Meta from "@/components/Shared/Meta";
 
 import { trpc } from "../utils/trpc";
 import { authOptions } from "./api/auth/[...nextauth]";
+import { borderRadius } from "@mui/system";
+import { getSystemErrorMap } from "util";
+import { table } from "console";
 
 import { styled } from "@mui/material/styles";
 import Grid from "@mui/material/Unstable_Grid2";
@@ -28,17 +32,26 @@ import Button from "@mui/material/Button";
 
 import RefreshIcon from "@mui/icons-material/Refresh";
 import BackIcon from "@mui/icons-material/ArrowBackIosNew";
+import DeleteIcon from "@mui/icons-material/DeleteOutlined";
 
 import Navigation from "../components/navigation/navigation";
 import Upload from "../components/upload/upload";
 
 import { Option } from "@/utils/text";
 
+import { nanoid } from "nanoid";
+
 interface ConceptState {
   id: string;
   name: string;
   parentId: string;
   parentName: string;
+}
+
+enum TabOptions {
+  Acronym = 1,
+  Image,
+  Story,
 }
 
 const Item = styled(Paper)(({ theme }) => ({
@@ -59,20 +72,33 @@ const Item2 = styled(Paper)(({ theme }) => ({
   overflow: "hidden",
 }));
 
-var definitionInput: string = "";
+const wordList: string[] = [];
 
-const CreateDefinition: NextPage = () => {
+const CreateListOfWords: NextPage = () => {
   const [openUpload, setOpenUpload] = useState(false);
 
   const uploadMutation = trpc.useMutation("post.createVideo");
 
-  const [mnemonicImage, setMnemonicImage] = useState<string[]>([]);
+  const uploadImageMutation = trpc.useMutation("post.uploadToS3");
+
+
+  const [mnemonicImage, setMnemonicImage] = useState<string[]>([
+    "",
+    "",
+    "",
+    "",
+  ]);
+
 
   const [story, setStory] = useState<string[]>([]);
 
   const imgRecommendationMutation = trpc.useMutation("recommendImg.stabledif");
   const storyRecommendationMutation = trpc.useMutation("recommendStory.story");
+  const promptRecommendationMutation = trpc.useMutation(
+    "recommendStory.prompt"
+  );
 
+  const [inputValue, setInputValue] = useState("");
   const [inputPromptValue, setInputPromptValue] = useState("");
   const [inputPostValue, setInputPostValue] = useState("");
 
@@ -89,7 +115,7 @@ const CreateDefinition: NextPage = () => {
     false,
   ]);
 
-  const [isLoadingAcronym,] = useState<boolean[]>([
+  const [isLoadingAcronym, setIsLoadingAcronym] = useState<boolean[]>([
     false,
     false,
     false,
@@ -103,10 +129,15 @@ const CreateDefinition: NextPage = () => {
     false,
   ]);
 
-  const [value, setValue] = useState("3");
+  const [value, setValue] = useState("2");
   const [storyGenerated, setStoryGenerated] = useState(false);
+  const [acronymGenerated, setAcronymGenerated] = useState(false);
+  const [imageGenerated, setImageGenerated] = useState(false);
+
   const [selectedMnemonic, setSelectedMnemonic] = useState(false);
   const [selectedMnemonicType, setSelectedMnemonicType] = useState("");
+
+  const [options, setOptions] = useState([]);
 
   const [open, setOpen] = useState(false);
 
@@ -117,11 +148,29 @@ const CreateDefinition: NextPage = () => {
   const [mnemonicType, setMnemonicType] = useState("");
   const [correctAnswer, setCorrectAnswer] = useState("");
 
-  const handleChange = (event: React.SyntheticEvent, newValue: string) => {
+  const [generating, setGenerating] = useState(false);
+
+  const handleChange = async (
+    event: React.SyntheticEvent,
+    newValue: string
+  ) => {
     setValue(newValue);
-    if (newValue === "3" && !storyGenerated && definitionInput.length > 0) {
-      handleRecommeddedStoryList();
+    const value = Number(newValue);
+    if (
+      value === TabOptions.Story &&
+      !storyGenerated &&
+      wordList.length > 0 &&
+      generating
+    ) {
+      handleRecommeddedStoryList(tableEntryValue);
       setStoryGenerated(true);
+    } else if (
+      value === TabOptions.Image &&
+      !imageGenerated &&
+      wordList.length > 0
+    ) {
+      handleRecommenddedPrompt();
+      setImageGenerated(true);
     }
   };
 
@@ -142,6 +191,7 @@ const CreateDefinition: NextPage = () => {
       description: inputPromptValue,
     });
     let prevMnemonicImage = mnemonicImage;
+    
     prevMnemonicImage[Number(index)] = created?.filename;
     setMnemonicImage(prevMnemonicImage);
 
@@ -150,25 +200,65 @@ const CreateDefinition: NextPage = () => {
     setIsLoadingImage(prevLoading);
   };
 
-  const handleRecommeddedImageList = async () => {
+  const handleRecommenddedPrompt = async () => {
+    setIsLoading(true);
+    var promptWordList = "";
+
+    for (let i = 0; i < wordList.length; i++) {
+      if (wordList[i] != undefined) {
+        if (i == wordList.length - 1) {
+          promptWordList += wordList[i];
+        } else {
+          promptWordList += wordList[i] + ", ";
+        }
+      }
+    }
+    const promptCreated = await promptRecommendationMutation.mutateAsync({
+      description: promptWordList,
+    });
+    setIsLoading(false);
+    const prompt = String(promptCreated?.result);
+    const sprompt = ltrim((prompt || "") as string);
+    setInputPromptValue(sprompt);
+    //await handleRecommeddedImageList(sprompt);
+  };
+
+  function ltrim(str: string) {
+    if (!str) return str;
+    return str.replace(/^\s+/g, "");
+  }
+
+  const handleUploadToS3 = async (file: string) => {
+    const res = await uploadImageMutation.mutateAsync({ file: file });
+    return res;
+  };
+
+  const handleRecommeddedImageList = async (prompt: string) => {
+    const features = ["happy", "funny", "drawing", "scary"];
     let prevLoading = isLoadingImage;
+    let prevMnemonicImage = mnemonicImage;
     for (let i = 0; i < 4; i++) {
       prevLoading[i] = true;
       setIsLoadingImage(prevLoading);
+      prevMnemonicImage[i] = "";
+      setMnemonicImage(prevMnemonicImage);
     }
 
     for (let i = 0; i < 4; i++) {
       prevLoading = isLoadingImage;
       prevLoading[Number(i)] = true;
       setIsLoadingImage(prevLoading);
+      const featurePrompt = prompt + " " + features[i];
 
-      const imageCreated = await imgRecommendationMutation.mutateAsync({
-        description: inputPromptValue,
+      const imageName= await imgRecommendationMutation.mutateAsync({
+        description: featurePrompt,
       });
-      setMnemonicImage((mnemonicImage) => [
-        ...mnemonicImage,
-        imageCreated?.filename,
-      ]);
+      const imageRoute = imageName?.filename as string;
+      const s3ImageURL = await handleUploadToS3(imageRoute)
+
+      prevMnemonicImage = mnemonicImage;
+      prevMnemonicImage[i] = s3ImageURL as string;
+      setMnemonicImage(prevMnemonicImage);
 
       prevLoading = isLoadingImage;
       prevLoading[Number(i)] = false;
@@ -176,34 +266,57 @@ const CreateDefinition: NextPage = () => {
     }
   };
 
+
   const handleRecommeddedStory = async (index: Number) => {
     let prevLoading = isLoadingStory;
     prevLoading[Number(index)] = true;
     setIsLoadingStory(prevLoading);
 
     setIsLoadingMnemonic(true);
+    var storyWordList = "";
 
+    for (let i = 0; i < wordList.length; i++) {
+      if (wordList[i] != undefined) {
+        if (i == wordList.length - 1) {
+          storyWordList += wordList[i];
+        } else {
+          storyWordList += wordList[i] + ", ";
+        }
+      }
+    }
     const storyCreated = await storyRecommendationMutation.mutateAsync({
-      description: definitionInput,
+      description: storyWordList,
     });
 
     let prevStory = story;
     prevStory[Number(index)] =
-      "Remember " + definitionInput + " with: " + storyCreated?.result;
+      "Remember " + storyWordList + " with: " + storyCreated?.result;
     setIsLoadingMnemonic(false);
     prevLoading = isLoadingStory;
     prevLoading[Number(index)] = false;
     setIsLoadingStory(prevLoading);
   };
 
-  const handleRecommeddedStoryList = async () => {
+  const handleRecommeddedStoryList = async (prompt: string) => {
     let prevLoading = isLoadingStory;
     for (let i = 0; i < 4; i++) {
       prevLoading[i] = true;
       setIsLoadingStory(prevLoading);
     }
     setIsLoadingMnemonic(true);
+    var storyWordList = "";
 
+    //Get first leter for each word in wordList
+
+    for (let i = 0; i < wordList.length; i++) {
+      if (wordList[i] != undefined) {
+        if (i == wordList.length - 1) {
+          storyWordList += wordList[i];
+        } else {
+          storyWordList += wordList[i] + ", ";
+        }
+      }
+    }
     setStory(() => []);
     for (let i = 0; i < 4; i++) {
       prevLoading = isLoadingStory;
@@ -211,11 +324,11 @@ const CreateDefinition: NextPage = () => {
       setIsLoadingStory(prevLoading);
 
       const storyCreated = await storyRecommendationMutation.mutateAsync({
-        description: definitionInput,
+        description: prompt,
       });
       setStory((prevStory) => [
         ...prevStory,
-        "Remember " + definitionInput + " with: " + String(storyCreated?.result),
+        "Remember " + prompt + " with: " + String(storyCreated?.result),
       ]);
 
       prevLoading = isLoadingStory;
@@ -229,20 +342,43 @@ const CreateDefinition: NextPage = () => {
     setOpenUpload(true); // TODO: connect to the mnemonics generation backend
   };
 
-  const handleDefinitionInput = async () => {
-    const answer = document.getElementById("answer");
-    if (answer != null) {
-      definitionInput = tableEntryValue;
-      if (value === "3") {
-        handleRecommeddedStoryList();
-        setStoryGenerated(true);
-      }
-    } else {
-      throw new Error("Missing element 'answer' table");
+  const handleGeneration = async () => {
+    setGenerating(true);
+    const tab = Number(value);
+    if (tab === TabOptions.Story) {
+      handleRecommeddedStoryList(tableEntryValue);
+      setStoryGenerated(true);
+      setImageGenerated(false);
+    } else if (tab === TabOptions.Image) {
+      handleRecommeddedImageList(tableEntryValue);
+      setImageGenerated(true);
+      setStoryGenerated(false);
     }
   };
 
-  // TODO: connect list of words answer with the curricular graph
+  const handleAddToSequence = async () => {
+    setGenerating(false);
+    let item = {
+      id: nanoid(),
+      title: tableEntryValue.trim(),
+    };
+    wordList.push(tableEntryValue);
+    const tab = Number(value);
+    setOptions((state): any => [...state, item]);
+    return;
+  };
+  const handleDelete = async (id: string) => {
+    setGenerating(false);
+    const index = options.findIndex((item: any) => item.id === id);
+    if (index > -1) {
+      options.splice(index, 1);
+      await wordList.splice(index, 1);
+      setOptions((state) => [...state]);
+    }
+    const tab = Number(value);
+    return;
+  };
+
   return (
     <>
       <Meta
@@ -256,8 +392,8 @@ const CreateDefinition: NextPage = () => {
         <div className="flex justify-center mx-2 flex-grow place-items-center">
           <div className="w-full max-w-[1000px] p-1 bg-white my-1">
             <div className="flex items-start mt-10 gap-4">
-              <div className="grid grid-cols-2 gap-11 p-2 w-[100%] h-[75%] mt-5 mb-2">
-                <div className="col-span-1 h-full w-full">
+              <div className="grid grid-cols-2 gap-11 p-2 w-[100%] mt-5 mb-2">
+                <div className="col-span-1 w-full">
                   <h1 className="text-2xl font-bold">
                     Memorize a definition{" "}
                     <Navigation
@@ -279,12 +415,16 @@ const CreateDefinition: NextPage = () => {
                         setParentId(parentId);
                         setParentName(parentName);
                         setInputPostValue(nodeName);
-                        const correctChoiceDesc = questionOptions?.map((op: Option) => {
-                          if (op.is_correct) return op.desc;
-                        }) as string[];
-                        let correctOption = correctChoiceDesc.filter(option => option !== undefined)[0];
+                        const correctChoiceDesc = questionOptions?.map(
+                          (op: Option) => {
+                            if (op.is_correct) return op.desc;
+                          }
+                        ) as string[];
+                        let correctOption = correctChoiceDesc.filter(
+                          (option) => option !== undefined
+                        )[0];
                         if (correctOption) {
-                          setCorrectAnswer(correctOption)
+                          setCorrectAnswer(correctOption);
                         }
                       }}
                       addNodeListToWorkspace={function (
@@ -334,7 +474,7 @@ const CreateDefinition: NextPage = () => {
                     )}
                     <Textarea
                       label="Enter your question"
-                      placeholder="e.g., definition of History"
+                      placeholder="e.g., world leaders during WW2"
                       value={inputPostValue}
                       onChange={(e) => {
                         setInputPostValue(e.target.value);
@@ -344,38 +484,105 @@ const CreateDefinition: NextPage = () => {
                   {correctAnswer != "" && (
                     <div>
                       <h3 className="text-lg font-bold">
-                        Answer: <span className="bg-lime-500">{correctAnswer}</span>
+                        Answer:
+                        <Box
+                          component="div"
+                          sx={{
+                            display: "inline",
+                            p: 1,
+                            m: 5,
+                            bgcolor: (theme) =>
+                              theme.palette.mode === "dark"
+                                ? "#101010"
+                                : "#fff",
+                            color: (theme) =>
+                              theme.palette.mode === "dark"
+                                ? "grey.300"
+                                : "grey.800",
+                            border: "1px solid",
+                            borderColor: (theme) =>
+                              theme.palette.mode === "dark"
+                                ? "grey.800"
+                                : "grey.300",
+                            borderRadius: 2,
+                            fontSize: "0.875rem",
+                            fontWeight: "700",
+                          }}
+                        >
+                          {correctAnswer}
+                        </Box>
                       </h3>
                     </div>
                   )}
-                  <div className="col-span-1 h-[35%] w-full">
+                  <div className="col-span-1 w-full">
                     <p>Input below:</p>
-                    <div className="grid gap-1" style={{ marginBottom: 10 }}>
-                      <Textarea
-                        placeholder=""
-                        id="newEntry"
-                        value={tableEntryValue}
-                        onChange={(e) => {
-                          setTableEntryValue(e.target.value);
-                        }}
-                      />
-                    </div>
+                    <input
+                      type="text"
+                      id="newEntry"
+                      className="p-2 w-full border border-gray-2 mt-1 mb-3 outline-none focus:border-gray-400 transition"
+                      value={tableEntryValue}
+                      onChange={(e) => {
+                        setTableEntryValue(e.target.value);
+                      }}
+                    />
                     <div className="grid grid-cols-2">
-                      <button
-                        onClick={async () => {
-                          await handleDefinitionInput();
-                        }}
-                        disabled={!tableEntryValue.trim()}
-                        className={`flex justify-center items-center gap-2 py-3 min-w-[20px] hover:brightness-90 transition text-white bg-red-1 disabled:text-gray-400 disabled:bg-gray-200`}
-                        style={{ borderRadius: 5, padding: 5, width: 200 }}
-                      >
-                        Generate Mnemonics
-                      </button>
+                    <button
+                          onClick={async () => {
+                            setIsLoadingMnemonic(true);
+                            await handleGeneration();
+                            setIsLoadingMnemonic(false);
+                          }}
+                          disabled={
+                            (!inputPromptValue.trim() && value == "2") ||
+                            !tableEntryValue.trim()
+                          }
+                          className={`flex justify-center items-center gap-2 py-3 hover:brightness-90 transition text-white bg-red-1 disabled:text-gray-400 disabled:bg-gray-200`}
+                          style={{
+                            borderRadius: 10,
+                            padding: 5,
+                            height: 38,
+                            marginLeft: 10,
+                            marginTop: 10,
+                            float: "right",
+                          }}
+                        >
+                          Generate
+                        </button>
                     </div>
-                    <div style={{ margin: 10, height: 390 }}>
-                      <ul id="answer"></ul>
+                    <div className="my-8 min-h-[200px]">
+                      <ul id="answer">
+                        {options.map((option: any, index) => {
+                          return (
+                            <li
+                              key={index}
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "space-between",
+                                padding: 10,
+                                border: "1px solid #ccc",
+                                borderRadius: 5,
+                                marginBottom: 5,
+                              }}
+                            >
+                              <p>{(index+1) + ".- " + option.title}</p>
+                              <button
+                                onClick={() => {
+                                  handleDelete(option.id);
+                                }}
+                                className={`flex justify-center items-center gap-2 py-3 min-w-[20px] hover:brightness-90 transition text-white bg-red-1 disabled:text-gray-400 disabled:bg-gray-200`}
+                                style={{ borderRadius: 5, padding: 5 }}
+                              >
+                                <DeleteIcon />
+                              </button>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                      
                     </div>
                   </div>
+
                   <div>
                     <button
                       onClick={async () => await handleUpload()}
@@ -383,7 +590,14 @@ const CreateDefinition: NextPage = () => {
                         isLoading || !selectedMnemonic || parentName === ""
                       }
                       className={`flex justify-center items-center gap-2 py-3 min-w-[170px] hover:brightness-90 transition text-white bg-red-1 disabled:text-gray-400 disabled:bg-gray-200`}
-                      style={{ borderRadius: 5, padding: 5 }}
+                      style={{
+                        borderRadius: 10,
+                        padding: 5,
+                        height: 38,
+                        marginTop: 10,
+                        marginLeft: 10,
+                        marginBottom: 10,
+                      }}
                     >
                       {isLoading && (
                         <span className="w-4 h-4 border-2 border-gray-500 border-t-transparent rounded-full animate-spin"></span>
@@ -402,17 +616,95 @@ const CreateDefinition: NextPage = () => {
                           aria-label="lab API tabs example"
                         >
                           <Tab
-                            label="Storys"
-                            value="3"
-                            disabled={selectedMnemonic}
-                          />
-                          <Tab
                             label="Images"
                             value="2"
                             disabled={selectedMnemonic}
                           />
+                          <Tab
+                            label="Storys"
+                            value="3"
+                            disabled={selectedMnemonic}
+                          />
                         </TabList>
                       </Box>
+                      <TabPanel value="2">
+                        <Grid
+                          container
+                          spacing={{ xs: 1, md: 1 }}
+                          columns={{ xs: 4, sm: 8, md: 12 }}
+                        >
+                          {Array.from(Array(4)).map((_, index) => (
+                            <Grid xs={4} sm={6} md={6} key={index}>
+                              <Item>
+                                <div className="flex justify-center items-center grid-cols-1">
+                                  {isLoadingImage[index] && (
+                                    <span className="w-10 h-10 border-2 border-gray-500 border-t-transparent rounded-full animate-spin"></span>
+                                  )}
+                                </div>
+
+                                {!mnemonicImage[index] ? (
+                                  <div className="col-span-1 bg-gray-1 h-full w-full"></div>
+                                ) : (
+                                  <div className="col-span-1 bg-gray-1 h-full w-full">
+                                    {!isLoadingImage[index] && (
+                                      <div className="col-span-1 bg-gray-1 h-full w-full">
+                                        <img
+                                          className="h-full w-auto object-contain"
+                                          src={mnemonicImage[index]}
+                                          alt=""
+                                        />
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+                              </Item>
+                              <Button
+                                disabled={
+                                  isLoadingImage[index] ||
+                                  mnemonicImage[index] == ""
+                                }
+                                variant="outlined"
+                                color="success"
+                                style={{
+                                  bottom: 0,
+                                  float: "left",
+                                  margin: 5,
+                                }}
+                                onClick={async () => {
+                                  setSelectedMnemonic(true);
+                                  setSelectedMnemonicType(
+                                    mnemonicImage[index] || ""
+                                  );
+                                  setMnemonicType("image");
+
+                                  setSelectedMnemonic(true);
+                                }}
+                              >
+                                Accept
+                              </Button>
+                              <Button
+                                disabled={
+                                  isLoadingImage[index] ||
+                                  mnemonicImage[index] == ""
+                                }
+                                onClick={async () => {
+                                  await handleRecommeddedImage(index);
+                                }}
+                                variant="outlined"
+                                color="error"
+                                style={{
+                                  bottom: 0,
+                                  float: "right",
+                                  margin: 5,
+                                }}
+                              >
+                                {" "}
+                                <RefreshIcon />
+                              </Button>
+                            </Grid>
+                          ))}
+                        </Grid>
+                      </TabPanel>
                       <TabPanel value="3">
                         <Grid
                           container
@@ -475,107 +767,6 @@ const CreateDefinition: NextPage = () => {
                           ))}
                         </Grid>
                       </TabPanel>
-                      <TabPanel value="2">
-                        <div className="grid grid-cols-2">
-                          <TextareaAutosize
-                            aria-label="empty textarea"
-                            placeholder="Prompt for image generation"
-                            value={inputPromptValue}
-                            onChange={(e) => {
-                              setInputPromptValue(e.target.value);
-                            }}
-                            style={{ width: 200, marginBottom: 10, padding: 5 }}
-                          />
-                          <button
-                            onClick={async () => {
-                              setIsLoadingMnemonic(true);
-                              await handleRecommeddedImageList();
-                              setIsLoadingMnemonic(false);
-                            }}
-                            disabled={!inputPromptValue.trim()}
-                            className={`flex justify-center items-center gap-2 py-3 hover:brightness-90 transition text-white bg-red-1 disabled:text-gray-400 disabled:bg-gray-200`}
-                            style={{
-                              borderRadius: 10,
-                              padding: 5,
-                              width: 100,
-                              height: 38,
-                              marginLeft: 10,
-                            }}
-                          >
-                            Generate
-                          </button>
-                        </div>
-                        <Grid
-                          container
-                          spacing={{ xs: 1, md: 1 }}
-                          columns={{ xs: 4, sm: 8, md: 12 }}
-                        >
-                          {Array.from(Array(4)).map((_, index) => (
-                            <Grid xs={4} sm={6} md={6} key={index}>
-                              <Item>
-                                <div className="flex justify-center items-center grid-cols-1">
-                                  {isLoadingImage[index] && (
-                                    <span className="w-10 h-10 border-2 border-gray-500 border-t-transparent rounded-full animate-spin"></span>
-                                  )}
-                                </div>
-
-                                {!mnemonicImage[index] ? (
-                                  <div className="col-span-1 bg-gray-1 h-full w-full"></div>
-                                ) : (
-                                  <div className="col-span-1 bg-gray-1 h-full w-full">
-                                    {!isLoadingImage[index] && (
-                                      <div className="col-span-1 bg-gray-1 h-full w-full">
-                                        <img
-                                          className="h-full w-auto object-contain"
-                                          src={mnemonicImage[index]}
-                                          alt=""
-                                        />
-                                      </div>
-                                    )}
-                                  </div>
-                                )}
-                              </Item>
-                              <Button
-                                disabled={isLoadingImage[index] || mnemonicImage[index] == null}
-                                variant="outlined"
-                                color="success"
-                                style={{
-                                  bottom: 0,
-                                  float: "left",
-                                  margin: 5,
-                                }}
-                                onClick={async () => {
-                                  setSelectedMnemonic(true);
-                                  setSelectedMnemonicType(
-                                    mnemonicImage[index] || ""
-                                  );
-                                  setMnemonicType("image");
-
-                                  setSelectedMnemonic(true);
-                                }}
-                              >
-                                Accept
-                              </Button>
-                              <Button
-                                disabled={isLoadingImage[index] || mnemonicImage[index] == null}
-                                onClick={async () => {
-                                  await handleRecommeddedImage(index);
-                                }}
-                                variant="outlined"
-                                color="error"
-                                style={{
-                                  bottom: 0,
-                                  float: "right",
-                                  margin: 5,
-                                }}
-                              >
-                                {" "}
-                                <RefreshIcon />
-                              </Button>
-                            </Grid>
-                          ))}
-                        </Grid>
-                      </TabPanel>
                     </TabContext>
                   </div>
                 )}
@@ -587,8 +778,16 @@ const CreateDefinition: NextPage = () => {
                           disabled={true}
                           aria-label="lab API tabs example"
                         >
-                          <Tab label="Images" value="2" disabled={selectedMnemonic} />
-                          <Tab label="Storys" value="3" disabled={selectedMnemonic} />
+                          <Tab
+                            label="Images"
+                            value="2"
+                            disabled={selectedMnemonic}
+                          />
+                          <Tab
+                            label="Storys"
+                            value="3"
+                            disabled={selectedMnemonic}
+                          />
                         </TabList>
                       </Box>
                       <TabPanel value="2">
@@ -672,7 +871,7 @@ const CreateDefinition: NextPage = () => {
   );
 };
 
-export default CreateDefinition;
+export default CreateListOfWords;
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
   const session = await getServerSession(req, res, authOptions);
