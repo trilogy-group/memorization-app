@@ -44,3 +44,5 @@ migrations
 public/*.png
 concept_data.txt
 log
+scripts/conceptstore_log.txt
+scripts/concepts.txt
