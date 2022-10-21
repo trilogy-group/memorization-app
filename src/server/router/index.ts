@@ -6,9 +6,7 @@ import { followRouter } from "./follow";
 import { likeRouter } from "./like";
 import { postRouter } from "./post";
 import { progressRouter } from "./progress";
-import { imgRecommendationRouter } from "./recommendImg";
-import { acronymRecommendationRouter } from "./recommendAcro";
-import { storyRecommendationRouter } from "./recommendStory";
+import { recommendationRouter } from "./recommendations";
 import { notificationRouter } from "./notification";
 import { contentTreeRouter } from "./contentTree";
 import { userRouter } from "./user";
@@ -22,9 +20,7 @@ export const appRouter = createRouter()
   .merge("comment.", commentRouter)
   .merge("progress.", progressRouter)
   .merge("notification.", notificationRouter)
-  .merge("recommendImg.", imgRecommendationRouter)
-  .merge("recommendAcro.", acronymRecommendationRouter)
-  .merge("recommendStory.", storyRecommendationRouter)
+  .merge("recommendations.", recommendationRouter)
   .merge("getContentTree.", contentTreeRouter);
 
 export type AppRouter = typeof appRouter;
