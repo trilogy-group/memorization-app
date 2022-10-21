@@ -1,11 +1,6 @@
 import React, { useState, useEffect } from "react";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import MenuBookIcon from "@mui/icons-material/MenuBook";
-import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
-import LocalActivityIcon from "@mui/icons-material/LocalActivity";
-
-import RefreshIcon from "@mui/icons-material/Refresh";
 
 import { TreeView, TreeItem } from "@mui/lab";
 import {
@@ -15,13 +10,11 @@ import {
   DialogContent,
   DialogActions,
   styled,
-  TextField,
 } from "@mui/material";
 
 import { trpc } from "../../utils/trpc";
 
 import {
-  Convert,
   ContentTree,
   Domain,
   Skill,

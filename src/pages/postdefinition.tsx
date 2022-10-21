@@ -1,8 +1,5 @@
 import type { GetServerSideProps, NextPage } from "next";
 import { Textarea } from "@nextui-org/react";
-import Link from "next/link";
-
-import { AiOutlinePlus } from "react-icons/ai";
 
 import { unstable_getServerSession as getServerSession } from "next-auth";
 import { useEffect, useState } from "react";
@@ -13,9 +10,6 @@ import Meta from "@/components/Shared/Meta";
 
 import { trpc } from "../utils/trpc";
 import { authOptions } from "./api/auth/[...nextauth]";
-import { borderRadius } from "@mui/system";
-import { getSystemErrorMap } from "util";
-import { table } from "console";
 
 import { styled } from "@mui/material/styles";
 import Grid from "@mui/material/Unstable_Grid2";
@@ -26,7 +20,6 @@ import Tab from "@mui/material/Tab";
 import TabContext from "@mui/lab/TabContext";
 import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
-import TextareaAutosize from "@mui/material/TextareaAutosize";
 
 import Button from "@mui/material/Button";
 
@@ -39,7 +32,6 @@ import Upload from "../components/upload/upload";
 
 import { Option } from "@/utils/text";
 
-import { nanoid } from "nanoid";
 
 interface ConceptState {
   id: string;
@@ -92,13 +84,12 @@ const CreateListOfWords: NextPage = () => {
 
   const [story, setStory] = useState<string[]>([]);
 
-  const imgRecommendationMutation = trpc.useMutation("recommendImg.stabledif");
-  const storyRecommendationMutation = trpc.useMutation("recommendStory.story");
+  const imgRecommendationMutation = trpc.useMutation("recommendations.stabledif");
+  const storyRecommendationMutation = trpc.useMutation("recommendations.story");
   const promptRecommendationMutation = trpc.useMutation(
-    "recommendStory.prompt"
+    "recommendations.prompt"
   );
 
-  const [inputValue, setInputValue] = useState("");
   const [inputPromptValue, setInputPromptValue] = useState("");
   const [inputPostValue, setInputPostValue] = useState("");
 
@@ -115,13 +106,6 @@ const CreateListOfWords: NextPage = () => {
     false,
   ]);
 
-  const [isLoadingAcronym, setIsLoadingAcronym] = useState<boolean[]>([
-    false,
-    false,
-    false,
-    false,
-  ]);
-
   const [isLoadingStory, setIsLoadingStory] = useState<boolean[]>([
     false,
     false,
@@ -132,7 +116,7 @@ const CreateListOfWords: NextPage = () => {
 
   const [value, setValue] = useState("2");
   const [storyGenerated, setStoryGenerated] = useState(false);
-  const [acronymGenerated, setAcronymGenerated] = useState(false);
+
   const [imageGenerated, setImageGenerated] = useState(false);
 
   const [selectedMnemonic, setSelectedMnemonic] = useState(false);

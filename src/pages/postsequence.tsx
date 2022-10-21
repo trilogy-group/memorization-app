@@ -1,6 +1,5 @@
 import type { GetServerSideProps, NextPage } from "next";
 import { Textarea } from "@nextui-org/react";
-import Link from "next/link";
 
 import { AiOutlinePlus } from "react-icons/ai";
 
@@ -13,10 +12,6 @@ import Meta from "@/components/Shared/Meta";
 
 import { trpc } from "../utils/trpc";
 import { authOptions } from "./api/auth/[...nextauth]";
-import { borderRadius } from "@mui/system";
-import { getSystemErrorMap } from "util";
-import { table } from "console";
-
 import { styled } from "@mui/material/styles";
 import Grid from "@mui/material/Unstable_Grid2";
 import Paper from "@mui/material/Paper";
@@ -94,14 +89,13 @@ const CreateListOfWords: NextPage = () => {
 
   const [story, setStory] = useState<string[]>([]);
 
-  const imgRecommendationMutation = trpc.useMutation("recommendImg.stabledif");
-  const acroRecommendationMutation = trpc.useMutation("recommendAcro.acronym");
-  const storyRecommendationMutation = trpc.useMutation("recommendStory.story");
+  const imgRecommendationMutation = trpc.useMutation("recommendations.stabledif");
+  const acroRecommendationMutation = trpc.useMutation("recommendations.acronym");
+  const storyRecommendationMutation = trpc.useMutation("recommendations.story");
   const promptRecommendationMutation = trpc.useMutation(
-    "recommendStory.prompt"
+    "recommendations.prompt"
   );
 
-  const [inputValue, setInputValue] = useState("");
   const [inputPromptValue, setInputPromptValue] = useState("");
   const [inputPostValue, setInputPostValue] = useState("");
 

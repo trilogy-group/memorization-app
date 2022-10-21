@@ -1,6 +1,5 @@
 import type { GetServerSideProps, NextPage } from "next";
 import { Textarea } from "@nextui-org/react";
-import Link from "next/link";
 
 import { AiOutlinePlus } from "react-icons/ai";
 
@@ -13,9 +12,6 @@ import Meta from "@/components/Shared/Meta";
 
 import { trpc } from "../utils/trpc";
 import { authOptions } from "./api/auth/[...nextauth]";
-import { borderRadius } from "@mui/system";
-import { getSystemErrorMap } from "util";
-import { table } from "console";
 
 import { styled } from "@mui/material/styles";
 import Grid from "@mui/material/Unstable_Grid2";
@@ -72,8 +68,6 @@ const Item2 = styled(Paper)(({ theme }) => ({
   overflow: "hidden",
 }));
 
-
-
 const CreateListOfWords: NextPage = () => {
   const [wordList, setWordList] = useState<string[]>([]);
 
@@ -82,7 +76,6 @@ const CreateListOfWords: NextPage = () => {
   const uploadMutation = trpc.useMutation("post.createVideo");
 
   const uploadImageMutation = trpc.useMutation("post.uploadToS3");
-
 
   const [mnemonicImage, setMnemonicImage] = useState<string[]>([
     "",
@@ -95,14 +88,13 @@ const CreateListOfWords: NextPage = () => {
 
   const [story, setStory] = useState<string[]>([]);
 
-  const imgRecommendationMutation = trpc.useMutation("recommendImg.stabledif");
-  const acroRecommendationMutation = trpc.useMutation("recommendAcro.acronym");
-  const storyRecommendationMutation = trpc.useMutation("recommendStory.story");
+  const imgRecommendationMutation = trpc.useMutation("recommendations.stabledif");
+  const acroRecommendationMutation = trpc.useMutation("recommendations.acronym");
+  const storyRecommendationMutation = trpc.useMutation("recommendations.story");
   const promptRecommendationMutation = trpc.useMutation(
-    "recommendStory.prompt"
+    "recommendations.prompt"
   );
 
-  const [inputValue, setInputValue] = useState("");
   const [inputPromptValue, setInputPromptValue] = useState("");
   const [inputPostValue, setInputPostValue] = useState("");
 
@@ -199,8 +191,8 @@ const CreateListOfWords: NextPage = () => {
   const handleRecommeddedImage = async (index: Number, prompt: string) => {
     let newLoading = isLoadingImage;
     newLoading[Number(index)] = true;
-    setIsLoadingImage(prevLoading => [...newLoading]);
-    
+    setIsLoadingImage((prevLoading) => [...newLoading]);
+
     const featurePrompt = prompt + " " + features[Number(index)];
 
     const created = await imgRecommendationMutation.mutateAsync({
@@ -210,13 +202,13 @@ const CreateListOfWords: NextPage = () => {
 
     const imageRoute = created?.filename as string;
     console.log(imageRoute);
-    const s3ImageURL = await handleUploadToS3(imageRoute)
+    const s3ImageURL = await handleUploadToS3(imageRoute);
     prevMnemonicImage[Number(index)] = s3ImageURL as string;
     setMnemonicImage(prevMnemonicImage);
 
     newLoading = isLoadingImage;
     newLoading[Number(index)] = false;
-    setIsLoadingImage(prevLoading => [...newLoading]);
+    setIsLoadingImage((prevLoading) => [...newLoading]);
   };
 
   const handleRecommenddedPrompt = async () => {
@@ -253,7 +245,6 @@ const CreateListOfWords: NextPage = () => {
   };
 
   const handleRecommeddedImageList = async (prompt: string) => {
-    
     let prevLoading = isLoadingImage;
     let prevMnemonicImage = mnemonicImage;
     for (let i = 0; i < 4; i++) {
@@ -269,11 +260,11 @@ const CreateListOfWords: NextPage = () => {
       setIsLoadingImage(prevLoading);
       const featurePrompt = prompt + " " + features[i];
 
-      const imageName= await imgRecommendationMutation.mutateAsync({
+      const imageName = await imgRecommendationMutation.mutateAsync({
         description: featurePrompt,
       });
       const imageRoute = imageName?.filename as string;
-      const s3ImageURL = await handleUploadToS3(imageRoute)
+      const s3ImageURL = await handleUploadToS3(imageRoute);
 
       prevMnemonicImage = mnemonicImage;
       prevMnemonicImage[i] = s3ImageURL as string;
@@ -470,7 +461,10 @@ const CreateListOfWords: NextPage = () => {
     const index = options.findIndex((item: any) => item.id === id);
     if (index > -1) {
       options.splice(index, 1);
-      setWordList((prevWordList) => {prevWordList.splice(index, 1); return prevWordList;});
+      setWordList((prevWordList) => {
+        prevWordList.splice(index, 1);
+        return prevWordList;
+      });
       setOptions((state) => [...state]);
     }
     const tab = Number(value);
@@ -684,29 +678,29 @@ const CreateListOfWords: NextPage = () => {
                           />
                         )}
                         {wordList.length > 0 && (
-                        <button
-                          onClick={async () => {
-                            setIsLoadingMnemonic(true);
-                            await handleGeneration();
-                            setIsLoadingMnemonic(false);
-                          }}
-                          disabled={
-                            (!inputPromptValue.trim() && value == "2") ||
-                            wordList.length == 0
-                          }
-                          className={`flex justify-center items-center gap-2 py-3 hover:brightness-90 transition text-white bg-red-1 disabled:text-gray-400 disabled:bg-gray-200`}
-                          style={{
-                            borderRadius: 10,
-                            padding: 5,
-                            width: "28%",
-                            height: 38,
-                            marginLeft: 10,
-                            marginTop: 10,
-                            float: "right",
-                          }}
-                        >
-                          Generate
-                        </button>
+                          <button
+                            onClick={async () => {
+                              setIsLoadingMnemonic(true);
+                              await handleGeneration();
+                              setIsLoadingMnemonic(false);
+                            }}
+                            disabled={
+                              (!inputPromptValue.trim() && value == "2") ||
+                              wordList.length == 0
+                            }
+                            className={`flex justify-center items-center gap-2 py-3 hover:brightness-90 transition text-white bg-red-1 disabled:text-gray-400 disabled:bg-gray-200`}
+                            style={{
+                              borderRadius: 10,
+                              padding: 5,
+                              width: "28%",
+                              height: 38,
+                              marginLeft: 10,
+                              marginTop: 10,
+                              float: "right",
+                            }}
+                          >
+                            Generate
+                          </button>
                         )}
                       </div>
                       {value == "2" && (
@@ -905,7 +899,10 @@ const CreateListOfWords: NextPage = () => {
                                   mnemonicImage[index] == ""
                                 }
                                 onClick={async () => {
-                                  await handleRecommeddedImage(index, inputPromptValue);
+                                  await handleRecommeddedImage(
+                                    index,
+                                    inputPromptValue
+                                  );
                                 }}
                                 variant="outlined"
                                 color="error"
