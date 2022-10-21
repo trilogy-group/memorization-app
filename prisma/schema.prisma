@@ -55,8 +55,7 @@ model User {
     points        Int            @default(0)
     progress      Progress[]
     notifications Notification[]
-    masteryId     Int?
-    mastery       Mastery?       @relation(fields: [masteryId], references: [id])
+    masteries     Mastery[]
     concepts      Concept[]
     Feed          Feed[]
 
@@ -116,10 +115,11 @@ model Post {
 // If all quizzes of one concept have reached the 60-day-interval threshold, we deem the concept mastered.
 // The mastered concepts are inserted into the Mastery table, the relating questions are removed from the progress table
 model Mastery {
-    id        Int     @id @default(autoincrement())
-    user      User[]
-    conceptId String
-    concepts  Concept @relation(fields: [conceptId], references: [id])
+    id      Int    @id @default(autoincrement())
+    userId  String
+    users   User   @relation(fields: [userId], references: [id])
+    quizId  Int
+    quizzes Quiz   @relation(fields: [quizId], references: [id])
 }
 
 model Like {
@@ -187,14 +187,13 @@ model Skill {
 }
 
 model Concept {
-    id        String    @id
-    name      String
-    masteries Mastery[]
-    quizzes   Quiz[]
-    users     User[]
-    skillId   String
-    skill     Skill     @relation(fields: [skillId], references: [id])
-    Feed      Feed[]
+    id      String @id
+    name    String
+    quizzes Quiz[]
+    users   User[]
+    skillId String
+    skill   Skill  @relation(fields: [skillId], references: [id])
+    Feed    Feed[]
 
     @@fulltext([name])
 }
@@ -212,6 +211,7 @@ model Quiz {
     concepts     Concept        @relation(fields: [conceptId], references: [id])
     Notification Notification[]
     Feed         Feed[]
+    Mastery      Mastery[]
 }
 
 model Feed {

@@ -287,6 +287,23 @@ export const progressRouter = createRouter()
             }
           }
         });
+        // if the interval is longer than 30 days, delete the progress, add it to mastery
+        if (repetitionItem.interval > 30) {
+          await prisma.progress.delete({
+            where: {
+              progress_identifier: {
+                userId: session?.user?.id as string,
+                quizId: input.quizId
+              },
+            }
+          });
+          await prisma.mastery.create({
+            data: {
+              userId: session?.user?.id as string,
+              quizId: input.quizId,
+            }
+          });
+        }
       }
 
       return;
