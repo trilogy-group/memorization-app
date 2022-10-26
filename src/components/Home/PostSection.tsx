@@ -12,7 +12,7 @@ import { IoIosShareAlt } from "react-icons/io";
 
 import { copyToClipboard } from "@/utils/clipboard";
 import { formatNumber } from "@/utils/number";
-import { formatAccountName } from "@/utils/text";
+import { formatAccountName, contentType } from "@/utils/text";
 import { trpc } from "@/utils/trpc";
 
 import VideoPlayer from "./VideoPlayer";
@@ -133,6 +133,39 @@ const PostSection: FC<PostSectionProps> = ({ post, refetch, origin, triggerRefet
     );
   };
 
+  const handleContentDisplay = () => {
+    if (post.contentType === contentType.text) {
+      return (
+        <div className="text-gray-500 text-sm break-words">
+          {post.caption + post.mnemonic_text}
+        </div>
+      );
+    }
+
+    if (post.contentType == contentType.image) {
+      return (
+        <Image
+          className="rounded-full object-cover"
+          height={300}
+          width={450}
+          src={post.coverURL!}
+          alt=""
+        />);
+    }
+
+    return <a
+      className={`${post.videoHeight > post.videoWidth * 1.3
+        ? "md:h-[600px]"
+        : "flex-grow h-auto"
+        } block bg-[#3D3C3D] rounded-md overflow-hidden flex-grow h-auto md:flex-grow-0`}
+    >
+      <VideoPlayer
+        src={post.videoURL}
+        poster={post.coverURL}
+      ></VideoPlayer>
+    </a>
+  };
+
   useEffect(() => {
     concept().then(() => { ; });
   }, []);
@@ -184,17 +217,9 @@ const PostSection: FC<PostSectionProps> = ({ post, refetch, origin, triggerRefet
         </div>
         <div className="flex items-end gap-5">
           <Link href={`/post/${post.id}`}>
-            <a
-              className={`${post.videoHeight > post.videoWidth * 1.3
-                ? "md:h-[600px]"
-                : "flex-grow h-auto"
-                } block bg-[#3D3C3D] rounded-md overflow-hidden flex-grow h-auto md:flex-grow-0`}
-            >
-              <VideoPlayer
-                src={post.videoURL}
-                poster={post.coverURL}
-              ></VideoPlayer>
-            </a>
+            {
+              handleContentDisplay()
+            }
           </Link>
           <div className="flex flex-col gap-1 lg:gap-2">
             <Button onClick={() => handleGotIt()} variant="outlined">

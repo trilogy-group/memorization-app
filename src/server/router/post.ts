@@ -1,4 +1,4 @@
-import { FeedItem } from "@/utils/text";
+import { FeedItem, contentType } from "@/utils/text";
 import { Follow, Like, Quiz, Post } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
@@ -36,13 +36,6 @@ function uploadToS3(fileName: string): Promise<any> {
       return resolve(data.Location);
     });
   });
-}
-
-enum contentType {
-  image = 1,
-  video = 2,
-  text = 3,
-  unknown = 4,
 }
 
 
