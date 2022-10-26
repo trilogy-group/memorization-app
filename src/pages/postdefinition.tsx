@@ -298,7 +298,7 @@ const CreateListOfWords: NextPage = () => {
 
     let prevStory = story;
     prevStory[Number(index)] =
-      "Remember " + storyWordList + " with: " + storyCreated?.result;
+      storyWordList + ": " + storyCreated?.result;
     setIsLoadingMnemonic(false);
     prevLoading = isLoadingStory;
     prevLoading[Number(index)] = false;
@@ -336,7 +336,7 @@ const CreateListOfWords: NextPage = () => {
       });
       setStory((prevStory) => [
         ...prevStory,
-        "Remember " + prompt + " with: " + String(storyCreated?.result),
+        prompt + ": " + String(storyCreated?.result),
       ]);
 
       prevLoading = isLoadingStory;
@@ -451,7 +451,7 @@ const CreateListOfWords: NextPage = () => {
                         caption={nodeName}
                         mnemonicType={mnemonicType}
                         imageUrl={""}
-                        mnemonicText={selectedMnemonicType}
+                        mnemonicText={correctAnswer + ", \n" +  selectedMnemonicType}
                       />
                     )}
                   </h1>
