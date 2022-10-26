@@ -236,12 +236,13 @@ export const postRouter = createRouter()
   .mutation("createVideo", {
     input: z.object({
       caption: z.string(),
-      videoURL: z.string().url(),
-      coverURL: z.string().url(),
-      videoWidth: z.number().gt(0),
-      videoHeight: z.number().gt(0),
+      videoURL: z.string(),
+      coverURL: z.string(),
+      videoWidth: z.number(),
+      videoHeight: z.number(),
       conceptId: z.string(),
       quizId: z.string(),
+      contentType: z.number(),
     }),
     // TODO: test whether quizFound works properly
     async resolve({ ctx: { prisma, session }, input }) {
@@ -251,6 +252,8 @@ export const postRouter = createRouter()
           idInConcept: input.quizId as string,
         }
       });
+
+      console.log(quizFound);
 
       if (quizFound == null) {
         throw new Error("Concept or quiz not found in the DB.");
@@ -264,7 +267,7 @@ export const postRouter = createRouter()
           videoWidth: input.videoWidth,
           videoHeight: input.videoHeight,
           mnemonic_text: "",
-          contentType: contentType.video,
+          contentType: input.contentType,
           userId: session?.user?.id!,
           quizId: quizFound.id,
         },
