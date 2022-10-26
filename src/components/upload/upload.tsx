@@ -93,6 +93,7 @@ export type UploadProps = {
   caption: string;
   mnemonicType: string;
   imageUrl: string;
+  mnemonicText: string;
 };
 
 const Upload = ({
@@ -103,6 +104,7 @@ const Upload = ({
   caption,
   mnemonicType,
   imageUrl,
+  mnemonicText,
 }: UploadProps) => {
   const router = useRouter();
 
@@ -373,6 +375,7 @@ const Upload = ({
         conceptId: conceptId,
         quizId: questionId,
         contentType: 2,
+        mnemonicText: mnemonicText,
       });
       toast.loading("Mnemonics Created! Points +1", { id: toastID });
       await new Promise((r) => setTimeout(r, 800));
@@ -424,6 +427,7 @@ const Upload = ({
         conceptId: conceptId,
         quizId: questionId,
         contentType: contentType,
+        mnemonicText: mnemonicText,
       });
       toast.loading("Mnemonics Created! Points +1", { id: toastID });
       await new Promise((r) => setTimeout(r, 800));

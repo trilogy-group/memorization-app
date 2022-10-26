@@ -540,6 +540,7 @@ const CreateListOfWords: NextPage = () => {
                         caption={nodeName}
                         mnemonicType={mnemonicType}
                         imageUrl={selectedMnemonicType}
+                        mnemonicText=""
                       />
                     )}
                     {mnemonicType !== "image" && (
@@ -551,6 +552,7 @@ const CreateListOfWords: NextPage = () => {
                         caption={nodeName}
                         mnemonicType={mnemonicType}
                         imageUrl={""}
+                        mnemonicText={selectedMnemonicType}
                       />
                     )}
                   </h1>
