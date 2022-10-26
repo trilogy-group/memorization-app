@@ -372,6 +372,7 @@ const Upload = ({
         videoWidth,
         conceptId: conceptId,
         quizId: questionId,
+        contentType: 2,
       });
       toast.loading("Mnemonics Created! Points +1", { id: toastID });
       await new Promise((r) => setTimeout(r, 800));
@@ -391,6 +392,59 @@ const Upload = ({
     }
   };
 
+  const handleNoVideoUpload = async () => { 
+    let contentType = 3
+
+    setIsLoading(true);
+
+    const toastID = toast.loading("Uploading...");
+
+    try {
+      let uploadedCover: any = null;
+
+      if (mnemonicType === "image") {
+        setCoverImageURL(imageUrl);
+        uploadedCover = imageUrl;
+        contentType = 1;
+
+      } else {
+        setCoverImageURL("")
+        uploadedCover = "";
+      }
+      toast.loading("Uploading metadata...", { id: toastID });
+
+      // Replace with concept from user input
+
+      const created = await uploadMutation.mutateAsync({
+        caption: caption,
+        coverURL: uploadedCover,
+        videoURL: "",
+        videoHeight: 0,
+        videoWidth: 0,
+        conceptId: conceptId,
+        quizId: questionId,
+        contentType: contentType,
+      });
+      toast.loading("Mnemonics Created! Points +1", { id: toastID });
+      await new Promise((r) => setTimeout(r, 800));
+
+      toast.dismiss(toastID);
+
+      setIsLoading(false);
+
+      router.push(`/post/${created.id}`);
+    } catch (error) {
+      console.log(error);
+      setIsLoading(false);
+      toast.error("Failed to upload video", {
+        position: "bottom-right",
+        id: toastID,
+      });
+    }
+  };
+
+
+
   const handleUpload = async () => {
     /* if (fileType == fileDataType.image) {
       handleImageUpload();
@@ -398,7 +452,7 @@ const Upload = ({
     if (fileType == fileDataType.video) {
       handleVideoUpload();
     } else {
-      throw new Error("Unknown file type. Only support video/image uploading.");
+      handleNoVideoUpload();
     }
   };
 
@@ -552,10 +606,10 @@ const Upload = ({
                   </button>
                   <button
                     onClick={async () => await handleUpload()}
-                    disabled={
-                      /* !inputValue.trim() || */
+                    /* disabled={
+                      !inputValue.trim()
                       !videoURL || !videoFile || isLoading
-                    }
+                    } */
                     className={`flex justify-center items-center gap-2 py-3 min-w-[170px] hover:brightness-90 transition text-white bg-red-1 disabled:text-gray-400 disabled:bg-gray-200`}
                   >
                     {isLoading && (
