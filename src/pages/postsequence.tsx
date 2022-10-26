@@ -307,7 +307,7 @@ const CreateListOfWords: NextPage = () => {
     });
     let prevAcronym = acronym;
     prevAcronym[Number(index)] =
-      "Remember " + acronymLeters + " with: " + String(acronymCreated?.result);
+      acronymLeters + ": " + String(acronymCreated?.result);
     setIsLoadingMnemonic(false);
 
     prevLoading = isLoadingAcronym;
@@ -343,9 +343,8 @@ const CreateListOfWords: NextPage = () => {
       });
       setAcronym((prevAcronym) => [
         ...prevAcronym,
-        "Remember " +
           acronymLeters +
-          " with: " +
+          ": " +
           String(acronymCreated?.result),
       ]);
       prevLoading = isLoadingAcronym;
@@ -378,7 +377,7 @@ const CreateListOfWords: NextPage = () => {
 
     let prevStory = story;
     prevStory[Number(index)] =
-      "Remember " + storyWordList + " with: " + storyCreated?.result;
+      storyWordList + ": " + storyCreated?.result;
     setIsLoadingMnemonic(false);
     prevLoading = isLoadingStory;
     prevLoading[Number(index)] = false;
@@ -416,7 +415,7 @@ const CreateListOfWords: NextPage = () => {
       });
       setStory((prevStory) => [
         ...prevStory,
-        "Remember " + storyWordList + " with: " + String(storyCreated?.result),
+        storyWordList + ": " + String(storyCreated?.result),
       ]);
 
       prevLoading = isLoadingStory;
@@ -549,7 +548,7 @@ const CreateListOfWords: NextPage = () => {
                         caption={nodeName}
                         mnemonicType={mnemonicType}
                         imageUrl={""}
-                        mnemonicText={selectedMnemonicType}
+                        mnemonicText={"Answer: " + correctAnswer + "; " + selectedMnemonicType}
                       />
                     )}
                   </h1>
