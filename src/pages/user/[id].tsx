@@ -15,7 +15,7 @@ import Navbar from "@/components/Layout/Navbar";
 import Meta from "@/components/Shared/Meta";
 import { prisma } from "@/server/db/client";
 import { formatNumber } from "@/utils/number";
-import { formatAccountName } from "@/utils/text";
+import { contentType, formatAccountName } from "@/utils/text";
 import { trpc } from "@/utils/trpc";
 
 import { authOptions } from "../api/auth/[...nextauth]";
@@ -122,7 +122,7 @@ const UserProfile: NextPage<UserProfileProps> = ({ user }) => {
                     <a className="block h-0 relative pb-[131%]">
                       <img
                         className="absolute inset-0 h-full w-full object-cover rounded"
-                        src={post.coverURL}
+                        src={post.contentType == contentType.text?"/textpost.png":post.coverURL}
                         alt=""
                       />
                       <BsPlay className="absolute left-3 bottom-3 fill-white w-7 h-7" />
@@ -164,7 +164,7 @@ export const getServerSideProps = async ({
           image: true,
           _count: { select: { followers: true, followings: true } },
           posts: {
-            select: { id: true, coverURL: true, caption: true },
+            select: { id: true, coverURL: true, caption: true, contentType: true },
             orderBy: { createdAt: "desc" },
           },
           points: true,

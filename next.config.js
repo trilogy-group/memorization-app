@@ -13,7 +13,13 @@ const nextConfig = {
     },
   },
   images: {
-    domains: ["lh3.googleusercontent.com", "platform-lookaside.fbsbx.com"],
+    domains: ["lh3.googleusercontent.com", "platform-lookaside.fbsbx.com", "tu2k22-memoryapp-public.s3.amazonaws.com"],
+    remotePatterns:[{
+      protocol: "https",
+      hostname: "tu2k22-memoryapp-public.s3.amazonaws.com",
+      port:'',
+      pathname:"/*"
+    }],
     minimumCacheTTL: 9999999,
   },
 };

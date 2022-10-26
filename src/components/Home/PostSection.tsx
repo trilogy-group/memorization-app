@@ -136,8 +136,8 @@ const PostSection: FC<PostSectionProps> = ({ post, refetch, origin, triggerRefet
   const handleContentDisplay = () => {
     if (post.contentType === contentType.text) {
       return (
-        <div className="text-gray-500 text-sm break-words">
-          {post.caption + post.mnemonic_text}
+        <div className="text-gray-500 text-sm flex justify-center flex-wrap  text-xl h-fit self-start break-all">
+          { post.mnemonic_text }
         </div>
       );
     }
@@ -171,7 +171,7 @@ const PostSection: FC<PostSectionProps> = ({ post, refetch, origin, triggerRefet
   }, []);
 
   return (
-    <div className="flex items-start p-2 lg:p-4 gap-3 full-screen">
+    <div className="flex items-start p-2 lg:p-4 gap-3 full-screen border-3">
       <Link href={`/user/${post.user.id}`}>
         <a className="flex-shrink-0 rounded-full">
           <Image
@@ -215,89 +215,93 @@ const PostSection: FC<PostSectionProps> = ({ post, refetch, origin, triggerRefet
             </div>
           )}
         </div>
-        <div className="flex items-end gap-5">
-          <Link href={`/post/${post.id}`}>
+        <div className="flex justify-between items-end gap-5">
+          <Link href={post.contentType==contentType.text?"":`/post/${post.id}`}>
             {
               handleContentDisplay()
             }
           </Link>
-          <div className="flex flex-col gap-1 lg:gap-2">
-            <Button onClick={() => handleGotIt()} variant="outlined">
-              Got it
-            </Button>
-          </div>
-          <div className="flex flex-col gap-1 lg:gap-2">
-            <button
-              onClick={() => toggleLike()}
-              className="lg:w-12 lg:h-12 w-7 h-7 bg-[#F1F1F2] fill-black flex justify-center items-center rounded-full"
-            >
-              <AiFillHeart
-                className={`lg:w-7 lg:h-7 h-5 w-5 ${isCurrentlyLiked ? "fill-pink" : ""
-                  }`}
-              />
-            </button>
-            <p className="text-center text-xs font-semibold">
-              {formatNumber(post._count.likes)}
-            </p>
-            <Link href={`/post/${post.id}`}>
-              <a className="lg:w-12 lg:h-12 w-7 h-7 bg-[#F1F1F2] fill-black flex justify-center items-center rounded-full">
-                <FaCommentDots className="lg:w-6 lg:h-6 h-4 w-4 scale-x-[-1]" />
-              </a>
-            </Link>
-            <p className="text-center text-xs font-semibold">
-              {formatNumber(post._count.comments)}
-            </p>
-            <div className="relative group">
-              <button className="lg:w-12 lg:h-12 w-7 h-7 bg-[#F1F1F2] fill-black flex justify-center items-center rounded-full">
-                <IoIosShareAlt className="lg:w-8 lg:h-8 w-6 h-6" />
+          <div className="flex items-end gap-4">
+            <div className="flex flex-col gap-1 lg:gap-2">
+              <Button onClick={() => handleGotIt()} variant="outlined">
+                Got it
+              </Button>
+            </div>
+            <div className="flex flex-col gap-1 lg:gap-2">
+              <button
+                onClick={() => toggleLike()}
+                className="lg:w-12 lg:h-12 w-7 h-7 bg-[#F1F1F2] fill-black flex justify-center items-center rounded-full"
+              >
+                <AiFillHeart
+                  className={`lg:w-7 lg:h-7 h-5 w-5 ${isCurrentlyLiked ? "fill-pink" : ""
+                    }`}
+                />
               </button>
-              <div className="absolute bottom-[100%] right-0 rounded-md py-2 flex flex-col items-stretch bg-white border opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10">
-                <a
-                  className="flex items-center gap-2 px-3 py-2 bg-white hover:bg-gray-100 transition"
-                  href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
-                    videoURL
-                  )}&t=${encodeURIComponent(`${post.user.name} on EdTok`)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <BsFacebook className="fill-[#0476E9] w-7 h-7" />
-                  <span className="whitespace-nowrap">Share to Facebook</span>
+              <p className="text-center text-xs font-semibold">
+                {formatNumber(post._count.likes)}
+              </p>
+              <div style={{display:post.contentType==contentType.text?"none":"inline"}}>
+              <Link href={`/post/${post.id}`}>
+                <a className="lg:w-12 lg:h-12 w-7 h-7 bg-[#F1F1F2] fill-black flex justify-center items-center rounded-full">
+                  <FaCommentDots className="lg:w-6 lg:h-6 h-4 w-4 scale-x-[-1]" />
                 </a>
-                <a
-                  className="flex items-center gap-2 px-3 py-2 bg-white hover:bg-gray-100 transition"
-                  href={`http://twitter.com/share?text=${encodeURIComponent(
-                    `${post.user.name} on EdTok`
-                  )}&url=${encodeURIComponent(videoURL)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <AiFillTwitterCircle className="fill-[#05AAF4] w-8 h-8 mx-[-2px]" />
-                  <span className="whitespace-nowrap">Share to Twitter</span>
-                </a>
-                <a
-                  className="flex items-center gap-2 px-3 py-2 bg-white hover:bg-gray-100 transition"
-                  href={`http://www.reddit.com/submit?url=${encodeURIComponent(
-                    videoURL
-                  )}&title=${encodeURIComponent(`${post.user.name} on EdTok`)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <BsReddit className="fill-[#FF4500] w-7 h-7" />
-                  <span className="whitespace-nowrap">Share to Reddit</span>
-                </a>
-                <button
-                  onClick={() => {
-                    copyToClipboard(videoURL)
-                      ?.then(() => toast("Copied to clipboard"))
-                      ?.catch(() => toast.error("Failed to copy to clipboard"));
-                  }}
-                  className="flex items-center gap-2 px-3 py-2 bg-white hover:bg-gray-100 transition"
-                >
-                  <span className="w-7 h-7 flex justify-center items-center bg-[#FE2C55] rounded-full">
-                    <BiLink className="fill-white w-5 h-5" />
-                  </span>
-                  <span className="whitespace-nowrap">Copy Link</span>
+              </Link>
+              <p className="text-center text-xs font-semibold">
+                {formatNumber(post._count.comments)}
+              </p>
+              </div>
+              <div className="relative group">
+                <button className="lg:w-12 lg:h-12 w-7 h-7 bg-[#F1F1F2] fill-black flex justify-center items-center rounded-full">
+                  <IoIosShareAlt className="lg:w-8 lg:h-8 w-6 h-6" />
                 </button>
+                <div className="absolute bottom-[100%] right-0 rounded-md py-2 flex flex-col items-stretch bg-white border opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10">
+                  <a
+                    className="flex items-center gap-2 px-3 py-2 bg-white hover:bg-gray-100 transition"
+                    href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
+                      videoURL
+                    )}&t=${encodeURIComponent(`${post.user.name} on EdTok`)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <BsFacebook className="fill-[#0476E9] w-7 h-7" />
+                    <span className="whitespace-nowrap">Share to Facebook</span>
+                  </a>
+                  <a
+                    className="flex items-center gap-2 px-3 py-2 bg-white hover:bg-gray-100 transition"
+                    href={`http://twitter.com/share?text=${encodeURIComponent(
+                      `${post.user.name} on EdTok`
+                    )}&url=${encodeURIComponent(videoURL)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <AiFillTwitterCircle className="fill-[#05AAF4] w-8 h-8 mx-[-2px]" />
+                    <span className="whitespace-nowrap">Share to Twitter</span>
+                  </a>
+                  <a
+                    className="flex items-center gap-2 px-3 py-2 bg-white hover:bg-gray-100 transition"
+                    href={`http://www.reddit.com/submit?url=${encodeURIComponent(
+                      videoURL
+                    )}&title=${encodeURIComponent(`${post.user.name} on EdTok`)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <BsReddit className="fill-[#FF4500] w-7 h-7" />
+                    <span className="whitespace-nowrap">Share to Reddit</span>
+                  </a>
+                  <button
+                    onClick={() => {
+                      copyToClipboard(videoURL)
+                        ?.then(() => toast("Copied to clipboard"))
+                        ?.catch(() => toast.error("Failed to copy to clipboard"));
+                    }}
+                    className="flex items-center gap-2 px-3 py-2 bg-white hover:bg-gray-100 transition"
+                  >
+                    <span className="w-7 h-7 flex justify-center items-center bg-[#FE2C55] rounded-full">
+                      <BiLink className="fill-white w-5 h-5" />
+                    </span>
+                    <span className="whitespace-nowrap">Copy Link</span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
