@@ -127,7 +127,7 @@ const Sidebar: FC<SidebarProps> = ({
           {leaderboardAccounts.map((account, index) => (
             <Link href={`/user/${account.id}`} key={account.id}>
               <a className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
+                <div className="lg:flex items-center gap-3">
                   <Image
                     className="rounded-full object-cover"
                     height={36}
@@ -147,7 +147,7 @@ const Sidebar: FC<SidebarProps> = ({
                   </div>
                 </div>
 
-                <div className="grid gap-2 grid-cols-2 items-center justify-center">
+                <div className="lg:grid md:hidden gap-2 grid-cols-2 items-center justify-center">
                   <Image
                     className="col-span-1 rounded-full object-cover"
                     style={{ marginLeft: 50 }}
@@ -168,7 +168,7 @@ const Sidebar: FC<SidebarProps> = ({
           <p className="text-sm">Following Accounts</p>
           {followingAccounts.map((account) => (
             <Link href={`/user/${account.id}`} key={account.id}>
-              <a className="flex items-center gap-3">
+              <a className="md:flex xs:hidden items-center gap-3">
                 <Image
                   className="rounded-full object-cover"
                   src={account.image!}
