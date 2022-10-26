@@ -548,7 +548,7 @@ const CreateListOfWords: NextPage = () => {
                         caption={nodeName}
                         mnemonicType={mnemonicType}
                         imageUrl={""}
-                        mnemonicText={"Answer: " + correctAnswer + " --- " + selectedMnemonicType}
+                        mnemonicText={"Answer: " + correctAnswer + "; " + selectedMnemonicType}
                       />
                     )}
                   </h1>
