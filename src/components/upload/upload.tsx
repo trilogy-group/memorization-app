@@ -436,7 +436,7 @@ const Upload = ({
 
       setIsLoading(false);
 
-      router.push(`/post/${created.id}`);
+      router.push(`/`);
     } catch (error) {
       console.log(error);
       setIsLoading(false);
