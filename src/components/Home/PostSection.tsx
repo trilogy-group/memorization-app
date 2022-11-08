@@ -37,7 +37,13 @@ interface PostSectionProps {
   onTriggerRefetchChange: Dispatch<SetStateAction<boolean>>;
 }
 
-const PostSection: FC<PostSectionProps> = ({ post, refetch, origin, triggerRefetch, onTriggerRefetchChange }) => {
+const PostSection: FC<PostSectionProps> = ({
+  post,
+  refetch,
+  origin,
+  triggerRefetch,
+  onTriggerRefetchChange,
+}) => {
   const session = useSession();
 
   const likeMutation = trpc.useMutation("like.toggle");
@@ -57,7 +63,9 @@ const PostSection: FC<PostSectionProps> = ({ post, refetch, origin, triggerRefet
   const [conceptValue, setConceptValue] = useState("");
 
   const concept = async () => {
-    const myString = await getConceptMutation.mutateAsync({ quizId: post.quizId as number });
+    const myString = await getConceptMutation.mutateAsync({
+      quizId: post.quizId as number,
+    });
     setConceptValue(myString);
   };
 
@@ -98,12 +106,14 @@ const PostSection: FC<PostSectionProps> = ({ post, refetch, origin, triggerRefet
       toast("You need to log in");
       return;
     }
-    progressMutation.mutateAsync({
-      postId: post.id
-    }).then(() => {
-      // Trigger refetch in the feeds
-      onTriggerRefetchChange(!triggerRefetch);
-    });
+    progressMutation
+      .mutateAsync({
+        postId: post.id,
+      })
+      .then(() => {
+        // Trigger refetch in the feeds
+        onTriggerRefetchChange(!triggerRefetch);
+      });
   };
 
   const toggleFollow = () => {
@@ -137,7 +147,7 @@ const PostSection: FC<PostSectionProps> = ({ post, refetch, origin, triggerRefet
     if (post.contentType === contentType.text) {
       return (
         <div className="text-gray-500 text-sm flex justify-center flex-wrap  text-xl h-fit self-start break-all">
-          { post.mnemonic_text }
+          {post.mnemonic_text}
         </div>
       );
     }
@@ -150,24 +160,25 @@ const PostSection: FC<PostSectionProps> = ({ post, refetch, origin, triggerRefet
           width={450}
           src={post.coverURL!}
           alt=""
-        />);
+        />
+      );
     }
 
-    return <a
-      className={`${post.videoHeight > post.videoWidth * 1.3
-        ? "md:h-[600px]"
-        : "flex-grow h-auto"
+    return (
+      <a
+        className={`${
+          post.videoHeight > post.videoWidth * 1.3
+            ? "md:h-[600px]"
+            : "flex-grow h-auto"
         } block bg-[#3D3C3D] rounded-md overflow-hidden flex-grow h-auto md:flex-grow-0`}
-    >
-      <VideoPlayer
-        src={post.videoURL}
-        poster={post.coverURL}
-      ></VideoPlayer>
-    </a>
+      >
+        <VideoPlayer src={post.videoURL} poster={post.coverURL}></VideoPlayer>
+      </a>
+    );
   };
 
   useEffect(() => {
-    concept().then(() => { ; });
+    concept().then(() => {});
   }, []);
 
   return (
@@ -194,7 +205,7 @@ const PostSection: FC<PostSectionProps> = ({ post, refetch, origin, triggerRefet
             <Link href={`/user/${post.user.id}`}>
               <a className="text-sm hover:underline">{post.user.name}</a>
             </Link>
-            <p style={{ wordWrap: "break-word", overflowWrap: "break-word" }}>
+            <p style={{ wordWrap: "break-word", overflowWrap: "break-word", whiteSpace: "pre-line" }}>
               {post.caption}
             </p>
           </div>
@@ -203,10 +214,11 @@ const PostSection: FC<PostSectionProps> = ({ post, refetch, origin, triggerRefet
             <div className="flex-shrink-0">
               <button
                 onClick={() => toggleFollow()}
-                className={`py-1 px-3 rounded text-sm mt-2 ${isCurrentlyFollowed ?? post.followedByMe
-                  ? "border hover:bg-[#F8F8F8] transition"
-                  : "border border-pink text-pink hover:bg-[#FFF4F5] transition"
-                  }`}
+                className={`py-1 px-3 rounded text-sm mt-2 ${
+                  isCurrentlyFollowed ?? post.followedByMe
+                    ? "border hover:bg-[#F8F8F8] transition"
+                    : "border border-pink text-pink hover:bg-[#FFF4F5] transition"
+                }`}
               >
                 {isCurrentlyFollowed ?? post.followedByMe
                   ? "Following"
@@ -216,10 +228,12 @@ const PostSection: FC<PostSectionProps> = ({ post, refetch, origin, triggerRefet
           )}
         </div>
         <div className="flex justify-between items-end gap-5">
-          <Link href={post.contentType==contentType.text?"":`/post/${post.id}`}>
-            {
-              handleContentDisplay()
+          <Link
+            href={
+              post.contentType == contentType.text ? "" : `/post/${post.id}`
             }
+          >
+            {handleContentDisplay()}
           </Link>
           <div className="flex items-end gap-4">
             <div className="flex flex-col gap-1 lg:gap-2">
@@ -233,22 +247,28 @@ const PostSection: FC<PostSectionProps> = ({ post, refetch, origin, triggerRefet
                 className="lg:w-12 lg:h-12 w-7 h-7 bg-[#F1F1F2] fill-black flex justify-center items-center rounded-full"
               >
                 <AiFillHeart
-                  className={`lg:w-7 lg:h-7 h-5 w-5 ${isCurrentlyLiked ? "fill-pink" : ""
-                    }`}
+                  className={`lg:w-7 lg:h-7 h-5 w-5 ${
+                    isCurrentlyLiked ? "fill-pink" : ""
+                  }`}
                 />
               </button>
               <p className="text-center text-xs font-semibold">
                 {formatNumber(post._count.likes)}
               </p>
-              <div style={{display:post.contentType==contentType.text?"none":"inline"}}>
-              <Link href={`/post/${post.id}`}>
-                <a className="lg:w-12 lg:h-12 w-7 h-7 bg-[#F1F1F2] fill-black flex justify-center items-center rounded-full">
-                  <FaCommentDots className="lg:w-6 lg:h-6 h-4 w-4 scale-x-[-1]" />
-                </a>
-              </Link>
-              <p className="text-center text-xs font-semibold">
-                {formatNumber(post._count.comments)}
-              </p>
+              <div
+                style={{
+                  display:
+                    post.contentType == contentType.text ? "none" : "inline",
+                }}
+              >
+                <Link href={`/post/${post.id}`}>
+                  <a className="lg:w-12 lg:h-12 w-7 h-7 bg-[#F1F1F2] fill-black flex justify-center items-center rounded-full">
+                    <FaCommentDots className="lg:w-6 lg:h-6 h-4 w-4 scale-x-[-1]" />
+                  </a>
+                </Link>
+                <p className="text-center text-xs font-semibold">
+                  {formatNumber(post._count.comments)}
+                </p>
               </div>
               <div className="relative group">
                 <button className="lg:w-12 lg:h-12 w-7 h-7 bg-[#F1F1F2] fill-black flex justify-center items-center rounded-full">
@@ -281,7 +301,9 @@ const PostSection: FC<PostSectionProps> = ({ post, refetch, origin, triggerRefet
                     className="flex items-center gap-2 px-3 py-2 bg-white hover:bg-gray-100 transition"
                     href={`http://www.reddit.com/submit?url=${encodeURIComponent(
                       videoURL
-                    )}&title=${encodeURIComponent(`${post.user.name} on EdTok`)}`}
+                    )}&title=${encodeURIComponent(
+                      `${post.user.name} on EdTok`
+                    )}`}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
@@ -292,7 +314,9 @@ const PostSection: FC<PostSectionProps> = ({ post, refetch, origin, triggerRefet
                     onClick={() => {
                       copyToClipboard(videoURL)
                         ?.then(() => toast("Copied to clipboard"))
-                        ?.catch(() => toast.error("Failed to copy to clipboard"));
+                        ?.catch(() =>
+                          toast.error("Failed to copy to clipboard")
+                        );
                     }}
                     className="flex items-center gap-2 px-3 py-2 bg-white hover:bg-gray-100 transition"
                   >

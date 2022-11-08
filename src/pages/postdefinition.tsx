@@ -436,7 +436,7 @@ const CreateListOfWords: NextPage = () => {
                         onClose={() => setOpenUpload(false)}
                         conceptId={parentId}
                         questionId={nodeId}
-                        caption={nodeName}
+                        caption={nodeName + "\n " +  correctAnswer}
                         mnemonicType={mnemonicType}
                         imageUrl={selectedMnemonicType}
                         mnemonicText=""
@@ -448,10 +448,10 @@ const CreateListOfWords: NextPage = () => {
                         onClose={() => setOpenUpload(false)}
                         conceptId={parentId}
                         questionId={nodeId}
-                        caption={nodeName}
+                        caption={nodeName + "\n " +  correctAnswer}
                         mnemonicType={mnemonicType}
                         imageUrl={""}
-                        mnemonicText={"Answer: " + correctAnswer + "; " +  selectedMnemonicType}
+                        mnemonicText={selectedMnemonicType}
                       />
                     )}
                   </h1>
