@@ -12,6 +12,7 @@ import { storyRecommendationRouter } from "./recommendStory";
 import { notificationRouter } from "./notification";
 import { contentTreeRouter } from "./contentTree";
 import { userRouter } from "./user";
+import { moderationRouter } from "./moderation";
 
 export const appRouter = createRouter()
   .transformer(superjson)
@@ -22,6 +23,7 @@ export const appRouter = createRouter()
   .merge("comment.", commentRouter)
   .merge("progress.", progressRouter)
   .merge("notification.", notificationRouter)
+  .merge("moderation.", moderationRouter)
   .merge("recommendImg.", imgRecommendationRouter)
   .merge("recommendAcro.", acronymRecommendationRouter)
   .merge("recommendStory.", storyRecommendationRouter)
