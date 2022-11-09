@@ -181,7 +181,7 @@ const Upload = ({
     }
   };
 
-  const handleVideoFileChange = async (file: File) => {
+  const handleVideoFileChange = (file: File) => {
     
 
     if (!file.type.startsWith("video")) {
