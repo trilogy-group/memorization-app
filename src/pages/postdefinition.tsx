@@ -81,14 +81,12 @@ const CreateListOfWords: NextPage = () => {
 
   const uploadImageMutation = trpc.useMutation("post.uploadToS3");
 
-
   const [mnemonicImage, setMnemonicImage] = useState<string[]>([
     "",
     "",
     "",
     "",
   ]);
-
 
   const [story, setStory] = useState<string[]>([]);
 
@@ -128,7 +126,6 @@ const CreateListOfWords: NextPage = () => {
     false,
     false,
   ]);
-
 
   const [value, setValue] = useState("2");
   const [storyGenerated, setStoryGenerated] = useState(false);
@@ -188,15 +185,15 @@ const CreateListOfWords: NextPage = () => {
   const handleRecommeddedImage = async (index: Number, prompt: string) => {
     let newLoading = isLoadingImage;
     newLoading[Number(index)] = true;
-    setIsLoadingImage(prevLoading => [...newLoading]);
-    
+    setIsLoadingImage((prevLoading) => [...newLoading]);
+
     const featurePrompt = prompt + " " + features[Number(index)];
 
     const created = await imgRecommendationMutation.mutateAsync({
       description: featurePrompt,
     });
     const imageRoute = created?.filename as string;
-    const s3ImageURL = await handleUploadToS3(imageRoute)
+    const s3ImageURL = await handleUploadToS3(imageRoute);
 
     let prevMnemonicImage = mnemonicImage;
 
@@ -205,24 +202,13 @@ const CreateListOfWords: NextPage = () => {
 
     newLoading = isLoadingImage;
     newLoading[Number(index)] = false;
-    setIsLoadingImage(prevLoading => [...newLoading]);
+    setIsLoadingImage((prevLoading) => [...newLoading]);
   };
 
   const handleRecommenddedPrompt = async () => {
     setIsLoading(true);
-    var promptWordList = "";
-
-    for (let i = 0; i < wordList.length; i++) {
-      if (wordList[i] != undefined) {
-        if (i == wordList.length - 1) {
-          promptWordList += wordList[i];
-        } else {
-          promptWordList += wordList[i] + ", ";
-        }
-      }
-    }
     const promptCreated = await promptRecommendationMutation.mutateAsync({
-      description: promptWordList,
+      description: correctAnswer,
     });
     setIsLoading(false);
     const prompt = String(promptCreated?.result);
@@ -257,11 +243,11 @@ const CreateListOfWords: NextPage = () => {
       setIsLoadingImage(prevLoading);
       const featurePrompt = prompt + " " + features[i];
 
-      const imageName= await imgRecommendationMutation.mutateAsync({
+      const imageName = await imgRecommendationMutation.mutateAsync({
         description: featurePrompt,
       });
       const imageRoute = imageName?.filename as string;
-      const s3ImageURL = await handleUploadToS3(imageRoute)
+      const s3ImageURL = await handleUploadToS3(imageRoute);
 
       prevMnemonicImage = mnemonicImage;
       prevMnemonicImage[i] = s3ImageURL as string;
@@ -272,7 +258,6 @@ const CreateListOfWords: NextPage = () => {
       setIsLoadingImage(prevLoading);
     }
   };
-
 
   const handleRecommeddedStory = async (index: Number) => {
     let prevLoading = [false, false, false, false];
@@ -297,8 +282,7 @@ const CreateListOfWords: NextPage = () => {
     });
 
     let prevStory = story;
-    prevStory[Number(index)] =
-      storyWordList + ": " + storyCreated?.result;
+    prevStory[Number(index)] = storyWordList + ": " + storyCreated?.result;
     setIsLoadingMnemonic(false);
     prevLoading = isLoadingStory;
     prevLoading[Number(index)] = false;
@@ -354,11 +338,11 @@ const CreateListOfWords: NextPage = () => {
     setGenerating(true);
     const tab = Number(value);
     if (tab === TabOptions.Story) {
-      handleRecommeddedStoryList(tableEntryValue);
+      handleRecommeddedStoryList(inputPromptValue);
       setStoryGenerated(true);
       setImageGenerated(false);
     } else if (tab === TabOptions.Image) {
-      handleRecommeddedImageList(tableEntryValue);
+      handleRecommeddedImageList(inputPromptValue);
       setImageGenerated(true);
       setStoryGenerated(false);
     }
@@ -422,6 +406,7 @@ const CreateListOfWords: NextPage = () => {
                         )[0];
                         if (correctOption) {
                           setCorrectAnswer(correctOption);
+                          setInputPromptValue(correctOption);
                         }
                       }}
                       addNodeListToWorkspace={function (
@@ -436,7 +421,7 @@ const CreateListOfWords: NextPage = () => {
                         onClose={() => setOpenUpload(false)}
                         conceptId={parentId}
                         questionId={nodeId}
-                        caption={nodeName + "\n " +  correctAnswer}
+                        caption={nodeName + "\n " + correctAnswer}
                         mnemonicType={mnemonicType}
                         imageUrl={selectedMnemonicType}
                         mnemonicText=""
@@ -448,7 +433,7 @@ const CreateListOfWords: NextPage = () => {
                         onClose={() => setOpenUpload(false)}
                         conceptId={parentId}
                         questionId={nodeId}
-                        caption={nodeName + "\n " +  correctAnswer}
+                        caption={nodeName + "\n " + correctAnswer}
                         mnemonicType={mnemonicType}
                         imageUrl={""}
                         mnemonicText={selectedMnemonicType}
@@ -513,40 +498,81 @@ const CreateListOfWords: NextPage = () => {
                       </h3>
                     </div>
                   )}
-                  <div className="col-span-1 w-full">
-                    <p>Input below:</p>
-                    <input
-                      type="text"
-                      id="newEntry"
-                      className="p-2 w-full border border-gray-2 mt-1 mb-3 outline-none focus:border-gray-400 transition"
-                      value={tableEntryValue}
-                      onChange={(e) => {
-                        setTableEntryValue(e.target.value);
-                      }}
-                    />
-                    <div className="grid grid-cols-2">
-                    <button
-                          onClick={async () => {
-                            setIsLoadingMnemonic(true);
-                            await handleGeneration();
-                            setIsLoadingMnemonic(false);
-                          }}
-                          disabled={
-                            (!tableEntryValue.trim() && value == "2") ||
-                            !tableEntryValue.trim()
-                          }
-                          className={`flex justify-center items-center gap-2 py-3 hover:brightness-90 transition text-white bg-red-1 disabled:text-gray-400 disabled:bg-gray-200`}
+                  <div className="">
+                    
+                    {value == "2" && (
+                      <TextareaAutosize
+                        aria-label="empty textarea"
+                        placeholder="Prompt for image generation"
+                        value={inputPromptValue}
+                        onChange={(e) => {
+                          setInputPromptValue(e.target.value);
+                        }}
+                        style={{
+                          width: "68%",
+                          marginBottom: 10,
+                          marginTop: 10,
+                          padding: 5,
+                        }}
+                      />
+                    )}
+
+                    {value == "3" && (
+                      <TextareaAutosize
+                        aria-label="empty textarea"
+                        placeholder="Prompt for story generation"
+                        value={inputPromptValue}
+                        onChange={(e) => {
+                          setInputPromptValue(e.target.value);
+                        }}
+                        style={{
+                          width: "68%",
+                          marginBottom: 10,
+                          marginTop: 10,
+                          padding: 5,
+                        }}
+                      />
+                    )}
+                      <button
+                        onClick={async () => {
+                          setIsLoadingMnemonic(true);
+                          await handleGeneration();
+                          setIsLoadingMnemonic(false);
+                        }}
+                        disabled={!inputPromptValue.trim()}
+                        className={`flex justify-center items-center gap-2 py-3 hover:brightness-90 transition text-white bg-red-1 disabled:text-gray-400 disabled:bg-gray-200`}
+                        style={{
+                          borderRadius: 10,
+                          padding: 5,
+                          width: "28%",
+                          height: 38,
+                          marginLeft: 10,
+                          marginTop: 10,
+                          float: "right",
+                        }}
+                      >
+                        Generate
+                      </button>
+                    <div>
+                    <Button
+                          className="disabled:text-gray-400 disabled:bg-gray-200`"
+                          disabled={correctAnswer == null || isLoading}
+                          variant="outlined"
+                          color="success"
                           style={{
-                            borderRadius: 10,
-                            padding: 5,
-                            height: 38,
-                            marginLeft: 10,
-                            marginTop: 10,
-                            float: "right",
+                            bottom: 0,
+                            float: "left",
+                            margin: 5,
+                          }}
+                          onClick={async () => {
+                            handleRecommenddedPrompt();
                           }}
                         >
-                          Generate
-                        </button>
+                          {isLoading && (
+                            <span className="w-4 h-4 border-2 border-gray-500 border-t-transparent rounded-full animate-spin"></span>
+                          )}
+                          Generate new prompt
+                        </Button>
                     </div>
                     <div className="my-8 min-h-[200px]">
                       <ul id="answer">
@@ -564,7 +590,7 @@ const CreateListOfWords: NextPage = () => {
                                 marginBottom: 5,
                               }}
                             >
-                              <p>{(index+1) + ".- " + option.title}</p>
+                              <p>{index + 1 + ".- " + option.title}</p>
                               <button
                                 onClick={() => {
                                   handleDelete(option.id);
@@ -578,7 +604,6 @@ const CreateListOfWords: NextPage = () => {
                           );
                         })}
                       </ul>
-                      
                     </div>
                   </div>
 
@@ -687,7 +712,10 @@ const CreateListOfWords: NextPage = () => {
                                   mnemonicImage[index] == ""
                                 }
                                 onClick={async () => {
-                                  await handleRecommeddedImage(index, tableEntryValue);
+                                  await handleRecommeddedImage(
+                                    index,
+                                    tableEntryValue
+                                  );
                                 }}
                                 variant="outlined"
                                 color="error"
