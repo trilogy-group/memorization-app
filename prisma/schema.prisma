@@ -58,6 +58,7 @@ model User {
     masteries     Mastery[]
     concepts      Concept[]
     Feed          Feed[]
+    admin         Boolean        @default(false)
 
     @@fulltext([name, email])
 }
