@@ -7,6 +7,9 @@ import LocalActivityIcon from "@mui/icons-material/LocalActivity";
 
 import RefreshIcon from "@mui/icons-material/Refresh";
 
+import axios from "axios";
+
+
 import { TreeView, TreeItem } from "@mui/lab";
 import {
   Button,
@@ -111,6 +114,7 @@ const Upload = ({
   const uploadMutation = trpc.useMutation("post.createVideo");
   const uploadImgMutation = trpc.useMutation("post.createImg");
   const uploadToS3Mutation = trpc.useMutation("post.uploadToS3");
+  const presignedUrlMutation = trpc.useMutation("post.presignedUrl");
 
   const inputRef = useRef<HTMLInputElement | null>(null);
 
@@ -178,6 +182,8 @@ const Upload = ({
   };
 
   const handleVideoFileChange = (file: File) => {
+    
+
     if (!file.type.startsWith("video")) {
       toast("Only video or image files are allowed");
       return;
@@ -189,12 +195,13 @@ const Upload = ({
       return;
     }
 
+    
+
     const url = URL.createObjectURL(file);
 
     setVideoFile(file);
     setVideoURL(url);
     setFileType(fileDataType.video);
-
     const video = document.createElement("video");
     video.style.opacity = "0";
     video.style.width = "0px";
@@ -311,6 +318,8 @@ const Upload = ({
   }; */
 
   const handleVideoUpload = async () => {
+    const file = videoFile;
+    if (!file) return;
     if (!coverImageURL || !videoFile || !videoURL || isLoading) return;
 
     setIsLoading(true);
@@ -318,19 +327,21 @@ const Upload = ({
     const toastID = toast.loading("Uploading...");
 
     try {
-      const uploadedVideo = (
-        await fetchWithProgress(
-          "POST",
-          new URL(
-            "/upload?fileName=video.mp4",
-            process.env.NEXT_PUBLIC_UPLOAD_URL!
-          ).href,
-          videoFile,
-          (percentage) => {
-            toast.loading(`Uploading ${percentage}%...`, { id: toastID });
-          }
-        )
-      ).url;
+      const [signedUrl, Key] = await presignedUrlMutation.mutateAsync({
+        fileName: file.name || "",
+        fileType: file.type || "",
+      });
+      console.log("url " + signedUrl + " key " + Key);
+      const fileType = encodeURIComponent(file.type);
+      console.log("file type " + fileType);
+      await axios.put(signedUrl as string, file, {
+        headers: {
+          "Content-Type": file.type,
+          "access-control-allow-origin": "*",
+        },
+      });
+  
+      const uploadedVideo = "https://tu2k22-memoryapp-public.s3.amazonaws.com/" + Key; 
 
       let uploadedCover: any = null;
 
@@ -365,7 +376,7 @@ const Upload = ({
       toast.loading("Uploading metadata...", { id: toastID });
 
       // Replace with concept from user input
-
+      console.log("Cover " + uploadedCover);
       const created = await uploadMutation.mutateAsync({
         caption: caption,
         coverURL: uploadedCover,
@@ -395,8 +406,8 @@ const Upload = ({
     }
   };
 
-  const handleNoVideoUpload = async () => { 
-    let contentType = 3
+  const handleNoVideoUpload = async () => {
+    let contentType = 3;
 
     setIsLoading(true);
 
@@ -409,7 +420,6 @@ const Upload = ({
         setCoverImageURL(imageUrl);
         uploadedCover = imageUrl;
         contentType = 1;
-
       } else {
         setCoverImageURL("")
         uploadedCover = "";
@@ -446,8 +456,6 @@ const Upload = ({
       });
     }
   };
-
-
 
   const handleUpload = async () => {
     /* if (fileType == fileDataType.image) {
