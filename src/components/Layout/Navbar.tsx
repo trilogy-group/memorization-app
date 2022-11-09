@@ -179,15 +179,6 @@ const Navbar: FC = () => {
                 <MenuItem onClick={handleClose}>
                   <Link
                     href={
-                      status === "authenticated" ? "/postsequence" : "/sign-in"
-                    }
-                  >
-                    Create a sequence
-                  </Link>
-                </MenuItem>
-                <MenuItem onClick={handleClose}>
-                  <Link
-                    href={
                       status === "authenticated" ? "/postdefinition" : "/sign-in"
                     }
                   >
