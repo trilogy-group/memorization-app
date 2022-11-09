@@ -405,6 +405,43 @@ export const postRouter = createRouter()
       }
       return conceptFound.concepts.name as string;
     }
+  }).mutation("presignedUrl", {
+    input: z.object({
+      fileName: z.string(),
+      fileType: z.string(),
+    }),
+    async resolve({ ctx: { prisma, session }, input }) {
+      console.log(input.fileName);
+      const ex = (input.fileType as string).split("/")[1];
+      const Key = `${randomUUID()}.${ex}`;
+      /* const post = await s3bucket.createPresignedPost({
+        Bucket: BUCKET_NAME,
+        Fields: {
+          key: Key,
+        },
+        Expires: 60, // seconds
+        Conditions: [
+          ["content-length-range", 0, 1048576], // up to 1 MB
+        ],
+      }); */
+      console.log("type " + input.fileType)
+      const fileParams = {
+        Bucket: BUCKET_NAME,
+        Key: Key,
+        Expires: 600,
+        ContentType: input.fileType,
+      };
+      const s3 = new AWS.S3({
+        accessKeyId: process.env.IAM_USER_KEY,
+        secretAccessKey: process.env.IAM_USER_SECRET,
+        region: "us-east-1",
+      });
+
+      const url = await s3.getSignedUrlPromise("putObject", fileParams);
+      console.log(url);
+      console.log(Key);
+      return [url, Key];
+    },
   });
 
 

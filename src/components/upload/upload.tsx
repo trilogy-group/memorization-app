@@ -4,6 +4,8 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
 import LocalActivityIcon from "@mui/icons-material/LocalActivity";
+import axios from "axios";
+
 
 import RefreshIcon from "@mui/icons-material/Refresh";
 
@@ -111,6 +113,8 @@ const Upload = ({
   const uploadMutation = trpc.useMutation("post.createVideo");
   const uploadImgMutation = trpc.useMutation("post.createImg");
   const uploadToS3Mutation = trpc.useMutation("post.uploadToS3");
+  const presignedUrlMutation = trpc.useMutation("post.presignedUrl");
+
 
   const inputRef = useRef<HTMLInputElement | null>(null);
 
@@ -177,7 +181,7 @@ const Upload = ({
     }
   };
 
-  const handleVideoFileChange = (file: File) => {
+  const handleVideoFileChange = async (file: File) => {
     if (!file.type.startsWith("video")) {
       toast("Only video or image files are allowed");
       return;
@@ -311,6 +315,8 @@ const Upload = ({
   }; */
 
   const handleVideoUpload = async () => {
+        const file = videoFile;
+    if (!file) return;
     if (!coverImageURL || !videoFile || !videoURL || isLoading) return;
 
     setIsLoading(true);
@@ -318,7 +324,7 @@ const Upload = ({
     const toastID = toast.loading("Uploading...");
 
     try {
-      const uploadedVideo = (
+      /*const uploadedVideo = (
         await fetchWithProgress(
           "POST",
           new URL(
@@ -330,7 +336,24 @@ const Upload = ({
             toast.loading(`Uploading ${percentage}%...`, { id: toastID });
           }
         )
-      ).url;
+      ).url;*/
+
+            const [signedUrl, Key] = await presignedUrlMutation.mutateAsync({
+        fileName: file.name || "",
+        fileType: file.type || "",
+      });
+          console.log("url " + signedUrl + " key " + Key);
+      const fileType = encodeURIComponent(file.type);
+      console.log("file type " + fileType);
+      await axios.put(signedUrl as string, file, {
+        headers: {
+          "Content-Type": file.type,
+          "access-control-allow-origin": "*",
+        },
+      });
+
+      const uploadedVideo = "https://tu2k22-memoryapp-public.s3.amazonaws.com/" + Key; 
+
 
       let uploadedCover: any = null;
 
@@ -395,7 +418,7 @@ const Upload = ({
     }
   };
 
-  const handleNoVideoUpload = async () => { 
+  const handleNoVideoUpload = async () => {
     let contentType = 3
 
     setIsLoading(true);
@@ -517,9 +540,8 @@ const Upload = ({
                       onDragEnter={dragFocus}
                       onDragOver={dragFocus}
                       onClick={() => inputRef.current?.click()}
-                      className={`w-[250px] flex-shrink-0 border-2 border-gray-300 rounded-md border-dashed flex flex-col items-center p-8 cursor-pointer hover:border-red-1 transition ${
-                        isFileDragging ? "border-red-1" : ""
-                      }`}
+                      className={`w-[250px] flex-shrink-0 border-2 border-gray-300 rounded-md border-dashed flex flex-col items-center p-8 cursor-pointer hover:border-red-1 transition ${isFileDragging ? "border-red-1" : ""
+                        }`}
                     >
                       <BsFillCloudUploadFill className="fill-[#B0B0B4] w-10 h-10" />
                       <h1 className="font-semibold mt-4 mb-2">
