@@ -147,7 +147,16 @@ const PostSection: FC<PostSectionProps> = ({
     if (post.contentType === contentType.text) {
       return (
         <div className="text-gray-500 text-sm flex justify-center flex-wrap  text-xl h-fit self-start break-all">
-          {post.mnemonic_text}
+          <p
+            style={{
+              wordWrap: "break-word",
+              overflowWrap: "break-word",
+              whiteSpace: "pre-line",
+            }}
+          >
+            {post.mnemonic_text}
+          </p>
+          
         </div>
       );
     }
@@ -205,7 +214,13 @@ const PostSection: FC<PostSectionProps> = ({
             <Link href={`/user/${post.user.id}`}>
               <a className="text-sm hover:underline">{post.user.name}</a>
             </Link>
-            <p style={{ wordWrap: "break-word", overflowWrap: "break-word", whiteSpace: "pre-line" }}>
+            <p
+              style={{
+                wordWrap: "break-word",
+                overflowWrap: "break-word",
+                whiteSpace: "pre-line",
+              }}
+            >
               {post.caption}
             </p>
           </div>
