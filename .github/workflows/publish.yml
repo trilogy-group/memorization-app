@@ -2,7 +2,7 @@ name: Publish Container Image to ECR
 
 on:
   push:
-    branches: [ staging ]
+    branches: [ staging, master ]
 
 jobs:
   build:
