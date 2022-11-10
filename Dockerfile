@@ -1,5 +1,3 @@
-# syntax = docker/dockerfile:experimental
-
 FROM node:16.8.0 AS nextjs
 
 USER root
