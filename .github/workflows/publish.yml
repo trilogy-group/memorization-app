@@ -21,6 +21,7 @@ jobs:
       with:
         secrets: ${{ toJSON(secrets) }}
         secrets_env: all
+        prefix_prod: ''
 
     - name: check .env
       run: |
