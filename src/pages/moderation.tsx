@@ -15,7 +15,7 @@ const Moderation: NextPage = () => {
   const [postId, setPostId] = useState<string | null>(null);
 
   const handleRemovePost = () => {
-    isModeratorMutation.mutateAsync(postId as string).then((res) => {
+    isModeratorMutation.mutateAsync({}).then((res) => {
       if (res === null) {
         toast.error("Not an admin, no privilege to remove posts", {
           position: "bottom-right",
