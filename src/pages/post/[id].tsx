@@ -132,42 +132,72 @@ const Post: NextPage<PostProps> = ({ post, href, title }) => {
       />
 
       <div className="flex flex-col lg:flex-row lg:h-screen items-stretch">
-      {post.contentType != contentType.text && (
-        <div className="lg:flex-grow flex justify-center items-center relative bg-[#1E1619]">
-          
-          <video
-            className="w-auto h-auto max-w-full max-h-[600px] lg:max-h-full"
-            src={post.videoURL}
-            muted={isMuted}
-            onVolumeChange={(e: any) => setIsMuted(e.target.muted)}
-            autoPlay
-            loop
-            // remove poster to prevent flickering/blinking
-            //poster={post.coverURL}
-            controls
-            playsInline
-          ></video>
-          
-          <div className="absolute top-5 left-5 flex gap-3">
-            {isBackButtonVisible && (
-              <button
-                onClick={() => router.push("/")}
-                className="bg-[#3D3C3D] w-[40px] h-[40px] rounded-full flex justify-center items-center"
-              >
-                <FaTimes className="w-5 h-5 fill-white" />
-              </button>
-            )}
-            <Link href="/">
-              <a className="w-[40px] h-[40px]">
-                <img
-                  className="w-full h-full object-cover rounded-full"
-                  src="/favicon.png"
-                  alt=""
-                />
-              </a>
-            </Link>
+        {
+          post.contentType === contentType.image && (
+            <div className="lg:flex-grow flex justify-center items-center relative bg-[#1E1619]">
+              <video
+                className="w-auto h-auto max-w-full max-h-[600px] lg:max-h-full"
+                poster={post.coverURL}
+              ></video>
+              <div className="absolute top-5 left-5 flex gap-3">
+                {isBackButtonVisible && (
+                  <button
+                    onClick={() => router.push("/")}
+                    className="bg-[#3D3C3D] w-[40px] h-[40px] rounded-full flex justify-center items-center"
+                  >
+                    <FaTimes className="w-5 h-5 fill-white" />
+                  </button>
+                )}
+                <Link href="/">
+                  <a className="w-[40px] h-[40px]">
+                    <img
+                      className="w-full h-full object-cover rounded-full"
+                      src="/favicon.png"
+                      alt=""
+                    />
+                  </a>
+                </Link>
+              </div>
+
+            </div>
+          )
+        }
+        {post.contentType != contentType.text && post.contentType != contentType.image && (
+          <div className="lg:flex-grow flex justify-center items-center relative bg-[#1E1619]">
+            (
+            <video
+              className="w-auto h-auto max-w-full max-h-[600px] lg:max-h-full"
+              src={post.videoURL}
+              muted={isMuted}
+              onVolumeChange={(e: any) => setIsMuted(e.target.muted)}
+              autoPlay
+              loop
+              // remove poster to prevent flickering/blinking
+              //poster={post.coverURL}
+              controls
+              playsInline
+            ></video>
+            )
+            <div className="absolute top-5 left-5 flex gap-3">
+              {isBackButtonVisible && (
+                <button
+                  onClick={() => router.push("/")}
+                  className="bg-[#3D3C3D] w-[40px] h-[40px] rounded-full flex justify-center items-center"
+                >
+                  <FaTimes className="w-5 h-5 fill-white" />
+                </button>
+              )}
+              <Link href="/">
+                <a className="w-[40px] h-[40px]">
+                  <img
+                    className="w-full h-full object-cover rounded-full"
+                    src="/favicon.png"
+                    alt=""
+                  />
+                </a>
+              </Link>
+            </div>
           </div>
-        </div>
         )}
         <div className="w-full lg:w-[500px] flex-shrink-0 flex flex-col items-stretch h-screen">
           <div className="px-4 pt-6 pb-4 flex-shrink-0 border-b">
@@ -201,8 +231,8 @@ const Post: NextPage<PostProps> = ({ post, href, title }) => {
                   <button
                     onClick={() => toggleFollow()}
                     className={`py-1 px-3 rounded text-sm mt-2 ${isCurrentlyFollowed ?? post.followedByMe
-                        ? "border hover:bg-[#F8F8F8] transition"
-                        : "border border-pink text-pink hover:bg-[#FFF4F5] transition"
+                      ? "border hover:bg-[#F8F8F8] transition"
+                      : "border border-pink text-pink hover:bg-[#FFF4F5] transition"
                       }`}
                   >
                     {isCurrentlyFollowed ?? post.followedByMe
@@ -360,8 +390,8 @@ const Post: NextPage<PostProps> = ({ post, href, title }) => {
               }
               type="submit"
               className={`transition ${postCommentMutation.isLoading || !inputValue.trim()
-                  ? ""
-                  : "text-pink"
+                ? ""
+                : "text-pink"
                 }`}
             >
               {postCommentMutation.isLoading ? "Posting..." : "Post"}
