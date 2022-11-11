@@ -19,10 +19,12 @@ import { VolumeContext } from "@/context/VolumeContext";
 import { prisma } from "@/server/db/client";
 import { copyToClipboard } from "@/utils/clipboard";
 import { formatNumber } from "@/utils/number";
-import { formatAccountName } from "@/utils/text";
+import { contentType, formatAccountName } from "@/utils/text";
 import { trpc } from "@/utils/trpc";
 
 import { authOptions } from "../api/auth/[...nextauth]";
+
+
 
 const Post: NextPage<PostProps> = ({ post, href, title }) => {
   const session = useSession();
@@ -130,7 +132,9 @@ const Post: NextPage<PostProps> = ({ post, href, title }) => {
       />
 
       <div className="flex flex-col lg:flex-row lg:h-screen items-stretch">
+      {post.contentType != contentType.text && (
         <div className="lg:flex-grow flex justify-center items-center relative bg-[#1E1619]">
+          
           <video
             className="w-auto h-auto max-w-full max-h-[600px] lg:max-h-full"
             src={post.videoURL}
@@ -142,6 +146,7 @@ const Post: NextPage<PostProps> = ({ post, href, title }) => {
             controls
             playsInline
           ></video>
+          
           <div className="absolute top-5 left-5 flex gap-3">
             {isBackButtonVisible && (
               <button
@@ -162,6 +167,7 @@ const Post: NextPage<PostProps> = ({ post, href, title }) => {
             </Link>
           </div>
         </div>
+        )}
         <div className="w-full lg:w-[500px] flex-shrink-0 flex flex-col items-stretch h-screen">
           <div className="px-4 pt-6 pb-4 flex-shrink-0 border-b">
             <div className="flex">
@@ -389,6 +395,7 @@ export const getServerSideProps = async ({
         coverURL: true,
         caption: true,
         mnemonic_text: true,
+        contentType: true,
         _count: { select: { likes: true } },
         user: { select: { id: true, image: true, name: true } },
         comments: {
