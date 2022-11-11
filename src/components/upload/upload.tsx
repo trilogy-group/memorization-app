@@ -32,7 +32,7 @@ import {
   Skill,
   Concept,
   Question,
-} from "../../server/router/contentTreeInterface";
+} from "@/utils/contentTreeInterface";
 
 import create from "zustand";
 import { devtools, persist } from "zustand/middleware";
