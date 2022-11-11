@@ -2,22 +2,21 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { createRouter } from "./context";
 
-import { Data, ContentTree } from "./contentTreeInterface";
+import { cacheData, cacheDataNoQ, ContentTree } from "@/utils/contentTreeInterface";
 //
 //   const contentTree = Convert.toContentTree(json);
 
-import { Cache } from "memory-cache";
 
-const cacheData = new Cache<string, ContentTree>();
-const cacheDataNoQ = new Cache<string, ContentTree>();
 
 async function fetchWithCache() {
   const apiKey = process.env.CURRICULUM_GRAPH_API_KEY || "";
   const apiUrl = process.env.CURRICULUM_GRAPH_API_URL || "";
   const value = cacheData.get(apiUrl);
   if (value) {
+    console.log('already cached');
     return value;
   } else {
+    console.log('not cached', value);
     const hours = 1;
     try {
       const data = await fetch(apiUrl, {
@@ -87,7 +86,7 @@ async function fetchWithCacheNoQ() {
       if (data === undefined) {
         throw new Error('Cannot fetch from ContentTree API');
       }
-      cacheData.put('TreeNoQ', data, hours * 1000 * 60 * 60);
+      cacheDataNoQ.put('TreeNoQ', data, hours * 1000 * 60 * 60);
       return data;
     } catch (error) {
       console.log(error);
