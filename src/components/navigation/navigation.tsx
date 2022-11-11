@@ -267,6 +267,7 @@ const Navigation = ({
           }
         );
     } else {
+      // contenttree only returns the concepts/skills/domains with created content
       await getContentTreeNoQMutation.mutateAsync(
         {
           description: "test",
