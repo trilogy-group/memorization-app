@@ -160,38 +160,14 @@ const PostSection: FC<PostSectionProps> = ({
       );
     }
 
-    if (post.contentType == contentType.image) {
-      return (
-        <Image
-          className="rounded-full object-cover"
-          height={300}
-          width={450}
-          src={post.coverURL!}
-          alt=""
-        />
-      );
-    }
-
     return (
-      <div className="text-gray-500 text-sm flex justify-left flex-wrap  text-xl h-fit self-start break-all">
-        <p
-          style={{
-            wordWrap: "break-word",
-            overflowWrap: "break-word",
-            whiteSpace: "pre-line",
-          }}
-        >
-          {post.mnemonic_text}
-        </p>
-        <a
-          className={`${post.videoHeight > post.videoWidth * 1.3
-            ? "md:h-[600px]"
-            : "flex-grow h-auto"
-            } block bg-[#3D3C3D] rounded-md overflow-hidden flex-grow h-auto md:flex-grow-0`}
-        >
-          <VideoPlayer src={post.videoURL} poster={post.coverURL}></VideoPlayer>
-        </a>
-      </div>
+      <Image
+        className="rounded-full object-cover"
+        height={300}
+        width={450}
+        src={post.coverURL!}
+        alt=""
+      />
     );
   };
 
