@@ -590,7 +590,6 @@ const Upload = ({
                         label="Mnemonic text"
                         value={mnemonicText}
                         readOnly
-                        minRows={2}
                         maxRows={10}
                         fullWidth={true}
                       />
