@@ -199,11 +199,10 @@ const Post: NextPage<PostProps> = ({ post, href, title }) => {
                 <div className="flex-shrink-0">
                   <button
                     onClick={() => toggleFollow()}
-                    className={`py-1 px-3 rounded text-sm mt-2 ${
-                      isCurrentlyFollowed ?? post.followedByMe
+                    className={`py-1 px-3 rounded text-sm mt-2 ${isCurrentlyFollowed ?? post.followedByMe
                         ? "border hover:bg-[#F8F8F8] transition"
                         : "border border-pink text-pink hover:bg-[#FFF4F5] transition"
-                    }`}
+                      }`}
                   >
                     {isCurrentlyFollowed ?? post.followedByMe
                       ? "Following"
@@ -237,9 +236,8 @@ const Post: NextPage<PostProps> = ({ post, href, title }) => {
                     className="w-9 h-9 bg-[#F1F1F2] fill-black flex justify-center items-center rounded-full"
                   >
                     <AiFillHeart
-                      className={`w-5 h-5 ${
-                        isCurrentlyLiked ? "fill-pink" : ""
-                      }`}
+                      className={`w-5 h-5 ${isCurrentlyLiked ? "fill-pink" : ""
+                        }`}
                     />
                   </button>
                   <span className="text-center text-xs font-semibold">
@@ -360,11 +358,10 @@ const Post: NextPage<PostProps> = ({ post, href, title }) => {
                 !session?.data?.user
               }
               type="submit"
-              className={`transition ${
-                postCommentMutation.isLoading || !inputValue.trim()
+              className={`transition ${postCommentMutation.isLoading || !inputValue.trim()
                   ? ""
                   : "text-pink"
-              }`}
+                }`}
             >
               {postCommentMutation.isLoading ? "Posting..." : "Post"}
             </button>
@@ -442,9 +439,8 @@ export const getServerSideProps = async ({
           followedByMe,
         },
         session,
-        href: `${
-          req.headers.host?.includes("localhost") ? "http" : "https"
-        }://${req.headers.host}/post/${id}`,
+        href: `${req.headers.host?.includes("localhost") ? "http" : "https"
+          }://${req.headers.host}/post/${id}`,
         title: `${post.user.name} on EdTok`,
       },
     };
