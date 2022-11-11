@@ -17,9 +17,11 @@ export const moderationRouter = createRouter()
     }),
     async resolve({ ctx: { prisma, session }, input }) {
       try {
+        console.log(input.postId);
         const deletedPost = await prisma.post.delete({
           where: { id: input.postId },
         })
+        console.log(deletedPost);
       } catch (e) { console.error(e); throw new Error("No such post in the database"); }
       return null;
     },
