@@ -27,7 +27,7 @@ import {
   Skill,
   Concept,
   Question,
-} from "@/utils/contentTreeInterface";
+} from "../../server/router/contentTreeInterface";
 
 import create from "zustand";
 import { devtools, persist } from "zustand/middleware";
@@ -267,7 +267,6 @@ const Navigation = ({
           }
         );
     } else {
-      // contenttree only returns the concepts/skills/domains with created content
       await getContentTreeNoQMutation.mutateAsync(
         {
           description: "test",

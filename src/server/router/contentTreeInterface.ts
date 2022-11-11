@@ -7,8 +7,6 @@
 // These functions will throw an error if the JSON doesn't
 // match the expected interface, even if the JSON is valid.
 
-import { Cache } from "memory-cache";
-
 export interface ContentTree {
     data: Data;
 }
@@ -18,27 +16,27 @@ export interface Data {
 }
 
 export interface Domain {
-    id: string;
-    name: string;
+    id:     string;
+    name:   string;
     skills: Skill[];
 }
 
 export interface Skill {
-    id: string;
-    name: string;
+    id:       string;
+    name:     string;
     concepts: Concept[];
 }
 
 export interface Concept {
-    id: string;
-    name: string;
+    id:        string;
+    name:      string;
     questions: Question[];
 }
 
 export interface Question {
-    id: QuestionID;
-    desc: QuestionDesc;
-    type: Type;
+    id:      QuestionID;
+    desc:    QuestionDesc;
+    type:    Type;
     options: Option[];
 }
 
@@ -51,9 +49,9 @@ export enum QuestionID {
 }
 
 export interface Option {
-    id: OptionID;
-    desc: OptionDesc;
-    ordinal: Ordinal;
+    id:         OptionID;
+    desc:       OptionDesc;
+    ordinal:    Ordinal;
     is_correct: boolean;
 }
 
@@ -98,7 +96,7 @@ function invalidValue(typ: any, val: any, key: any = ''): never {
     if (key) {
         throw Error(`Invalid value for key "${key}". Expected type ${JSON.stringify(typ)} but got ${JSON.stringify(val)}`);
     }
-    throw Error(`Invalid value ${JSON.stringify(val)} for type ${JSON.stringify(typ)}`,);
+    throw Error(`Invalid value ${JSON.stringify(val)} for type ${JSON.stringify(typ)}`, );
 }
 
 function jsonToJSProps(typ: any): any {
@@ -132,7 +130,7 @@ function transform(val: any, typ: any, getProps: any, key: any = ''): any {
             const typ = typs[i];
             try {
                 return transform(val, typ, getProps);
-            } catch (_) { }
+            } catch (_) {}
         }
         return invalidValue(typs, val);
     }
@@ -189,9 +187,9 @@ function transform(val: any, typ: any, getProps: any, key: any = ''): any {
     if (Array.isArray(typ)) return transformEnum(typ, val);
     if (typeof typ === "object") {
         return typ.hasOwnProperty("unionMembers") ? transformUnion(typ.unionMembers, val)
-            : typ.hasOwnProperty("arrayItems") ? transformArray(typ.arrayItems, val)
-                : typ.hasOwnProperty("props") ? transformObject(getProps(typ), typ.additional, val)
-                    : invalidValue(typ, val);
+            : typ.hasOwnProperty("arrayItems")    ? transformArray(typ.arrayItems, val)
+            : typ.hasOwnProperty("props")         ? transformObject(getProps(typ), typ.additional, val)
+            : invalidValue(typ, val);
     }
     // Numbers can be parsed by Date but shouldn't be.
     if (typ === Date && typeof val !== "number") return transformDate(val);
@@ -288,7 +286,3 @@ const typeMap: any = {
         "MCQ",
     ],
 };
-
-
-export const cacheData = new Cache<string, ContentTree>();
-export const cacheDataNoQ = new Cache<string, ContentTree>();
