@@ -156,7 +156,6 @@ const PostSection: FC<PostSectionProps> = ({
           >
             {post.mnemonic_text}
           </p>
-          
         </div>
       );
     }
@@ -174,15 +173,26 @@ const PostSection: FC<PostSectionProps> = ({
     }
 
     return (
-      <a
-        className={`${
-          post.videoHeight > post.videoWidth * 1.3
-            ? "md:h-[600px]"
-            : "flex-grow h-auto"
-        } block bg-[#3D3C3D] rounded-md overflow-hidden flex-grow h-auto md:flex-grow-0`}
-      >
-        <VideoPlayer src={post.videoURL} poster={post.coverURL}></VideoPlayer>
-      </a>
+      <div className="text-gray-500 text-sm flex justify-left flex-wrap  text-xl h-fit self-start break-all">
+        <p
+          style={{
+            wordWrap: "break-word",
+            overflowWrap: "break-word",
+            whiteSpace: "pre-line",
+          }}
+        >
+          {post.mnemonic_text}
+        </p>
+        <a
+          className={`${
+            post.videoHeight > post.videoWidth * 1.3
+              ? "md:h-[600px]"
+              : "flex-grow h-auto"
+          } block bg-[#3D3C3D] rounded-md overflow-hidden flex-grow h-auto md:flex-grow-0`}
+        >
+          <VideoPlayer src={post.videoURL} poster={post.coverURL}></VideoPlayer>
+        </a>
+      </div>
     );
   };
 
