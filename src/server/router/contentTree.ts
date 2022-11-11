@@ -124,7 +124,7 @@ export const contentTreeRouter = createRouter()
       description: z.string(),
     }),
 
-    async resolve({ ctx: { session }, input }) {
+    async resolve({ ctx: { session, prisma }, input }) {
       // find questions where no post has been made
       const questionIds = await prisma?.quiz.findMany({
         where: {
