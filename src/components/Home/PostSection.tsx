@@ -20,6 +20,8 @@ import { Button } from "@mui/material";
 
 import Chip from "@mui/material/Chip";
 import Stack from "@mui/material/Stack";
+import { BsPlay } from "react-icons/bs";
+
 
 interface PostSectionProps {
   post: Post & {
@@ -159,16 +161,38 @@ const PostSection: FC<PostSectionProps> = ({
         </div>
       );
     }
-
-    return (
-      <Image
-        className="rounded-full object-cover"
-        height={300}
-        width={450}
-        src={post.coverURL!}
-        alt=""
-      />
-    );
+    if (post.videoURL === "" || post.videoURL === null) {
+      return (
+        <div>
+          <img
+            className="rounded-full object-cover"
+            height={300}
+            width={450}
+            src={
+              post.coverURL
+            }
+            alt=""
+          />
+        </div>
+      );
+    } else {
+      return (
+        <div>
+          <a className="h-0 relative pb-[131%]">
+            <img
+              className="rounded-full object-cover"
+              height={300}
+              width={450}
+              src={
+                post.coverURL
+              }
+              alt=""
+            />
+            <BsPlay className="absolute left-2 bottom-6 fill-black w-7 h-7" />
+          </a>
+        </div>
+      );
+    }
   };
 
   useEffect(() => {
