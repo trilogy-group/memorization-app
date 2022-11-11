@@ -288,7 +288,7 @@ const CreateListOfWords: NextPage = () => {
 
     setIsLoadingMnemonic(true);
 
-    var acronymWordList = "";
+    /* var acronymWordList = "";
 
     for (let i = 0; i < wordList.length; i++) {
       if (wordList[i] != undefined) {
@@ -298,7 +298,7 @@ const CreateListOfWords: NextPage = () => {
           acronymWordList += wordList[i] + ", ";
         }
       }
-    }
+    } */
 
     var acronymLeters = "";
 
@@ -318,7 +318,7 @@ const CreateListOfWords: NextPage = () => {
     });
     let prevAcronym = acronym;
     prevAcronym[Number(index)] =
-      acronymWordList +
+      /* acronymWordList + */
       
       String(acronymCreated?.result);
     setIsLoadingMnemonic(false);
@@ -337,7 +337,7 @@ const CreateListOfWords: NextPage = () => {
 
     setIsLoadingMnemonic(true);
 
-    var acronymWordList = "";
+    /* var acronymWordList = "";
 
     for (let i = 0; i < wordList.length; i++) {
       if (wordList[i] != undefined) {
@@ -347,7 +347,7 @@ const CreateListOfWords: NextPage = () => {
           acronymWordList += wordList[i] + ", ";
         }
       }
-    }
+    } */
 
     var acronymLeters = "";
 
@@ -369,7 +369,7 @@ const CreateListOfWords: NextPage = () => {
       });
       setAcronym((prevAcronym) => [
         ...prevAcronym,
-        acronymWordList +
+        /* acronymWordList + */
           String(acronymCreated?.result),
       ]);
       prevLoading = isLoadingAcronym;
@@ -448,6 +448,22 @@ const CreateListOfWords: NextPage = () => {
     }
     setIsLoadingMnemonic(false);
   };
+
+  const handleSelectedMnemonic = async (acronym: String) => {
+    var acronymWordList = "";
+
+    for (let i = 0; i < wordList.length; i++) {
+      if (wordList[i] != undefined) {
+        if (i == wordList.length - 1) {
+          acronymWordList += wordList[i];
+        } else {
+          acronymWordList += wordList[i] + ", ";
+        }
+      }
+    }
+    return acronymWordList + ": " + acronym;
+
+  }
 
   const handleUpload = async () => {
     setOpenUpload(true); // TODO: connect to the mnemonics generation backend
@@ -850,7 +866,8 @@ const CreateListOfWords: NextPage = () => {
                                 }}
                                 onClick={async () => {
                                   setSelectedMnemonic(true);
-                                  setSelectedMnemonicType(acronym[index] || "");
+                                  const selectedAcronym = await handleSelectedMnemonic(acronym[index] || "");
+                                  setSelectedMnemonicType(selectedAcronym || "");
                                   setMnemonicType("acronym");
                                 }}
                               >
