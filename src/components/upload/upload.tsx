@@ -5,10 +5,11 @@ import MenuBookIcon from "@mui/icons-material/MenuBook";
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
 import LocalActivityIcon from "@mui/icons-material/LocalActivity";
 
+import { Textarea, Grid } from "@nextui-org/react";
+
 import RefreshIcon from "@mui/icons-material/Refresh";
 
 import axios from "axios";
-
 
 import { TreeView, TreeItem } from "@mui/lab";
 import {
@@ -182,8 +183,6 @@ const Upload = ({
   };
 
   const handleVideoFileChange = (file: File) => {
-    
-
     if (!file.type.startsWith("video")) {
       toast("Only video or image files are allowed");
       return;
@@ -194,8 +193,6 @@ const Upload = ({
       toast("Max 200MB file size");
       return;
     }
-
-    
 
     const url = URL.createObjectURL(file);
 
@@ -340,8 +337,9 @@ const Upload = ({
           "access-control-allow-origin": "*",
         },
       });
-  
-      const uploadedVideo = "https://tu2k22-memoryapp-public.s3.amazonaws.com/" + Key; 
+
+      const uploadedVideo =
+        "https://tu2k22-memoryapp-public.s3.amazonaws.com/" + Key;
 
       let uploadedCover: any = null;
 
@@ -421,7 +419,7 @@ const Upload = ({
         uploadedCover = imageUrl;
         contentType = 1;
       } else {
-        setCoverImageURL("")
+        setCoverImageURL("");
         uploadedCover = "";
       }
       toast.loading("Uploading metadata...", { id: toastID });
@@ -564,8 +562,8 @@ const Upload = ({
                 }}
               />
 
-              <div className="flex-grow">
-                <label className="block font-medium" htmlFor="caption">
+              <div>
+                {/* <label className="block font-medium" htmlFor="caption">
                   Caption
                 </label>
                 <input
@@ -574,29 +572,54 @@ const Upload = ({
                   className="p-2 w-full border border-gray-2 mt-1 mb-3 outline-none focus:border-gray-400 transition"
                   value={caption}
                   readOnly
-                />
+                /> */}
+                <Grid.Container gap={1} className="w-full">
+                  <Grid className="w-full">
+                    <Textarea
+                      label="Caption"
+                      value={caption}
+                      readOnly
+                      minRows={5}
+                      maxRows={10}
+                      fullWidth={true}
+                    />
+                  </Grid>
+                  {mnemonicType != "image" && (
+                    <Grid className="w-full">
+                      <Textarea
+                        label="Mnemonic text"
+                        value={mnemonicText}
+                        readOnly
+                        maxRows={10}
+                        fullWidth={true}
+                      />
+                    </Grid>
+                  )}
+                </Grid.Container>
 
-                <p className="font-medium">Cover</p>
-                {mnemonicType !== "image" && (
-                  <div className="p-2 border border-gray-2 h-[170px] mb-2">
-                    {coverImageURL ? (
+                {coverImageURL && (
+                  <div>
+                    <p className="font-medium">Cover</p>
+                    {mnemonicType !== "image" && (
+                      <div className="p-2 border border-gray-2 h-[170px] mb-2">
+                        {coverImageURL ? (
+                          <img
+                            className="h-full w-auto object-contain"
+                            src={coverImageURL}
+                            alt=""
+                          />
+                        ) : (
+                          <div className="bg-gray-1 h-full w-[100px]"></div>
+                        )}
+                      </div>
+                    )}
+                    {mnemonicType === "image" && coverImageURL && (
                       <img
                         className="h-full w-auto object-contain"
                         src={coverImageURL}
                         alt=""
                       />
-                    ) : (
-                      <div className="bg-gray-1 h-full w-[100px]"></div>
                     )}
-                  </div>
-                )}
-                {mnemonicType === "image" && coverImageURL && (
-                  <div className="p-1 border border-gray-2 h-[350px] mb-2">
-                    <img
-                      className="h-full w-auto object-contain"
-                      src={coverImageURL}
-                      alt=""
-                    />
                   </div>
                 )}
 

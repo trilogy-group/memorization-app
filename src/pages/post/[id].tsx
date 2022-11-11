@@ -30,10 +30,9 @@ const Post: NextPage<PostProps> = ({ post, href, title }) => {
 
   const [isBackButtonVisible, setIsBackButtonVisible] = useState(false);
 
-  const likeCountQuery = trpc.useQuery(
-    ["like.count", { postId: post?.id! }],
-    { initialData: { count: post?._count.likes! } }
-  );
+  const likeCountQuery = trpc.useQuery(["like.count", { postId: post?.id! }], {
+    initialData: { count: post?._count.likes! },
+  });
   const commentsQuery = trpc.useQuery(
     ["comment.by-post", { postID: post?.id! }],
     { initialData: post?.comments! }
@@ -106,15 +105,18 @@ const Post: NextPage<PostProps> = ({ post, href, title }) => {
       });
     try {
       notificationMutation.mutateAsync({
-        content: session.data?.user?.name + " commented your post " + "\"" + inputValue.trim() + "\"",
+        content:
+          session.data?.user?.name +
+          " commented your post " +
+          '"' +
+          inputValue.trim() +
+          '"',
         postId: post?.id as string,
         userId: post?.user.id as string,
       });
     } catch {
       throw new Error("Cannot update notifications");
     }
-
-
   };
 
   if (!post) return <></>;
@@ -209,7 +211,17 @@ const Post: NextPage<PostProps> = ({ post, href, title }) => {
             >
               {post.caption}
             </p>
-
+            <div className="text-gray-500 text-sm flex justify-left flex-wrap  text-xl h-fit self-start break-all">
+              <p
+                style={{
+                  wordWrap: "break-word",
+                  overflowWrap: "break-word",
+                  whiteSpace: "pre-line",
+                }}
+              >
+                {post.mnemonic_text}
+              </p>
+            </div>
             <div className="flex justify-between items-center">
               <div className="flex gap-5">
                 <div className="flex items-center gap-1">
@@ -334,7 +346,11 @@ const Post: NextPage<PostProps> = ({ post, href, title }) => {
               onChange={(e) => setInputValue(e.target.value)}
             />
             <button
-              disabled={postCommentMutation.isLoading || !inputValue.trim() || !session?.data?.user}
+              disabled={
+                postCommentMutation.isLoading ||
+                !inputValue.trim() ||
+                !session?.data?.user
+              }
               type="submit"
               className={`transition ${postCommentMutation.isLoading || !inputValue.trim()
                   ? ""
@@ -372,6 +388,7 @@ export const getServerSideProps = async ({
         videoURL: true,
         coverURL: true,
         caption: true,
+        mnemonic_text: true,
         _count: { select: { likes: true } },
         user: { select: { id: true, image: true, name: true } },
         comments: {

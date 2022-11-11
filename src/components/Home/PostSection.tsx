@@ -156,7 +156,6 @@ const PostSection: FC<PostSectionProps> = ({
           >
             {post.mnemonic_text}
           </p>
-          
         </div>
       );
     }
@@ -174,20 +173,30 @@ const PostSection: FC<PostSectionProps> = ({
     }
 
     return (
-      <a
-        className={`${
-          post.videoHeight > post.videoWidth * 1.3
+      <div className="text-gray-500 text-sm flex justify-left flex-wrap  text-xl h-fit self-start break-all">
+        <p
+          style={{
+            wordWrap: "break-word",
+            overflowWrap: "break-word",
+            whiteSpace: "pre-line",
+          }}
+        >
+          {post.mnemonic_text}
+        </p>
+        <a
+          className={`${post.videoHeight > post.videoWidth * 1.3
             ? "md:h-[600px]"
             : "flex-grow h-auto"
-        } block bg-[#3D3C3D] rounded-md overflow-hidden flex-grow h-auto md:flex-grow-0`}
-      >
-        <VideoPlayer src={post.videoURL} poster={post.coverURL}></VideoPlayer>
-      </a>
+            } block bg-[#3D3C3D] rounded-md overflow-hidden flex-grow h-auto md:flex-grow-0`}
+        >
+          <VideoPlayer src={post.videoURL} poster={post.coverURL}></VideoPlayer>
+        </a>
+      </div>
     );
   };
 
   useEffect(() => {
-    concept().then(() => {});
+    concept().then(() => { });
   }, []);
 
   return (
@@ -229,11 +238,10 @@ const PostSection: FC<PostSectionProps> = ({
             <div className="flex-shrink-0">
               <button
                 onClick={() => toggleFollow()}
-                className={`py-1 px-3 rounded text-sm mt-2 ${
-                  isCurrentlyFollowed ?? post.followedByMe
-                    ? "border hover:bg-[#F8F8F8] transition"
-                    : "border border-pink text-pink hover:bg-[#FFF4F5] transition"
-                }`}
+                className={`py-1 px-3 rounded text-sm mt-2 ${isCurrentlyFollowed ?? post.followedByMe
+                  ? "border hover:bg-[#F8F8F8] transition"
+                  : "border border-pink text-pink hover:bg-[#FFF4F5] transition"
+                  }`}
               >
                 {isCurrentlyFollowed ?? post.followedByMe
                   ? "Following"
@@ -262,9 +270,8 @@ const PostSection: FC<PostSectionProps> = ({
                 className="lg:w-12 lg:h-12 w-7 h-7 bg-[#F1F1F2] fill-black flex justify-center items-center rounded-full"
               >
                 <AiFillHeart
-                  className={`lg:w-7 lg:h-7 h-5 w-5 ${
-                    isCurrentlyLiked ? "fill-pink" : ""
-                  }`}
+                  className={`lg:w-7 lg:h-7 h-5 w-5 ${isCurrentlyLiked ? "fill-pink" : ""
+                    }`}
                 />
               </button>
               <p className="text-center text-xs font-semibold">
