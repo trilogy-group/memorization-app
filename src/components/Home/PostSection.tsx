@@ -146,7 +146,7 @@ const PostSection: FC<PostSectionProps> = ({
   };
 
   const handleContentDisplay = () => {
-    var content = "";
+    var content = <></>;
     
     if ("" == post.mnemonic_text) 
       content = (<img

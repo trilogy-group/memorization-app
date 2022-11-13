@@ -319,7 +319,7 @@ const CreateListOfWords: NextPage = () => {
     let prevAcronym = acronym;
     prevAcronym[Number(index)] =
       /* acronymWordList + */
-      
+
       String(acronymCreated?.result);
     setIsLoadingMnemonic(false);
 
@@ -370,7 +370,7 @@ const CreateListOfWords: NextPage = () => {
       setAcronym((prevAcronym) => [
         ...prevAcronym,
         /* acronymWordList + */
-          String(acronymCreated?.result),
+        String(acronymCreated?.result),
       ]);
       prevLoading = isLoadingAcronym;
       prevLoading[Number(i)] = false;
@@ -655,36 +655,52 @@ const CreateListOfWords: NextPage = () => {
                     </div>
                   )}
                   <div className="col-span-1 w-full">
-                    <p>Input below:</p>
-                    <input
-                      type="text"
-                      id="newEntry"
-                      className="p-2 w-full border border-gray-2 mt-1 mb-3 outline-none focus:border-gray-400 transition"
-                      value={tableEntryValue}
-                      onChange={(e) => {
-                        setTableEntryValue(e.target.value);
-                      }}
-                    />
-                    <div className="grid grid-cols-2">
-                      <button
-                        onClick={async () => {
-                          await handleAddToSequence();
-                          setTableEntryValue("");
-                        }}
-                        disabled={!tableEntryValue.trim()}
-                        className={`flex justify-center items-center gap-2 py-3 min-w-[20px] hover:brightness-90 transition text-white bg-red-1 disabled:text-gray-400 disabled:bg-gray-200`}
-                        style={{ borderRadius: 5, padding: 5, width: 200 }}
-                      >
-                        <AiOutlinePlus className="w-5 h-5" />
-                        Add entry
-                      </button>
-                    </div>
+
                     <div className="my-8 min-h-[200px]">
                       <ul id="answer">
+                        <li
+                          key={0}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            padding: 10,
+                            border: "1px solid #ccc",
+                            borderRadius: 5,
+                            marginBottom: 5,
+                          }}
+                        >
+                          <p><b>Add List:</b></p>
+                          <input
+                            type="text"
+                            id="newEntry"
+                            className="p-2 w-full border border-gray-2 mt-1 mb-3 outline-none focus:border-gray-400 transition"
+                            value={tableEntryValue}
+                            onChange={(e) => {
+                              setTableEntryValue(e.target.value);
+                            }}
+                            onKeyDown={async (e) => {
+                              if (13 == e.keyCode) {
+                                await handleAddToSequence();
+                                setTableEntryValue("");
+                              }
+                            }}
+                          />
+                          <button
+                            onClick={async () => {
+                              await handleAddToSequence();
+                              setTableEntryValue("");
+                            }}
+                            className={`flex justify-center items-center gap-2 py-3 min-w-[20px] hover:brightness-90 transition text-black bg-green-500 disabled:text-gray-400 disabled:bg-gray-200`}
+                            style={{ borderRadius: 5, padding: 5, marginBottom: 9 }}
+                          >
+                            <AiOutlinePlus className="w-8 h-8" />
+                          </button>
+                        </li>
                         {options.map((option: any, index) => {
                           return (
                             <li
-                              key={index}
+                              key={index + 1}
                               style={{
                                 display: "flex",
                                 alignItems: "center",
@@ -843,7 +859,7 @@ const CreateListOfWords: NextPage = () => {
                                   >
                                     {!isLoadingAcronym[index] && acronym[index]}
                                   </p>
-                                  
+
                                 </div>
 
                                 <div className="flex justify-center items-center grid-cols-2">
@@ -1075,14 +1091,14 @@ const CreateListOfWords: NextPage = () => {
                         >
                           <Grid xs={4} sm={6} md={12}>
                             <Item2><p
-                                    style={{
-                                      wordWrap: "break-word",
-                                      overflowWrap: "break-word",
-                                      whiteSpace: "pre-line",
-                                    }}
-                                  >
-                                    {selectedMnemonicType}
-                                  </p></Item2>
+                              style={{
+                                wordWrap: "break-word",
+                                overflowWrap: "break-word",
+                                whiteSpace: "pre-line",
+                              }}
+                            >
+                              {selectedMnemonicType}
+                            </p></Item2>
 
                             <Button
                               className="disabled:text-gray-400 disabled:bg-gray-200`"
