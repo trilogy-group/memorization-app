@@ -54,7 +54,7 @@ const UserProfile: NextPage<UserProfileProps> = ({ user }) => {
 
       <Navbar />
       <div className="flex justify-center mx-4">
-        <div className="w-full max-w-[1150px]">
+        <div className="w-full max-w-[1920px]">
           <div className="p-5 border-b mb-5">
             <div className="flex gap-3">
               <div>

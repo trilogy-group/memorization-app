@@ -37,7 +37,7 @@ const Home: NextPage<HomeProps> = ({
       <Navbar />
 
       <div className="flex justify-center mx-4">
-        <div className="w-full max-w-[1150px] flex">
+        <div className="w-full max-w-[1920px] flex">
           <Sidebar
             leaderboardAccounts={leaderboardAccounts!}
             followingAccounts={followingAccounts!}

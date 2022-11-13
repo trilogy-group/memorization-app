@@ -124,9 +124,9 @@ const Post: NextPage<PostProps> = ({ post, href, title }) => {
   //There should be a much better way to handle that, you can start by modifying the struct of post.
   const answerPosition = post?.caption?.indexOf( "Answer:" );
   const question = (-1 == answerPosition)?post?.caption:post?.caption.substring(0,answerPosition);
-  const answer = (-1 == answerPosition)?"No Answer Found":post?.caption.substr(answerPosition?+7);
-  var mnemonics = <></>
-  if ("" == post.mnemonic_text)
+  const answer = (-1 == answerPosition)?"No Answer Found":post?.caption.substr(answerPosition?answerPosition:0 + 7);
+  var mnemonics = <></>;
+  if ("" == post?.mnemonic_text)
     mnemonics = <img src={post.coverURL} />
   else 
     mnemonics = (
@@ -138,7 +138,7 @@ const Post: NextPage<PostProps> = ({ post, href, title }) => {
             whiteSpace: "pre-line",
           }}
         >
-          {post.mnemonic_text}
+          {post?.mnemonic_text}
         </p>
       </div>
     );
