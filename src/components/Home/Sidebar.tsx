@@ -147,7 +147,7 @@ const Sidebar: FC<SidebarProps> = ({
                   </div>
                 </div>
 
-                <div className="lg:grid md:hidden gap-2 grid-cols-2 items-center justify-center">
+                <div className="lg:grid hidden gap-2 grid-cols-2 items-center justify-center">
                   <Image
                     className="col-span-1 rounded-full object-cover"
                     style={{ marginLeft: 50 }}
@@ -156,7 +156,7 @@ const Sidebar: FC<SidebarProps> = ({
                     src={"/star.png"}
                     alt=""
                   />
-                  <div className="col-span-1">{account.points}</div>
+                  <div className="col-span-1 hidden lg:block">{account.points}</div>
                 </div>
               </a>
             </Link>

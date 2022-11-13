@@ -121,7 +121,29 @@ const Post: NextPage<PostProps> = ({ post, href, title }) => {
     }
   };
 
-  if (!post) return <></>;
+  //There should be a much better way to handle that, you can start by modifying the struct of post.
+  const answerPosition = post?.caption?.indexOf( "Answer:" );
+  const question = (-1 == answerPosition)?post?.caption:post?.caption.substring(0,answerPosition);
+  const answer = (-1 == answerPosition)?"No Answer Found":post?.caption.substr(answerPosition+7);
+  var mnemonics = <></>
+  if ("" == post.mnemonic_text)
+    mnemonics = <img src={post.coverURL} />
+  else 
+    mnemonics = (
+      <div className="text-gray-500 text-sm flex justify-left flex-wrap  text-xl h-fit self-start break-all">
+        <p
+          style={{
+            wordWrap: "break-word",
+            overflowWrap: "break-word",
+            whiteSpace: "pre-line",
+          }}
+        >
+          {post.mnemonic_text}
+        </p>
+      </div>
+    );
+
+  if (!post) return <>Page Not Found</>;
 
   return (
     <>
@@ -162,7 +184,11 @@ const Post: NextPage<PostProps> = ({ post, href, title }) => {
             </div>
           )
         }
-        {post.contentType != contentType.text && post.contentType != contentType.image && (
+        {
+          //Really not sure what we are trying to do with the conditions
+          //Am sure however that they are cleaner ways of handling the same
+        }
+        {(post.contentType != contentType.text && post.contentType != contentType.image)? (
           <div className="lg:flex-grow flex justify-center items-center relative bg-[#1E1619]">
             (
             <video
@@ -197,6 +223,10 @@ const Post: NextPage<PostProps> = ({ post, href, title }) => {
                 </a>
               </Link>
             </div>
+          </div>
+        ) : (
+          <div className="lg:flex-grow flex justify-center items-center relative bg-[#1E1619]">
+            {mnemonics}
           </div>
         )}
         <div className="w-full lg:w-[500px] flex-shrink-0 flex flex-col items-stretch h-screen">
@@ -242,22 +272,19 @@ const Post: NextPage<PostProps> = ({ post, href, title }) => {
                 </div>
               )}
             </div>
-            <p
+            <div
               className="my-3"
               style={{ wordWrap: "break-word", overflowWrap: "break-word" }}
             >
-              {post.caption}
-            </p>
-            <div className="text-gray-500 text-sm flex justify-left flex-wrap  text-xl h-fit self-start break-all">
-              <p
-                style={{
-                  wordWrap: "break-word",
-                  overflowWrap: "break-word",
-                  whiteSpace: "pre-line",
-                }}
-              >
-                {post.mnemonic_text}
-              </p>
+              {
+                //Doing a workaround this shuold be a part of schema
+              }
+              <span className="box-decoration-slice bg-gradient-to-r from-indigo-600 to-pink-500 text-white px-2 block">Question:</span>
+              {question}
+              <span className="box-decoration-slice bg-gradient-to-r from-indigo-600 to-pink-500 text-white px-2 block">Answer:</span>
+              {answer}
+              <span className="box-decoration-slice bg-gradient-to-r from-indigo-600 to-pink-500 text-white px-2 block">Mnemonic:</span>
+              {mnemonics}
             </div>
             <div className="flex justify-between items-center">
               <div className="flex gap-5">
