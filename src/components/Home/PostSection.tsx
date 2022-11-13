@@ -146,53 +146,45 @@ const PostSection: FC<PostSectionProps> = ({
   };
 
   const handleContentDisplay = () => {
-    if (post.contentType === contentType.text) {
-      return (
-        <div className="text-gray-500 text-sm flex justify-center flex-wrap  text-xl h-fit self-start break-all">
-          <p
-            style={{
-              wordWrap: "break-word",
-              overflowWrap: "break-word",
-              whiteSpace: "pre-line",
-            }}
+    var content = "";
+    
+    if ("" == post.mnemonic_text) 
+      content = (<img
+        className="w-full object-contain rounded-full object-cover"
+        src={post.coverURL}
+        alt=""
+      />) 
+    else 
+      content = (<p className="text-3xl block pb-[10%]"
+        style={{
+          wordWrap: "break-word",
+          overflowWrap: "break-word",
+          whiteSpace: "pre-line",
+        }}
+      >
+        {post.mnemonic_text}
+      </p>)
+    
+    if ( post.videoURL != "" && post.videoURL != null ) 
+        content = (
+          <Link
+          className="w-full"
+          href={
+            post.contentType == contentType.text ? "" : `/post/${post.id}`
+          }
           >
-            {post.mnemonic_text}
-          </p>
-        </div>
-      );
-    }
-    if (post.videoURL === "" || post.videoURL === null) {
-      return (
-        <div>
-          <img
-            className="rounded-full object-cover"
-            height={300}
-            width={450}
-            src={
-              post.coverURL
-            }
-            alt=""
-          />
-        </div>
-      );
-    } else {
-      return (
-        <div>
-          <a className="h-0 relative pb-[131%]">
-            <img
-              className="rounded-full object-cover"
-              height={300}
-              width={450}
-              src={
-                post.coverURL
-              }
-              alt=""
-            />
-            <BsPlay className="absolute left-2 bottom-6 fill-black w-7 h-7" />
-          </a>
-        </div>
-      );
-    }
+            <div className="w-full">
+              {content}
+              <BsPlay className="relative left-2 bottom-6 fill-black w-7 h-7" />
+            </div>
+          </Link>
+        );
+    return (
+      <div 
+        className={(("" == post.mnemonic_text)?"justify-center":"left") + "text-gray-500 text-sm flex flex-wrap  text-xl h-fit self-start break-all w-full "} >
+        {content}
+      </div>
+    );
   };
 
   useEffect(() => {
@@ -250,14 +242,8 @@ const PostSection: FC<PostSectionProps> = ({
             </div>
           )}
         </div>
-        <div className="flex justify-between items-end gap-5">
-          <Link
-            href={
-              post.contentType == contentType.text ? "" : `/post/${post.id}`
-            }
-          >
-            {handleContentDisplay()}
-          </Link>
+        <div className="w-full flex justify-between items-end gap-5">
+          {handleContentDisplay()}
           <div className="flex items-end gap-4">
             <div className="flex flex-col gap-1 lg:gap-2">
               <Button onClick={() => handleGotIt()} variant="outlined">

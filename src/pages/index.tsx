@@ -54,7 +54,7 @@ const Home: NextPage<HomeProps> = ({
                 onTriggerRefetchChange={setTriggerRefetch}
               />
           }
-          <div id="notificationArea" className="w-1/6">
+          <div id="notificationArea" className="hide">
             <ToastContainer />
           </div>
         </div>
