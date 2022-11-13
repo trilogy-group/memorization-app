@@ -140,7 +140,7 @@ const CreateListOfWords: NextPage = () => {
 
   const [options, setOptions] = useState([]);
 
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(true);
 
   const [nodeId, setNodeId] = useState("");
   const [nodeName, setNodeName] = useState("");
