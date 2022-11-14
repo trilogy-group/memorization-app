@@ -17,7 +17,7 @@ async function fetchWithCache() {
     return value;
   } else {
     console.log('not cached', value);
-    const hours = 1;
+    const hours = 24;
     try {
       const data = await fetch(apiUrl, {
         method: "POST",
@@ -55,7 +55,7 @@ async function fetchWithCache() {
 async function fetchWithCacheNoQ() {
   const apiKey = process.env.CURRICULUM_GRAPH_API_KEY || "";
   const apiUrl = process.env.CURRICULUM_GRAPH_API_URL || "";
-  const hours = 1;
+  const hours = 24;
   const value = cacheDataNoQ.get('TreeNoQ');
   if (value) {
     return value;
