@@ -18,7 +18,7 @@ Demo website: [https://memoryapp.tu2k22.devfactory.com/](https://memoryapp.tu2k2
 
 ## Features
 
-- Auth (Google, Facebook)
+- Auth (Google)
 - Upload video with thumbnail
 - Infinite loading
 - Follow user
