@@ -187,47 +187,48 @@ const Post: NextPage<PostProps> = ({ post, href, title }) => {
           //Really not sure what we are trying to do with the conditions
           //Am sure however that they are cleaner ways of handling the same
         }
-        {(post.contentType != contentType.text && post.contentType != contentType.image)? (
-          <div className="lg:flex-grow flex justify-center items-center relative bg-[#1E1619]">
-            (
-            <video
-              className="w-auto h-auto max-w-full max-h-[600px] lg:max-h-full"
-              src={post.videoURL}
-              muted={isMuted}
-              onVolumeChange={(e: any) => setIsMuted(e.target.muted)}
-              autoPlay
-              loop
-              // remove poster to prevent flickering/blinking
-              //poster={post.coverURL}
-              controls
-              playsInline
-            ></video>
-            )
-            <div className="absolute top-5 left-5 flex gap-3">
-              {isBackButtonVisible && (
-                <button
-                  onClick={() => router.push("/")}
-                  className="bg-[#3D3C3D] w-[40px] h-[40px] rounded-full flex justify-center items-center"
-                >
-                  <FaTimes className="w-5 h-5 fill-white" />
-                </button>
-              )}
-              <Link href="/">
-                <a className="w-[40px] h-[40px]">
-                  <img
-                    className="w-full h-full object-cover rounded-full"
-                    src="/favicon.png"
-                    alt=""
-                  />
-                </a>
-              </Link>
-            </div>
+        <div className="lg:flex-grow flex justify-center items-center relative bg-[#1E1619]">
+          {(post.contentType != contentType.text && post.contentType != contentType.image)? (
+              (
+              <video
+                className="w-auto h-auto max-w-full max-h-[600px] lg:max-h-full"
+                src={post.videoURL}
+                muted={isMuted}
+                onVolumeChange={(e: any) => setIsMuted(e.target.muted)}
+                autoPlay
+                loop
+                // remove poster to prevent flickering/blinking
+                //poster={post.coverURL}
+                controls
+                playsInline
+              ></video>
+              )
+          ) : (
+              <div style={{paddingTop: "100px", color: "white", fontSize: "4rem", lineHeight: "4rem"}} >
+                {mnemonics}
+              </div>
+          )}
+          <div className="absolute top-5 left-5 flex gap-3">
+            {isBackButtonVisible && (
+              <button
+                onClick={() => router.push("/")}
+                className="bg-[#3D3C3D] w-[40px] h-[40px] rounded-full flex justify-center items-center"
+              >
+                <FaTimes className="w-5 h-5 fill-white" />
+              </button>
+            )}
+            <Link href="/">
+              <a className="w-[40px] h-[40px]">
+                <img
+                  className="w-full h-full object-cover rounded-full"
+                  src="/favicon.png"
+                  alt=""
+                />
+              </a>
+            </Link>
           </div>
-        ) : (
-          <div className="lg:flex-grow flex justify-center items-center relative bg-[#1E1619]">
-            {mnemonics}
-          </div>
-        )}
+        </div>
+
         <div className="w-full lg:w-[500px] flex-shrink-0 flex flex-col items-stretch h-screen">
           <div className="px-4 pt-6 pb-4 flex-shrink-0 border-b">
             <div className="flex">
