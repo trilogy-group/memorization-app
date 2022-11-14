@@ -645,7 +645,7 @@ const CreateListOfWords: NextPage = () => {
                             disabled={selectedMnemonic}
                           />
                           <Tab
-                            label="Storys"
+                            label="Stories"
                             value="3"
                             disabled={selectedMnemonic}
                           />
@@ -811,7 +811,7 @@ const CreateListOfWords: NextPage = () => {
                             disabled={selectedMnemonic}
                           />
                           <Tab
-                            label="Storys"
+                            label="Stories"
                             value="3"
                             disabled={selectedMnemonic}
                           />
