@@ -20,6 +20,7 @@ import { Button } from "@mui/material";
 
 import Chip from "@mui/material/Chip";
 import Stack from "@mui/material/Stack";
+import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import { BsPlay } from "react-icons/bs";
 
 
@@ -227,10 +228,18 @@ const PostSection: FC<PostSectionProps> = ({
           </div>
           {/* @ts-ignore */}
           {post.userId !== session.data?.user?.id && (
-            <div className="flex-shrink-0">
+            <div className="flex-shrink-0 w-20">
+              <Button 
+                onClick={() => handleGotIt()} variant="outlined"
+                className={`w-20 text-black bg-green-500 py-1 px-3 rounded text-sm mt-2 border hover:bg-green-200 transition"
+                  }`}
+              >
+                <ThumbUpIcon></ThumbUpIcon>Got it 
+              </Button>
+
               <button
                 onClick={() => toggleFollow()}
-                className={`py-1 px-3 rounded text-sm mt-2 ${isCurrentlyFollowed ?? post.followedByMe
+                className={`w-20 py-1 px-3 rounded text-sm mt-2 ${isCurrentlyFollowed ?? post.followedByMe
                   ? "border hover:bg-[#F8F8F8] transition"
                   : "border border-pink text-pink hover:bg-[#FFF4F5] transition"
                   }`}
@@ -245,11 +254,6 @@ const PostSection: FC<PostSectionProps> = ({
         <div className="w-full flex justify-between items-end gap-5">
           {handleContentDisplay()}
           <div className="flex items-end gap-4">
-            <div className="flex flex-col gap-1 lg:gap-2">
-              <Button onClick={() => handleGotIt()} variant="outlined">
-                Got it
-              </Button>
-            </div>
             <div className="flex flex-col gap-1 lg:gap-2">
               <button
                 onClick={() => toggleLike()}
