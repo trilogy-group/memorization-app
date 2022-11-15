@@ -43,11 +43,11 @@ Here are the steps to setup this project
   - Save changes
 - Change App Mode in the header to "Live".
 
-### Discord webhook url
+<!-- ### Discord webhook url
 
 - Go to discord and create a new Server. The only member must be you only so that no one can access your files.
 - Create a new text channel
 - Click on the cog icon ⚙️ to "Edit channel"
 - Go to "Integration" tab
 - Click on "View webhooks"
-- "Create a new webhook" and then "Copy Webhook URL". Use that URL as DISCORD_WEBHOOK_URL environment variable
+- "Create a new webhook" and then "Copy Webhook URL". Use that URL as DISCORD_WEBHOOK_URL environment variable -->

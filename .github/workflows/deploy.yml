@@ -1,0 +1,42 @@
+name: Deploy CDK Stack
+
+on:
+  push:
+    branches: [ master ]
+    paths:
+      - "aws/**"
+
+jobs:
+  build:
+    name: Deploy Stack
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Check out code
+      uses: actions/checkout@v3
+      with:
+        ref: staging
+
+    - uses: actions/setup-node@v3
+      with:
+        node-version: 16
+
+    - uses: shine1594/secrets-to-env-action@master
+      with:
+        secrets: ${{ toJSON(secrets) }}
+        secrets_env: all
+        prefix_prod: ''
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{secrets.AWS_ACCESS_KEY_ID}}
+        aws-secret-access-key: ${{secrets.AWS_SECRET_ACCESS_KEY}}
+        aws-region: ${{secrets.AWS_REGION}}
+    
+    - name: Run CDK
+      run: |
+        npm install -g aws-cdk
+        cd aws
+        pip install -r requirements.txt
+        cdk deploy --all --require-approval never 

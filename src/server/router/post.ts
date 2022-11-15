@@ -1,4 +1,4 @@
-import { FeedItem } from "@/utils/text";
+import { FeedItem, contentType } from "@/utils/text";
 import { Follow, Like, Quiz, Post } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
@@ -7,6 +7,7 @@ import { createRouter } from "./context";
 
 import * as fs from "fs";
 import * as AWS from "aws-sdk";
+import { randomUUID } from "crypto";
 
 const BUCKET_NAME = process.env.BUCKET_NAME;
 const IAM_USER_KEY = process.env.IAM_USER_KEY;
@@ -14,7 +15,7 @@ const IAM_USER_SECRET = process.env.IAM_USER_SECRET;
 
 const s3bucket = new AWS.S3({
   accessKeyId: IAM_USER_KEY,
-  secretAccessKey: IAM_USER_SECRET
+  secretAccessKey: IAM_USER_SECRET,
 });
 
 function uploadToS3(fileName: string): Promise<any> {
@@ -23,11 +24,11 @@ function uploadToS3(fileName: string): Promise<any> {
   const params = {
     Bucket: BUCKET_NAME as string,
     Key: fileName,
-    Body: readStream
+    Body: readStream,
   };
 
   return new Promise((resolve, reject) => {
-    s3bucket.upload(params, function (err: any, data: { Location: string; }) {
+    s3bucket.upload(params, function (err: any, data: { Location: string }) {
       readStream.destroy();
 
       if (err) {
@@ -37,14 +38,6 @@ function uploadToS3(fileName: string): Promise<any> {
     });
   });
 }
-
-enum contentType {
-  image = 1,
-  video = 2,
-  text = 3,
-  unknown = 4,
-}
-
 
 export const postRouter = createRouter()
   .query("for-you", {
@@ -62,7 +55,7 @@ export const postRouter = createRouter()
         },
         select: {
           postId: true,
-        }
+        },
       });
 
       const feedPostIdArr = feedItems.map((feed) => feed.postId);
@@ -77,12 +70,12 @@ export const postRouter = createRouter()
         },
         orderBy: {
           likes: {
-            _count: "desc"
-          }
+            _count: "desc",
+          },
         },
         where: {
-          id: { in: feedPostIdArr }
-        }
+          id: { in: feedPostIdArr },
+        },
       });
 
       let likes: Like[] = [];
@@ -112,14 +105,14 @@ export const postRouter = createRouter()
 
       const progress = await prisma.progress.findMany({
         where: {
-          userId : session?.user?.id as string,
+          userId: session?.user?.id as string,
           nextEvaluate: {
-            lt: new Date()
-          }
+            lt: new Date(),
+          },
         },
         select: {
           quizId: true,
-        }
+        },
       });
 
       const quizIdArr = progress.map((q) => q.quizId);
@@ -132,12 +125,12 @@ export const postRouter = createRouter()
             some: {
               userId: session?.user?.id as string,
               nextEvaluate: {
-                lt: new Date()
-              }
-            }
+                lt: new Date(),
+              },
+            },
           },
           //id: { in: viewedFeeds.map((f) => { return f.quizId; }) }
-          id: { in: quizIdArr }
+          id: { in: quizIdArr },
         },
       });
       // TODO: if feeds are incomplete, do not add the quiz
@@ -148,15 +141,15 @@ export const postRouter = createRouter()
           likedByMe: likes.some((like) => like.postId === item.id),
           followedByMe: followings.some(
             (following) => following.followingId === item.userId
-          )
-        }
+          ),
+        };
       });
 
-      const results: FeedItem[] = []
+      const results: FeedItem[] = [];
       posts.forEach((post) => {
-        results.push({ type: "Post", post: post })
-      })
-      results.push({ type: 'Quiz', quizzes: quizzes })
+        results.push({ type: "Post", post: post });
+      });
+      results.push({ type: "Quiz", quizzes: quizzes });
 
       return {
         items: results,
@@ -236,12 +229,14 @@ export const postRouter = createRouter()
   .mutation("createVideo", {
     input: z.object({
       caption: z.string(),
-      videoURL: z.string().url(),
-      coverURL: z.string().url(),
-      videoWidth: z.number().gt(0),
-      videoHeight: z.number().gt(0),
+      videoURL: z.string(),
+      coverURL: z.string(),
+      videoWidth: z.number(),
+      videoHeight: z.number(),
       conceptId: z.string(),
       quizId: z.string(),
+      contentType: z.number(),
+      mnemonicText: z.string(),
     }),
     // TODO: test whether quizFound works properly
     async resolve({ ctx: { prisma, session }, input }) {
@@ -249,7 +244,7 @@ export const postRouter = createRouter()
         where: {
           conceptId: input.conceptId,
           idInConcept: input.quizId as string,
-        }
+        },
       });
 
       if (quizFound == null) {
@@ -263,8 +258,8 @@ export const postRouter = createRouter()
           coverURL: input.coverURL,
           videoWidth: input.videoWidth,
           videoHeight: input.videoHeight,
-          mnemonic_text: "",
-          contentType: contentType.video,
+          mnemonic_text: input.mnemonicText,
+          contentType: input.contentType,
           userId: session?.user?.id!,
           quizId: quizFound.id,
         },
@@ -292,8 +287,8 @@ export const postRouter = createRouter()
         where: {
           concepts: {
             id: input.conceptId,
-          }
-        }
+          },
+        },
       });
 
       if (quizFound == null) {
@@ -310,7 +305,7 @@ export const postRouter = createRouter()
           mnemonic_text: "",
           userId: session?.user?.id!,
           contentType: contentType.image,
-          quizId: quizFound.id
+          quizId: quizFound.id,
         },
       });
       await prisma.user.update({
@@ -335,8 +330,8 @@ export const postRouter = createRouter()
         where: {
           concepts: {
             id: input.conceptId,
-          }
-        }
+          },
+        },
       });
 
       if (quizFound == null) {
@@ -373,7 +368,46 @@ export const postRouter = createRouter()
       const Location: String = (await uploadToS3(input.file)) as string;
       return Location;
     },
-  }).mutation("getHint", {
+  })
+  .mutation("presignedUrl", {
+    input: z.object({
+      fileName: z.string(),
+      fileType: z.string(),
+    }),
+    async resolve({ ctx: { prisma, session }, input }) {
+      console.log(input.fileName);
+      const ex = (input.fileType as string).split("/")[1];
+      const Key = `${randomUUID()}.${ex}`;
+      /* const post = await s3bucket.createPresignedPost({
+        Bucket: BUCKET_NAME,
+        Fields: {
+          key: Key,
+        },
+        Expires: 60, // seconds
+        Conditions: [
+          ["content-length-range", 0, 1048576], // up to 1 MB
+        ],
+      }); */
+      console.log("type " + input.fileType)
+      const fileParams = {
+        Bucket: BUCKET_NAME,
+        Key: Key,
+        Expires: 600,
+        ContentType: input.fileType,
+      };
+      const s3 = new AWS.S3({
+        accessKeyId: process.env.IAM_USER_KEY,
+        secretAccessKey: process.env.IAM_USER_SECRET,
+        region: "us-east-1",
+      });
+
+      const url = await s3.getSignedUrlPromise("putObject", fileParams);
+      console.log(url);
+      console.log(Key);
+      return [url, Key];
+    },
+  })
+  .mutation("getHint", {
     input: z.object({
       quizId: z.number(),
     }),
@@ -384,7 +418,7 @@ export const postRouter = createRouter()
         },
         select: {
           coverURL: true,
-        }
+        },
       });
 
       if (hintFound == null) {
@@ -392,7 +426,8 @@ export const postRouter = createRouter()
       }
       return hintFound.coverURL as string;
     },
-  }).mutation("getConcept", {
+  })
+  .mutation("getConcept", {
     input: z.object({
       quizId: z.number(),
     }),
@@ -403,13 +438,11 @@ export const postRouter = createRouter()
         },
         select: {
           concepts: true,
-        }
+        },
       });
       if (conceptFound == null) {
         throw new Error("Concept or quiz not found in the DB.");
       }
       return conceptFound.concepts.name as string;
-    }
+    },
   });
-
-

@@ -18,7 +18,7 @@ Demo website: [https://memoryapp.tu2k22.devfactory.com/](https://memoryapp.tu2k2
 
 ## Features
 
-- Auth (Google, Facebook)
+- Auth (Google)
 - Upload video with thumbnail
 - Infinite loading
 - Follow user
@@ -30,19 +30,55 @@ Demo website: [https://memoryapp.tu2k22.devfactory.com/](https://memoryapp.tu2k2
 - Search accounts and videos
 - SEO
 
-## Installation
+## Development Set-up
 
-#### 1. nvm install --lts && npm i
+#### 1. Prerequisites
+- Python v3.7+
+- [Install nvm](https://www.freecodecamp.org/news/node-version-manager-nvm-install-guide/) then run
+```bash
+nvm install --lts
+```
 #### 2. Install mysql
-Then execute `CREATE DATABASE memoryapp`
-#### 3. Get credentials
-Log in to AWS console, get [.env from s3](https://s3.console.aws.amazon.com/s3/upload/tu2k22-memoryapp)
-
-Change `DATABASE_URL` to `DATABASE_URL=mysql://yourmysqldbadminname:password@127.0.0.1:3306/memoryapp`
+- Create a mysql db user with all privileges
+- Then execute `CREATE DATABASE memoryapp`
+#### 3. Populate DB
+- run the following script to get Concepts from the Curriculum Graph
+```bash
+bash scripts/get_concepts/sh > data.txt
+```
+- Open [db population script](./scripts/loadConcepts.py)
+- edit the username and password to your username and password
+- run the following command
+```bash
+bash scripts/loadConcepts.py
+```
+#### 4. Get environment variables
+- Log in to aws console in the TrilogyUniversity Account (Account Id: 280022023954)
+- Get [.env file from s3](https://s3.console.aws.amazon.com/s3/upload/tu2k22-memoryapp)
+- Change `DATABASE_URL` in .env to `DATABASE_URL=mysql://yourmysqldbadminname:password@127.0.0.1:3306/memoryapp`
 `memoryapp` is the database name.
 
-#### 4. npx prisma migrate dev --name init
-#### 5. npm run dev
+#### 5. Running the app
 
-#### For further details
+```bash
+npm install
+npx prisma migrate dev --name init
+npx prisma generate
+npm run dev
+```
+
+#### 6. For further details
 See [SELF-HOSTING.md](/SELF-HOSTING.md)
+
+## Deployment
+Deployment is handled through CDK stack defined in [aws](./aws/) folder.
+It's an application load balanced ECS service. 
+Deployment is automated through CI/CD. By default the action is triggered only when there are changes on the master branch in the aws folder
+
+To run the deployment manually, run
+
+```bash
+cd aws
+pip install -r requirements.txt
+cdk deploy --all --require-approval never
+```

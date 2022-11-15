@@ -37,7 +37,7 @@ const Home: NextPage<HomeProps> = ({
       <Navbar />
 
       <div className="flex justify-center mx-4">
-        <div className="w-full max-w-[1150px] flex">
+        <div className="w-full max-w-[1920px] flex">
           <Sidebar
             leaderboardAccounts={leaderboardAccounts!}
             followingAccounts={followingAccounts!}
@@ -54,7 +54,7 @@ const Home: NextPage<HomeProps> = ({
                 onTriggerRefetchChange={setTriggerRefetch}
               />
           }
-          <div id="notificationArea" className="w-1/6">
+          <div id="notificationArea" className="hide">
             <ToastContainer />
           </div>
         </div>

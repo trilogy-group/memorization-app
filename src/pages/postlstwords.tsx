@@ -72,8 +72,6 @@ const Item2 = styled(Paper)(({ theme }) => ({
   overflow: "hidden",
 }));
 
-
-
 const CreateListOfWords: NextPage = () => {
   const [wordList, setWordList] = useState<string[]>([]);
 
@@ -82,7 +80,6 @@ const CreateListOfWords: NextPage = () => {
   const uploadMutation = trpc.useMutation("post.createVideo");
 
   const uploadImageMutation = trpc.useMutation("post.uploadToS3");
-
 
   const [mnemonicImage, setMnemonicImage] = useState<string[]>([
     "",
@@ -143,7 +140,7 @@ const CreateListOfWords: NextPage = () => {
 
   const [options, setOptions] = useState([]);
 
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(true);
 
   const [nodeId, setNodeId] = useState("");
   const [nodeName, setNodeName] = useState("");
@@ -199,8 +196,8 @@ const CreateListOfWords: NextPage = () => {
   const handleRecommeddedImage = async (index: Number, prompt: string) => {
     let newLoading = isLoadingImage;
     newLoading[Number(index)] = true;
-    setIsLoadingImage(prevLoading => [...newLoading]);
-    
+    setIsLoadingImage((prevLoading) => [...newLoading]);
+
     const featurePrompt = prompt + " " + features[Number(index)];
 
     const created = await imgRecommendationMutation.mutateAsync({
@@ -210,13 +207,13 @@ const CreateListOfWords: NextPage = () => {
 
     const imageRoute = created?.filename as string;
     console.log(imageRoute);
-    const s3ImageURL = await handleUploadToS3(imageRoute)
+    const s3ImageURL = await handleUploadToS3(imageRoute);
     prevMnemonicImage[Number(index)] = s3ImageURL as string;
     setMnemonicImage(prevMnemonicImage);
 
     newLoading = isLoadingImage;
     newLoading[Number(index)] = false;
-    setIsLoadingImage(prevLoading => [...newLoading]);
+    setIsLoadingImage((prevLoading) => [...newLoading]);
   };
 
   const handleRecommenddedPrompt = async () => {
@@ -253,7 +250,6 @@ const CreateListOfWords: NextPage = () => {
   };
 
   const handleRecommeddedImageList = async (prompt: string) => {
-    
     let prevLoading = isLoadingImage;
     let prevMnemonicImage = mnemonicImage;
     for (let i = 0; i < 4; i++) {
@@ -269,11 +265,11 @@ const CreateListOfWords: NextPage = () => {
       setIsLoadingImage(prevLoading);
       const featurePrompt = prompt + " " + features[i];
 
-      const imageName= await imgRecommendationMutation.mutateAsync({
+      const imageName = await imgRecommendationMutation.mutateAsync({
         description: featurePrompt,
       });
       const imageRoute = imageName?.filename as string;
-      const s3ImageURL = await handleUploadToS3(imageRoute)
+      const s3ImageURL = await handleUploadToS3(imageRoute);
 
       prevMnemonicImage = mnemonicImage;
       prevMnemonicImage[i] = s3ImageURL as string;
@@ -291,6 +287,19 @@ const CreateListOfWords: NextPage = () => {
     setIsLoadingAcronym(prevLoading);
 
     setIsLoadingMnemonic(true);
+
+    /* var acronymWordList = "";
+
+    for (let i = 0; i < wordList.length; i++) {
+      if (wordList[i] != undefined) {
+        if (i == wordList.length - 1) {
+          acronymWordList += wordList[i];
+        } else {
+          acronymWordList += wordList[i] + ", ";
+        }
+      }
+    } */
+
     var acronymLeters = "";
 
     //Get first leter for each word in wordList
@@ -309,7 +318,9 @@ const CreateListOfWords: NextPage = () => {
     });
     let prevAcronym = acronym;
     prevAcronym[Number(index)] =
-      "Remember " + acronymLeters + " with: " + String(acronymCreated?.result);
+      /* acronymWordList + */
+
+      String(acronymCreated?.result);
     setIsLoadingMnemonic(false);
 
     prevLoading = isLoadingAcronym;
@@ -325,6 +336,19 @@ const CreateListOfWords: NextPage = () => {
     }
 
     setIsLoadingMnemonic(true);
+
+    /* var acronymWordList = "";
+
+    for (let i = 0; i < wordList.length; i++) {
+      if (wordList[i] != undefined) {
+        if (i == wordList.length - 1) {
+          acronymWordList += wordList[i];
+        } else {
+          acronymWordList += wordList[i] + ", ";
+        }
+      }
+    } */
+
     var acronymLeters = "";
 
     //Get first leter for each word in wordList
@@ -345,10 +369,8 @@ const CreateListOfWords: NextPage = () => {
       });
       setAcronym((prevAcronym) => [
         ...prevAcronym,
-        "Remember " +
-          acronymLeters +
-          " with: " +
-          String(acronymCreated?.result),
+        /* acronymWordList + */
+        String(acronymCreated?.result),
       ]);
       prevLoading = isLoadingAcronym;
       prevLoading[Number(i)] = false;
@@ -379,8 +401,7 @@ const CreateListOfWords: NextPage = () => {
     });
 
     let prevStory = story;
-    prevStory[Number(index)] =
-      "Remember " + storyWordList + " with: " + storyCreated?.result;
+    prevStory[Number(index)] = storyWordList + ": " + storyCreated?.result;
     setIsLoadingMnemonic(false);
     prevLoading = isLoadingStory;
     prevLoading[Number(index)] = false;
@@ -418,7 +439,7 @@ const CreateListOfWords: NextPage = () => {
       });
       setStory((prevStory) => [
         ...prevStory,
-        "Remember " + storyWordList + " with: " + String(storyCreated?.result),
+        storyWordList + ": " + String(storyCreated?.result),
       ]);
 
       prevLoading = isLoadingStory;
@@ -427,6 +448,22 @@ const CreateListOfWords: NextPage = () => {
     }
     setIsLoadingMnemonic(false);
   };
+
+  const handleSelectedMnemonic = async (acronym: String) => {
+    var acronymWordList = "";
+
+    for (let i = 0; i < wordList.length; i++) {
+      if (wordList[i] != undefined) {
+        if (i == wordList.length - 1) {
+          acronymWordList += wordList[i];
+        } else {
+          acronymWordList += wordList[i] + ", ";
+        }
+      }
+    }
+    return acronymWordList + ": " + acronym;
+
+  }
 
   const handleUpload = async () => {
     setOpenUpload(true); // TODO: connect to the mnemonics generation backend
@@ -470,7 +507,10 @@ const CreateListOfWords: NextPage = () => {
     const index = options.findIndex((item: any) => item.id === id);
     if (index > -1) {
       options.splice(index, 1);
-      setWordList((prevWordList) => {prevWordList.splice(index, 1); return prevWordList;});
+      setWordList((prevWordList) => {
+        prevWordList.splice(index, 1);
+        return prevWordList;
+      });
       setOptions((state) => [...state]);
     }
     const tab = Number(value);
@@ -537,9 +577,10 @@ const CreateListOfWords: NextPage = () => {
                         onClose={() => setOpenUpload(false)}
                         conceptId={parentId}
                         questionId={nodeId}
-                        caption={nodeName}
+                        caption={nodeName + "\n Answer: " +  correctAnswer}
                         mnemonicType={mnemonicType}
                         imageUrl={selectedMnemonicType}
+                        mnemonicText=""
                       />
                     )}
                     {mnemonicType !== "image" && (
@@ -548,9 +589,10 @@ const CreateListOfWords: NextPage = () => {
                         onClose={() => setOpenUpload(false)}
                         conceptId={parentId}
                         questionId={nodeId}
-                        caption={nodeName}
+                        caption={nodeName + "\n Answer: " +  correctAnswer}
                         mnemonicType={mnemonicType}
                         imageUrl={""}
+                        mnemonicText={selectedMnemonicType}
                       />
                     )}
                   </h1>
@@ -613,36 +655,52 @@ const CreateListOfWords: NextPage = () => {
                     </div>
                   )}
                   <div className="col-span-1 w-full">
-                    <p>Input below:</p>
-                    <input
-                      type="text"
-                      id="newEntry"
-                      className="p-2 w-full border border-gray-2 mt-1 mb-3 outline-none focus:border-gray-400 transition"
-                      value={tableEntryValue}
-                      onChange={(e) => {
-                        setTableEntryValue(e.target.value);
-                      }}
-                    />
-                    <div className="grid grid-cols-2">
-                      <button
-                        onClick={async () => {
-                          await handleAddToSequence();
-                          setTableEntryValue("");
-                        }}
-                        disabled={!tableEntryValue.trim()}
-                        className={`flex justify-center items-center gap-2 py-3 min-w-[20px] hover:brightness-90 transition text-white bg-red-1 disabled:text-gray-400 disabled:bg-gray-200`}
-                        style={{ borderRadius: 5, padding: 5, width: 200 }}
-                      >
-                        <AiOutlinePlus className="w-5 h-5" />
-                        Add entry
-                      </button>
-                    </div>
+
                     <div className="my-8 min-h-[200px]">
                       <ul id="answer">
+                        <li
+                          key={0}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            padding: 10,
+                            border: "1px solid #ccc",
+                            borderRadius: 5,
+                            marginBottom: 5,
+                          }}
+                        >
+                          <p><b>Add List:</b></p>
+                          <input
+                            type="text"
+                            id="newEntry"
+                            className="p-2 w-full border border-gray-2 mt-1 mb-3 outline-none focus:border-gray-400 transition"
+                            value={tableEntryValue}
+                            onChange={(e) => {
+                              setTableEntryValue(e.target.value);
+                            }}
+                            onKeyDown={async (e) => {
+                              if (13 == e.keyCode) {
+                                await handleAddToSequence();
+                                setTableEntryValue("");
+                              }
+                            }}
+                          />
+                          <button
+                            onClick={async () => {
+                              await handleAddToSequence();
+                              setTableEntryValue("");
+                            }}
+                            className={`flex justify-center items-center gap-2 py-3 min-w-[20px] hover:brightness-90 transition text-black bg-green-500 disabled:text-gray-400 disabled:bg-gray-200`}
+                            style={{ borderRadius: 5, padding: 5, marginBottom: 9 }}
+                          >
+                            <AiOutlinePlus className="w-8 h-8" />
+                          </button>
+                        </li>
                         {options.map((option: any, index) => {
                           return (
                             <li
-                              key={index}
+                              key={index + 1}
                               style={{
                                 display: "flex",
                                 alignItems: "center",
@@ -684,29 +742,29 @@ const CreateListOfWords: NextPage = () => {
                           />
                         )}
                         {wordList.length > 0 && (
-                        <button
-                          onClick={async () => {
-                            setIsLoadingMnemonic(true);
-                            await handleGeneration();
-                            setIsLoadingMnemonic(false);
-                          }}
-                          disabled={
-                            (!inputPromptValue.trim() && value == "2") ||
-                            wordList.length == 0
-                          }
-                          className={`flex justify-center items-center gap-2 py-3 hover:brightness-90 transition text-white bg-red-1 disabled:text-gray-400 disabled:bg-gray-200`}
-                          style={{
-                            borderRadius: 10,
-                            padding: 5,
-                            width: "28%",
-                            height: 38,
-                            marginLeft: 10,
-                            marginTop: 10,
-                            float: "right",
-                          }}
-                        >
-                          Generate
-                        </button>
+                          <button
+                            onClick={async () => {
+                              setIsLoadingMnemonic(true);
+                              await handleGeneration();
+                              setIsLoadingMnemonic(false);
+                            }}
+                            disabled={
+                              (!inputPromptValue.trim() && value == "2") ||
+                              wordList.length == 0
+                            }
+                            className={`flex justify-center items-center gap-2 py-3 hover:brightness-90 transition text-white bg-red-1 disabled:text-gray-400 disabled:bg-gray-200`}
+                            style={{
+                              borderRadius: 10,
+                              padding: 5,
+                              width: "28%",
+                              height: 38,
+                              marginLeft: 10,
+                              marginTop: 10,
+                              float: "right",
+                            }}
+                          >
+                            Generate
+                          </button>
                         )}
                       </div>
                       {value == "2" && (
@@ -776,7 +834,7 @@ const CreateListOfWords: NextPage = () => {
                             disabled={selectedMnemonic}
                           />
                           <Tab
-                            label="Storys"
+                            label="Stories"
                             value="3"
                             disabled={selectedMnemonic}
                           />
@@ -792,7 +850,16 @@ const CreateListOfWords: NextPage = () => {
                             <Grid xs={4} sm={6} md={6} key={index}>
                               <Item>
                                 <div className="flex justify-center items-center grid-cols-2">
-                                  {!isLoadingAcronym[index] && acronym[index]}
+                                  <p
+                                    style={{
+                                      wordWrap: "break-word",
+                                      overflowWrap: "break-word",
+                                      whiteSpace: "pre-line",
+                                    }}
+                                  >
+                                    {!isLoadingAcronym[index] && acronym[index]}
+                                  </p>
+
                                 </div>
 
                                 <div className="flex justify-center items-center grid-cols-2">
@@ -815,7 +882,8 @@ const CreateListOfWords: NextPage = () => {
                                 }}
                                 onClick={async () => {
                                   setSelectedMnemonic(true);
-                                  setSelectedMnemonicType(acronym[index] || "");
+                                  const selectedAcronym = await handleSelectedMnemonic(acronym[index] || "");
+                                  setSelectedMnemonicType(selectedAcronym || "");
                                   setMnemonicType("acronym");
                                 }}
                               >
@@ -905,7 +973,10 @@ const CreateListOfWords: NextPage = () => {
                                   mnemonicImage[index] == ""
                                 }
                                 onClick={async () => {
-                                  await handleRecommeddedImage(index, inputPromptValue);
+                                  await handleRecommeddedImage(
+                                    index,
+                                    inputPromptValue
+                                  );
                                 }}
                                 variant="outlined"
                                 color="error"
@@ -1006,7 +1077,7 @@ const CreateListOfWords: NextPage = () => {
                             disabled={selectedMnemonic}
                           />
                           <Tab
-                            label="Storys"
+                            label="Stories"
                             value="3"
                             disabled={selectedMnemonic}
                           />
@@ -1019,7 +1090,15 @@ const CreateListOfWords: NextPage = () => {
                           columns={{ xs: 4, sm: 8, md: 12 }}
                         >
                           <Grid xs={4} sm={6} md={12}>
-                            <Item2>{selectedMnemonicType}</Item2>
+                            <Item2><p
+                              style={{
+                                wordWrap: "break-word",
+                                overflowWrap: "break-word",
+                                whiteSpace: "pre-line",
+                              }}
+                            >
+                              {selectedMnemonicType}
+                            </p></Item2>
 
                             <Button
                               className="disabled:text-gray-400 disabled:bg-gray-200`"

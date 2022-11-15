@@ -31,7 +31,7 @@ const Search: FC<SearchProps> = ({ posts, accounts }) => {
       />
       <Navbar />
       <div className="flex justify-center mx-4">
-        <div className="w-full max-w-[1150px]">
+        <div className="w-full max-w-[1920px]">
           <div className="flex gap-10 px-10 my-4 border-b">
             <button
               onClick={() => setCurrentTab(Tabs.accounts)}

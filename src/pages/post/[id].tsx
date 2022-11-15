@@ -19,10 +19,12 @@ import { VolumeContext } from "@/context/VolumeContext";
 import { prisma } from "@/server/db/client";
 import { copyToClipboard } from "@/utils/clipboard";
 import { formatNumber } from "@/utils/number";
-import { formatAccountName } from "@/utils/text";
+import { contentType, formatAccountName } from "@/utils/text";
 import { trpc } from "@/utils/trpc";
 
 import { authOptions } from "../api/auth/[...nextauth]";
+
+
 
 const Post: NextPage<PostProps> = ({ post, href, title }) => {
   const session = useSession();
@@ -30,10 +32,9 @@ const Post: NextPage<PostProps> = ({ post, href, title }) => {
 
   const [isBackButtonVisible, setIsBackButtonVisible] = useState(false);
 
-  const likeCountQuery = trpc.useQuery(
-    ["like.count", { postId: post?.id! }],
-    { initialData: { count: post?._count.likes! } }
-  );
+  const likeCountQuery = trpc.useQuery(["like.count", { postId: post?.id! }], {
+    initialData: { count: post?._count.likes! },
+  });
   const commentsQuery = trpc.useQuery(
     ["comment.by-post", { postID: post?.id! }],
     { initialData: post?.comments! }
@@ -106,18 +107,43 @@ const Post: NextPage<PostProps> = ({ post, href, title }) => {
       });
     try {
       notificationMutation.mutateAsync({
-        content: session.data?.user?.name + " commented your post " + "\"" + inputValue.trim() + "\"",
+        content:
+          session.data?.user?.name +
+          " commented your post " +
+          '"' +
+          inputValue.trim() +
+          '"',
         postId: post?.id as string,
         userId: post?.user.id as string,
       });
     } catch {
       throw new Error("Cannot update notifications");
     }
-
-
   };
 
-  if (!post) return <></>;
+  //There should be a much better way to handle that, you can start by modifying the struct of post.
+  const answerPosition = post?.caption?.indexOf( "Answer:" );
+  const question = (-1 == answerPosition)?post?.caption:post?.caption.substring(0,answerPosition);
+  const answer = (-1 == answerPosition)?"No Answer Found":post?.caption.substr((answerPosition?answerPosition:0) + 7);
+  var mnemonics = <></>;
+  if ("" == post?.mnemonic_text)
+    mnemonics = <img src={post.coverURL} />
+  else 
+    mnemonics = (
+      <div className="text-gray-500 text-sm flex justify-left flex-wrap  text-xl h-fit self-start break-all">
+        <p
+          style={{
+            wordWrap: "break-word",
+            overflowWrap: "break-word",
+            whiteSpace: "pre-line",
+          }}
+        >
+          {post?.mnemonic_text}
+        </p>
+      </div>
+    );
+
+  if (!post) return <>Page Not Found</>;
 
   return (
     <>
@@ -128,18 +154,60 @@ const Post: NextPage<PostProps> = ({ post, href, title }) => {
       />
 
       <div className="flex flex-col lg:flex-row lg:h-screen items-stretch">
+        {
+          post.contentType === contentType.image && (
+            <div className="lg:flex-grow flex justify-center items-center relative bg-[#1E1619]">
+              <video
+                className="w-auto h-auto max-w-full max-h-[600px] lg:max-h-full"
+                poster={post.coverURL}
+              ></video>
+              <div className="absolute top-5 left-5 flex gap-3">
+                {isBackButtonVisible && (
+                  <button
+                    onClick={() => router.push("/")}
+                    className="bg-[#3D3C3D] w-[40px] h-[40px] rounded-full flex justify-center items-center"
+                  >
+                    <FaTimes className="w-5 h-5 fill-white" />
+                  </button>
+                )}
+                <Link href="/">
+                  <a className="w-[40px] h-[40px]">
+                    <img
+                      className="w-full h-full object-cover rounded-full"
+                      src="/favicon.png"
+                      alt=""
+                    />
+                  </a>
+                </Link>
+              </div>
+            </div>
+          )
+        }
+        {
+          //Really not sure what we are trying to do with the conditions
+          //Am sure however that they are cleaner ways of handling the same
+        }
         <div className="lg:flex-grow flex justify-center items-center relative bg-[#1E1619]">
-          <video
-            className="w-auto h-auto max-w-full max-h-[600px] lg:max-h-full"
-            src={post.videoURL}
-            muted={isMuted}
-            onVolumeChange={(e: any) => setIsMuted(e.target.muted)}
-            autoPlay
-            loop
-            poster={post.coverURL}
-            controls
-            playsInline
-          ></video>
+          {(post.contentType != contentType.text && post.contentType != contentType.image)? (
+              (
+              <video
+                className="w-auto h-auto max-w-full max-h-[600px] lg:max-h-full"
+                src={post.videoURL}
+                muted={isMuted}
+                onVolumeChange={(e: any) => setIsMuted(e.target.muted)}
+                autoPlay
+                loop
+                // remove poster to prevent flickering/blinking
+                //poster={post.coverURL}
+                controls
+                playsInline
+              ></video>
+              )
+          ) : (
+              <div style={{paddingTop: "100px", color: "white", fontSize: "4rem", lineHeight: "4rem"}} >
+                {mnemonics}
+              </div>
+          )}
           <div className="absolute top-5 left-5 flex gap-3">
             {isBackButtonVisible && (
               <button
@@ -160,6 +228,7 @@ const Post: NextPage<PostProps> = ({ post, href, title }) => {
             </Link>
           </div>
         </div>
+
         <div className="w-full lg:w-[500px] flex-shrink-0 flex flex-col items-stretch h-screen">
           <div className="px-4 pt-6 pb-4 flex-shrink-0 border-b">
             <div className="flex">
@@ -192,8 +261,8 @@ const Post: NextPage<PostProps> = ({ post, href, title }) => {
                   <button
                     onClick={() => toggleFollow()}
                     className={`py-1 px-3 rounded text-sm mt-2 ${isCurrentlyFollowed ?? post.followedByMe
-                        ? "border hover:bg-[#F8F8F8] transition"
-                        : "border border-pink text-pink hover:bg-[#FFF4F5] transition"
+                      ? "border hover:bg-[#F8F8F8] transition"
+                      : "border border-pink text-pink hover:bg-[#FFF4F5] transition"
                       }`}
                   >
                     {isCurrentlyFollowed ?? post.followedByMe
@@ -203,13 +272,20 @@ const Post: NextPage<PostProps> = ({ post, href, title }) => {
                 </div>
               )}
             </div>
-            <p
+            <div
               className="my-3"
               style={{ wordWrap: "break-word", overflowWrap: "break-word" }}
             >
-              {post.caption}
-            </p>
-
+              {
+                //Doing a workaround this shuold be a part of schema
+              }
+              <span className="box-decoration-slice bg-gradient-to-r from-indigo-600 to-pink-500 text-white px-2 block">Question:</span>
+              {question}
+              <span className="box-decoration-slice bg-gradient-to-r from-indigo-600 to-pink-500 text-white px-2 block">Answer:</span>
+              {answer}
+              <span className="box-decoration-slice bg-gradient-to-r from-indigo-600 to-pink-500 text-white px-2 block">Mnemonic:</span>
+              {mnemonics}
+            </div>
             <div className="flex justify-between items-center">
               <div className="flex gap-5">
                 <div className="flex items-center gap-1">
@@ -334,11 +410,15 @@ const Post: NextPage<PostProps> = ({ post, href, title }) => {
               onChange={(e) => setInputValue(e.target.value)}
             />
             <button
-              disabled={postCommentMutation.isLoading || !inputValue.trim() || !session?.data?.user}
+              disabled={
+                postCommentMutation.isLoading ||
+                !inputValue.trim() ||
+                !session?.data?.user
+              }
               type="submit"
               className={`transition ${postCommentMutation.isLoading || !inputValue.trim()
-                  ? ""
-                  : "text-pink"
+                ? ""
+                : "text-pink"
                 }`}
             >
               {postCommentMutation.isLoading ? "Posting..." : "Post"}
@@ -372,6 +452,8 @@ export const getServerSideProps = async ({
         videoURL: true,
         coverURL: true,
         caption: true,
+        mnemonic_text: true,
+        contentType: true,
         _count: { select: { likes: true } },
         user: { select: { id: true, image: true, name: true } },
         comments: {

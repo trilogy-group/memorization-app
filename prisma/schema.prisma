@@ -58,6 +58,7 @@ model User {
     masteries     Mastery[]
     concepts      Concept[]
     Feed          Feed[]
+    admin         Boolean        @default(false)
 
     @@fulltext([name, email])
 }
@@ -216,7 +217,7 @@ model Quiz {
 
 model Feed {
     postId    String
-    post      Post    @relation(fields: [postId], references: [id])
+    post      Post    @relation(fields: [postId], references: [id], onDelete: Cascade)
     userId    String
     user      User    @relation(fields: [userId], references: [id])
     quizId    Int

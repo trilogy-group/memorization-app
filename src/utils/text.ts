@@ -40,3 +40,10 @@ export interface Option {
   is_correct: boolean,
 }
 
+export enum contentType {
+  image = 1,
+  video = 2,
+  text = 3,
+  unknown = 4,
+}
+

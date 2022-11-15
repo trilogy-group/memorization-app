@@ -5,7 +5,11 @@ import MenuBookIcon from "@mui/icons-material/MenuBook";
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
 import LocalActivityIcon from "@mui/icons-material/LocalActivity";
 
+import { Textarea, Grid } from "@nextui-org/react";
+
 import RefreshIcon from "@mui/icons-material/Refresh";
+
+import axios from "axios";
 
 import { TreeView, TreeItem } from "@mui/lab";
 import {
@@ -28,7 +32,7 @@ import {
   Skill,
   Concept,
   Question,
-} from "../../server/router/contentTreeInterface";
+} from "@/utils/contentTreeInterface";
 
 import create from "zustand";
 import { devtools, persist } from "zustand/middleware";
@@ -93,6 +97,7 @@ export type UploadProps = {
   caption: string;
   mnemonicType: string;
   imageUrl: string;
+  mnemonicText: string;
 };
 
 const Upload = ({
@@ -103,12 +108,14 @@ const Upload = ({
   caption,
   mnemonicType,
   imageUrl,
+  mnemonicText,
 }: UploadProps) => {
   const router = useRouter();
 
   const uploadMutation = trpc.useMutation("post.createVideo");
   const uploadImgMutation = trpc.useMutation("post.createImg");
   const uploadToS3Mutation = trpc.useMutation("post.uploadToS3");
+  const presignedUrlMutation = trpc.useMutation("post.presignedUrl");
 
   const inputRef = useRef<HTMLInputElement | null>(null);
 
@@ -192,7 +199,6 @@ const Upload = ({
     setVideoFile(file);
     setVideoURL(url);
     setFileType(fileDataType.video);
-
     const video = document.createElement("video");
     video.style.opacity = "0";
     video.style.width = "0px";
@@ -309,6 +315,8 @@ const Upload = ({
   }; */
 
   const handleVideoUpload = async () => {
+    const file = videoFile;
+    if (!file) return;
     if (!coverImageURL || !videoFile || !videoURL || isLoading) return;
 
     setIsLoading(true);
@@ -316,19 +324,22 @@ const Upload = ({
     const toastID = toast.loading("Uploading...");
 
     try {
-      const uploadedVideo = (
-        await fetchWithProgress(
-          "POST",
-          new URL(
-            "/upload?fileName=video.mp4",
-            process.env.NEXT_PUBLIC_UPLOAD_URL!
-          ).href,
-          videoFile,
-          (percentage) => {
-            toast.loading(`Uploading ${percentage}%...`, { id: toastID });
-          }
-        )
-      ).url;
+      const [signedUrl, Key] = await presignedUrlMutation.mutateAsync({
+        fileName: file.name || "",
+        fileType: file.type || "",
+      });
+      console.log("url " + signedUrl + " key " + Key);
+      const fileType = encodeURIComponent(file.type);
+      console.log("file type " + fileType);
+      await axios.put(signedUrl as string, file, {
+        headers: {
+          "Content-Type": file.type,
+          "access-control-allow-origin": "*",
+        },
+      });
+
+      const uploadedVideo =
+        "https://tu2k22-memoryapp-public.s3.amazonaws.com/" + Key;
 
       let uploadedCover: any = null;
 
@@ -363,7 +374,7 @@ const Upload = ({
       toast.loading("Uploading metadata...", { id: toastID });
 
       // Replace with concept from user input
-
+      console.log("Cover " + uploadedCover);
       const created = await uploadMutation.mutateAsync({
         caption: caption,
         coverURL: uploadedCover,
@@ -372,6 +383,8 @@ const Upload = ({
         videoWidth,
         conceptId: conceptId,
         quizId: questionId,
+        contentType: 2,
+        mnemonicText: mnemonicText,
       });
       toast.loading("Mnemonics Created! Points +1", { id: toastID });
       await new Promise((r) => setTimeout(r, 800));
@@ -391,6 +404,57 @@ const Upload = ({
     }
   };
 
+  const handleNoVideoUpload = async () => {
+    let contentType = 3;
+
+    setIsLoading(true);
+
+    const toastID = toast.loading("Uploading...");
+
+    try {
+      let uploadedCover: any = null;
+
+      if (mnemonicType === "image") {
+        setCoverImageURL(imageUrl);
+        uploadedCover = imageUrl;
+        contentType = 1;
+      } else {
+        setCoverImageURL("");
+        uploadedCover = "";
+      }
+      toast.loading("Uploading metadata...", { id: toastID });
+
+      // Replace with concept from user input
+
+      const created = await uploadMutation.mutateAsync({
+        caption: caption,
+        coverURL: uploadedCover,
+        videoURL: "",
+        videoHeight: 0,
+        videoWidth: 0,
+        conceptId: conceptId,
+        quizId: questionId,
+        contentType: contentType,
+        mnemonicText: mnemonicText,
+      });
+      toast.loading("Mnemonics Created! Points +1", { id: toastID });
+      await new Promise((r) => setTimeout(r, 800));
+
+      toast.dismiss(toastID);
+
+      setIsLoading(false);
+
+      router.push(`/`);
+    } catch (error) {
+      console.log(error);
+      setIsLoading(false);
+      toast.error("Failed to upload video", {
+        position: "bottom-right",
+        id: toastID,
+      });
+    }
+  };
+
   const handleUpload = async () => {
     /* if (fileType == fileDataType.image) {
       handleImageUpload();
@@ -398,7 +462,7 @@ const Upload = ({
     if (fileType == fileDataType.video) {
       handleVideoUpload();
     } else {
-      throw new Error("Unknown file type. Only support video/image uploading.");
+      handleNoVideoUpload();
     }
   };
 
@@ -498,8 +562,8 @@ const Upload = ({
                 }}
               />
 
-              <div className="flex-grow">
-                <label className="block font-medium" htmlFor="caption">
+              <div>
+                {/* <label className="block font-medium" htmlFor="caption">
                   Caption
                 </label>
                 <input
@@ -508,29 +572,54 @@ const Upload = ({
                   className="p-2 w-full border border-gray-2 mt-1 mb-3 outline-none focus:border-gray-400 transition"
                   value={caption}
                   readOnly
-                />
+                /> */}
+                <Grid.Container gap={1} className="w-full">
+                  <Grid className="w-full">
+                    <Textarea
+                      label="Caption"
+                      value={caption}
+                      readOnly
+                      minRows={5}
+                      maxRows={10}
+                      fullWidth={true}
+                    />
+                  </Grid>
+                  {mnemonicType != "image" && (
+                    <Grid className="w-full">
+                      <Textarea
+                        label="Mnemonic text"
+                        value={mnemonicText}
+                        readOnly
+                        maxRows={10}
+                        fullWidth={true}
+                      />
+                    </Grid>
+                  )}
+                </Grid.Container>
 
-                <p className="font-medium">Cover</p>
-                {mnemonicType !== "image" && (
-                  <div className="p-2 border border-gray-2 h-[170px] mb-2">
-                    {coverImageURL ? (
+                {coverImageURL && (
+                  <div>
+                    <p className="font-medium">Cover</p>
+                    {mnemonicType !== "image" && (
+                      <div className="p-2 border border-gray-2 h-[170px] mb-2">
+                        {coverImageURL ? (
+                          <img
+                            className="h-full w-auto object-contain"
+                            src={coverImageURL}
+                            alt=""
+                          />
+                        ) : (
+                          <div className="bg-gray-1 h-full w-[100px]"></div>
+                        )}
+                      </div>
+                    )}
+                    {mnemonicType === "image" && coverImageURL && (
                       <img
                         className="h-full w-auto object-contain"
                         src={coverImageURL}
                         alt=""
                       />
-                    ) : (
-                      <div className="bg-gray-1 h-full w-[100px]"></div>
                     )}
-                  </div>
-                )}
-                {mnemonicType === "image" && coverImageURL && (
-                  <div className="p-1 border border-gray-2 h-[350px] mb-2">
-                    <img
-                      className="h-full w-auto object-contain"
-                      src={coverImageURL}
-                      alt=""
-                    />
                   </div>
                 )}
 
@@ -552,10 +641,10 @@ const Upload = ({
                   </button>
                   <button
                     onClick={async () => await handleUpload()}
-                    disabled={
-                      /* !inputValue.trim() || */
+                    /* disabled={
+                      !inputValue.trim()
                       !videoURL || !videoFile || isLoading
-                    }
+                    } */
                     className={`flex justify-center items-center gap-2 py-3 min-w-[170px] hover:brightness-90 transition text-white bg-red-1 disabled:text-gray-400 disabled:bg-gray-200`}
                   >
                     {isLoading && (

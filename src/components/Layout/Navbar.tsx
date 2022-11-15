@@ -94,7 +94,7 @@ const Navbar: FC = () => {
   return (
     <nav className="border-b sticky top-0 z-20 bg-white">
       <div className="flex justify-center mx-4">
-        <div className="w-full max-w-[1150px] flex justify-between items-center h-[60px]">
+        <div className="w-full max-w-[1920px] flex justify-between items-center h-[60px]">
           <Link href="/">
             <a className="flex items-end gap-1">
               <Image src="/logo.png" alt="Logo" width={30} height={30} />
@@ -174,15 +174,6 @@ const Navbar: FC = () => {
                     }
                   >
                     Create a list of words
-                  </Link>
-                </MenuItem>
-                <MenuItem onClick={handleClose}>
-                  <Link
-                    href={
-                      status === "authenticated" ? "/postsequence" : "/sign-in"
-                    }
-                  >
-                    Create a sequence
                   </Link>
                 </MenuItem>
                 <MenuItem onClick={handleClose}>

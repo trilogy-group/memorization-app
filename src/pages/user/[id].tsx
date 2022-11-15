@@ -15,10 +15,13 @@ import Navbar from "@/components/Layout/Navbar";
 import Meta from "@/components/Shared/Meta";
 import { prisma } from "@/server/db/client";
 import { formatNumber } from "@/utils/number";
-import { formatAccountName } from "@/utils/text";
+import { contentType, formatAccountName } from "@/utils/text";
 import { trpc } from "@/utils/trpc";
 
 import { authOptions } from "../api/auth/[...nextauth]";
+
+import { Textarea, Grid } from "@nextui-org/react";
+
 
 const UserProfile: NextPage<UserProfileProps> = ({ user }) => {
   const session = useSession();
@@ -51,7 +54,7 @@ const UserProfile: NextPage<UserProfileProps> = ({ user }) => {
 
       <Navbar />
       <div className="flex justify-center mx-4">
-        <div className="w-full max-w-[1150px]">
+        <div className="w-full max-w-[1920px]">
           <div className="p-5 border-b mb-5">
             <div className="flex gap-3">
               <div>
@@ -105,7 +108,7 @@ const UserProfile: NextPage<UserProfileProps> = ({ user }) => {
               </div>
               <div className="flex items-center gap-2">
                 <span className="font-bold text-lg">
-                  {formatNumber(user?.points||0)}
+                  {formatNumber(user?.points || 0)}
                 </span>
                 <span>Points</span>
               </div>
@@ -120,11 +123,39 @@ const UserProfile: NextPage<UserProfileProps> = ({ user }) => {
                 <div key={post.id}>
                   <Link href={`/post/${post.id}`}>
                     <a className="block h-0 relative pb-[131%]">
-                      <img
-                        className="absolute inset-0 h-full w-full object-cover rounded"
-                        src={post.coverURL}
-                        alt=""
-                      />
+                      {post.contentType != contentType.text && (
+                        <img
+                          className="absolute inset-0 h-full w-full object-cover rounded"
+                          src={
+                            post.contentType == contentType.text
+                              ? "/textpost.png"
+                              : post.coverURL
+                          }
+                          alt=""
+                        />
+                      )}
+
+                      {post.contentType == contentType.text && (
+                        <Grid.Container gap={1} className="w-full">
+                          <Grid className="w-full">
+                            <Textarea
+                              value={post.mnemonic_text}
+                              readOnly
+                              minRows={12}
+                              maxRows={12}
+                              fullWidth={true}
+                              // Show it's clickable
+                              style={{ cursor: "pointer" }}
+                              className="cursor-pointer"
+                              //On click go to post
+                              onClick={() => {
+                                window.location.href = `/post/${post.id}`;
+                              }}
+                            />
+                          </Grid>
+                        </Grid.Container>
+                      )}
+
                       <BsPlay className="absolute left-3 bottom-3 fill-white w-7 h-7" />
                     </a>
                   </Link>
@@ -164,7 +195,13 @@ export const getServerSideProps = async ({
           image: true,
           _count: { select: { followers: true, followings: true } },
           posts: {
-            select: { id: true, coverURL: true, caption: true },
+            select: {
+              id: true,
+              coverURL: true,
+              caption: true,
+              contentType: true,
+              mnemonic_text: true,
+            },
             orderBy: { createdAt: "desc" },
           },
           points: true,
