@@ -38,4 +38,5 @@ jobs:
       run: |
         npm install -g aws-cdk
         cd aws
+        pip install -r requirements.txt
         cdk deploy --all --require-approval never 
