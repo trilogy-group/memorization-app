@@ -69,3 +69,16 @@ npm run dev
 
 #### 6. For further details
 See [SELF-HOSTING.md](/SELF-HOSTING.md)
+
+## Deployment
+Deployment is handled through CDK stack defined in [aws](./aws/) folder.
+It's an application load balanced ECS service. 
+Deployment is automated through CI/CD. By default the action is triggered only when there are changes on the master branch in the aws folder
+
+To run the deployment manually, run
+
+```bash
+cd aws
+pip install -r requirements.txt
+cdk deploy --all --require-approval never
+```
