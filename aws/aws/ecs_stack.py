@@ -24,7 +24,6 @@ class EcsStack(Stack):
             "memoryapp-cdk",
             allow_all_outbound=True,
             description="memoryapp tu2k22 ecs cdk deploy",
-            security_group_name="tu2k22-memoryapp",
             vpc=vpc,
         )
 
