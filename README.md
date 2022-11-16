@@ -82,3 +82,5 @@ cd aws
 pip install -r requirements.txt
 cdk deploy --all --require-approval never
 ```
+
+The publish action in the github workflows publishes a new version of the code each time a commit is pushed to master and updates the ECS service
