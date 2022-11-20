@@ -1,0 +1,1354 @@
+<!doctype html>
+<html>
+  <head>
+    <title>EdTok API</title>
+    <style type="text/css">
+      body {
+      	font-family: Trebuchet MS, sans-serif;
+      	font-size: 15px;
+      	color: #444;
+      	margin-right: 24px;
+      }
+      
+      h1	{
+      	font-size: 25px;
+      }
+      h2	{
+      	font-size: 20px;
+      }
+      h3	{
+      	font-size: 16px;
+      	font-weight: bold;
+      }
+      hr	{
+      	height: 1px;
+      	border: 0;
+      	color: #ddd;
+      	background-color: #ddd;
+      }
+      
+      .app-desc {
+        clear: both;
+        margin-left: 20px;
+      }
+      .param-name {
+        width: 100%;
+      }
+      .license-info {
+        margin-left: 20px;
+      }
+      
+      .license-url {
+        margin-left: 20px;
+      }
+      
+      .model {
+        margin: 0 0 0px 20px;
+      }
+      
+      .method {
+        margin-left: 20px;
+      }
+      
+      .method-notes	{
+      	margin: 10px 0 20px 0;
+      	font-size: 90%;
+      	color: #555;
+      }
+      
+      pre {
+        padding: 10px;
+        margin-bottom: 2px;
+      }
+      
+      .http-method {
+       text-transform: uppercase;
+      }
+      
+      pre.get {
+        background-color: #0f6ab4;
+      }
+      
+      pre.post {
+        background-color: #10a54a;
+      }
+      
+      pre.put {
+        background-color: #c5862b;
+      }
+      
+      pre.delete {
+        background-color: #a41e22;
+      }
+      
+      .huge	{
+      	color: #fff;
+      }
+      
+      pre.example {
+        background-color: #f3f3f3;
+        padding: 10px;
+        border: 1px solid #ddd;
+      }
+      
+      code {
+        white-space: pre;
+      }
+      
+      .nickname {
+        font-weight: bold;
+      }
+      
+      .method-path {
+        font-size: 1.5em;
+        background-color: #0f6ab4;
+      }
+      
+      .up {
+        float:right;
+      }
+      
+      .parameter {
+        width: 500px;
+      }
+      
+      .param {
+        width: 500px;
+        padding: 10px 0 0 20px;
+        font-weight: bold;
+      }
+      
+      .param-desc {
+        width: 700px;
+        padding: 0 0 0 20px;
+        color: #777;
+      }
+      
+      .param-type {
+        font-style: italic;
+      }
+      
+      .param-enum-header {
+      width: 700px;
+      padding: 0 0 0 60px;
+      color: #777;
+      font-weight: bold;
+      }
+      
+      .param-enum {
+      width: 700px;
+      padding: 0 0 0 80px;
+      color: #777;
+      font-style: italic;
+      }
+      
+      .field-label {
+        padding: 0;
+        margin: 0;
+        clear: both;
+      }
+      
+      .field-items	{
+      	padding: 0 0 15px 0;
+      	margin-bottom: 15px;
+      }
+      
+      .return-type {
+        clear: both;
+        padding-bottom: 10px;
+      }
+      
+      .param-header {
+        font-weight: bold;
+      }
+      
+      .method-tags {
+        text-align: right;
+      }
+      
+      .method-tag {
+        background: none repeat scroll 0% 0% #24A600;
+        border-radius: 3px;
+        padding: 2px 10px;
+        margin: 2px;
+        color: #FFF;
+        display: inline-block;
+        text-decoration: none;
+      }
+    </style>
+  </head>
+  <body>
+  <h1>EdTok API</h1>
+    <div class="app-desc">EdTok API</div>
+    <div class="app-desc">More information: <a href="https://helloreverb.com">https://helloreverb.com</a></div>
+    <div class="app-desc">Contact Info: <a href="hello@helloreverb.com">hello@helloreverb.com</a></div>
+    <div class="app-desc">Version: 1.0.0</div>
+    <div class="app-desc">BasePath:/davidfortuoso-ti/EdTok/1.0.0</div>
+    <div class="license-info">All rights reserved</div>
+    <div class="license-url">http://apache.org/licenses/LICENSE-2.0.html</div>
+  <h2>Access</h2>
+
+  <h2><a name="__Methods">Methods</a></h2>
+  [ Jump to <a href="#__Models">Models</a> ]
+
+  <h3>Table of Contents </h3>
+  <div class="method-summary"></div>
+  <h4><a href="#Comment">Comment</a></h4>
+  <ul>
+  <li><a href="#byPost"><code><span class="http-method">get</span> /comment/by-post</code></a></li>
+  <li><a href="#post"><code><span class="http-method">get</span> /comment/post</code></a></li>
+  </ul>
+  <h4><a href="#Follow">Follow</a></h4>
+  <ul>
+  <li><a href="#toggleFollow"><code><span class="http-method">get</span> /follow/toggle</code></a></li>
+  </ul>
+  <h4><a href="#GetContentTree">GetContentTree</a></h4>
+  <ul>
+  <li><a href="#contentTree"><code><span class="http-method">get</span> /getContentTree/contentTree</code></a></li>
+  <li><a href="#contentTreeNoQ"><code><span class="http-method">get</span> /getContentTree/contentTreeNoQ</code></a></li>
+  </ul>
+  <h4><a href="#Like">Like</a></h4>
+  <ul>
+  <li><a href="#count"><code><span class="http-method">get</span> /like/count</code></a></li>
+  <li><a href="#toggle"><code><span class="http-method">get</span> /like/toggle</code></a></li>
+  </ul>
+  <h4><a href="#Moderation">Moderation</a></h4>
+  <ul>
+  <li><a href="#isModerator"><code><span class="http-method">get</span> /moderation/isModerator</code></a></li>
+  <li><a href="#remove"><code><span class="http-method">post</span> /moderation/remove</code></a></li>
+  </ul>
+  <h4><a href="#Notification">Notification</a></h4>
+  <ul>
+  <li><a href="#createComment"><code><span class="http-method">post</span> /notification/createComment</code></a></li>
+  <li><a href="#createLike"><code><span class="http-method">post</span> /notification/createLike</code></a></li>
+  <li><a href="#createQuiz"><code><span class="http-method">post</span> /notification/createQuiz</code></a></li>
+  <li><a href="#forYouNotification"><code><span class="http-method">get</span> /notification/for-you</code></a></li>
+  </ul>
+  <h4><a href="#Post">Post</a></h4>
+  <ul>
+  <li><a href="#createImg"><code><span class="http-method">post</span> /post/createImg</code></a></li>
+  <li><a href="#createText"><code><span class="http-method">post</span> /post/createText</code></a></li>
+  <li><a href="#createVideo"><code><span class="http-method">post</span> /post/createVideo</code></a></li>
+  <li><a href="#following"><code><span class="http-method">get</span> /post/following</code></a></li>
+  <li><a href="#forYou"><code><span class="http-method">get</span> /post/for-you</code></a></li>
+  <li><a href="#getConcept"><code><span class="http-method">get</span> /post/getConcept</code></a></li>
+  <li><a href="#getHint"><code><span class="http-method">get</span> /post/getHint</code></a></li>
+  <li><a href="#presignedUrl"><code><span class="http-method">get</span> /post/presignedUrl</code></a></li>
+  <li><a href="#uploadToS3"><code><span class="http-method">post</span> /post/UploadToS3</code></a></li>
+  </ul>
+  <h4><a href="#Progress">Progress</a></h4>
+  <ul>
+  <li><a href="#getEfactor"><code><span class="http-method">get</span> /progress/get-efactor</code></a></li>
+  <li><a href="#getManyQuizzes"><code><span class="http-method">get</span> /progress/get-many-quizzes</code></a></li>
+  <li><a href="#getOneQuizes"><code><span class="http-method">get</span> /progress/get-one-quiz</code></a></li>
+  <li><a href="#postGotIt"><code><span class="http-method">post</span> /progress/post-got-it</code></a></li>
+  <li><a href="#postOneQuizResult"><code><span class="http-method">post</span> /progress/post-one-quiz-result</code></a></li>
+  </ul>
+  <h4><a href="#RecommendAcronym">RecommendAcronym</a></h4>
+  <ul>
+  <li><a href="#acronym"><code><span class="http-method">get</span> /recommendAcro/acronym</code></a></li>
+  </ul>
+  <h4><a href="#RecommendImage">RecommendImage</a></h4>
+  <ul>
+  <li><a href="#stabledif"><code><span class="http-method">get</span> /recommendImg/stabledif</code></a></li>
+  </ul>
+  <h4><a href="#RecommendStory">RecommendStory</a></h4>
+  <ul>
+  <li><a href="#prompt"><code><span class="http-method">get</span> /recommendStory/prompt</code></a></li>
+  <li><a href="#story"><code><span class="http-method">get</span> /recommendStory/story</code></a></li>
+  </ul>
+  <h4><a href="#User">User</a></h4>
+  <ul>
+  <li><a href="#addConcept"><code><span class="http-method">get</span> /user/addConcept</code></a></li>
+  <li><a href="#score"><code><span class="http-method">get</span> /user/score</code></a></li>
+  </ul>
+
+  <h1><a name="Comment">Comment</a></h1>
+  <div class="method"><a name="byPost"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /comment/by-post</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">byPost</span>)</div>
+    <div class="method-notes">Returns comments of a post.</div>
+
+
+
+
+
+    <h3 class="field-label">Query parameters</h3>
+    <div class="field-items">
+      <div class="param">postId (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Post ID </div>    </div>  <!-- field-items -->
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Comments
+        <a href="#"></a>
+    <h4 class="field-label">400</h4>
+    bad input parameter
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="post"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /comment/post</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">post</span>)</div>
+    <div class="method-notes">Adds comment to a post.</div>
+
+
+
+
+
+    <h3 class="field-label">Query parameters</h3>
+    <div class="field-items">
+      <div class="param">postId (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Post ID </div>      <div class="param">content (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Content </div>    </div>  <!-- field-items -->
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Comment added
+        <a href="#"></a>
+    <h4 class="field-label">400</h4>
+    bad input parameter
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <h1><a name="Follow">Follow</a></h1>
+  <div class="method"><a name="toggleFollow"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /follow/toggle</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">toggleFollow</span>)</div>
+    <div class="method-notes">Follows a user.</div>
+
+
+
+
+
+    <h3 class="field-label">Query parameters</h3>
+    <div class="field-items">
+      <div class="param">followingId (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Following ID </div>      <div class="param">isFollowed (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Is Followed </div>    </div>  <!-- field-items -->
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Follow added
+        <a href="#"></a>
+    <h4 class="field-label">400</h4>
+    bad input parameter
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <h1><a name="GetContentTree">GetContentTree</a></h1>
+  <div class="method"><a name="contentTree"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /getContentTree/contentTree</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">contentTree</span>)</div>
+    <div class="method-notes">Returns content tree with questions.</div>
+
+
+
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Content tree
+        <a href="#"></a>
+    <h4 class="field-label">400</h4>
+    bad input parameter
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="contentTreeNoQ"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /getContentTree/contentTreeNoQ</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">contentTreeNoQ</span>)</div>
+    <div class="method-notes">Returns content tree without questions.</div>
+
+
+
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Content tree
+        <a href="#"></a>
+    <h4 class="field-label">400</h4>
+    bad input parameter
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <h1><a name="Like">Like</a></h1>
+  <div class="method"><a name="count"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /like/count</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">count</span>)</div>
+    <div class="method-notes">Returns number of likes.</div>
+
+
+
+
+
+    <h3 class="field-label">Query parameters</h3>
+    <div class="field-items">
+      <div class="param">postId (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Post ID </div>    </div>  <!-- field-items -->
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Number of likes
+        <a href="#"></a>
+    <h4 class="field-label">400</h4>
+    bad input parameter
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="toggle"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /like/toggle</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">toggle</span>)</div>
+    <div class="method-notes">Adds like to a post.</div>
+
+
+
+
+
+    <h3 class="field-label">Query parameters</h3>
+    <div class="field-items">
+      <div class="param">postId (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Post ID </div>      <div class="param">isLiked (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Is Liked </div>    </div>  <!-- field-items -->
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Like added
+        <a href="#"></a>
+    <h4 class="field-label">400</h4>
+    bad input parameter
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <h1><a name="Moderation">Moderation</a></h1>
+  <div class="method"><a name="isModerator"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /moderation/isModerator</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">isModerator</span>)</div>
+    <div class="method-notes">Checks if user is moderator.</div>
+
+
+
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Status
+        <a href="#"></a>
+    <h4 class="field-label">400</h4>
+    bad input parameter
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="remove"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /moderation/remove</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">remove</span>)</div>
+    <div class="method-notes">Removes post.</div>
+
+
+
+
+
+    <h3 class="field-label">Query parameters</h3>
+    <div class="field-items">
+      <div class="param">postId (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Post ID </div>    </div>  <!-- field-items -->
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Removed
+        <a href="#"></a>
+    <h4 class="field-label">400</h4>
+    bad input parameter
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <h1><a name="Notification">Notification</a></h1>
+  <div class="method"><a name="createComment"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /notification/createComment</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">createComment</span>)</div>
+    <div class="method-notes">Adds comment notification.</div>
+
+
+
+
+
+    <h3 class="field-label">Query parameters</h3>
+    <div class="field-items">
+      <div class="param">content (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Content </div>      <div class="param">postId (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Post ID </div>      <div class="param">userId (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; User ID </div>    </div>  <!-- field-items -->
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Created
+        <a href="#"></a>
+    <h4 class="field-label">400</h4>
+    bad input parameter
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="createLike"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /notification/createLike</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">createLike</span>)</div>
+    <div class="method-notes">Adds like notification.</div>
+
+
+
+
+
+    <h3 class="field-label">Query parameters</h3>
+    <div class="field-items">
+      <div class="param">content (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Content </div>      <div class="param">postId (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Post ID </div>      <div class="param">userId (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; User ID </div>    </div>  <!-- field-items -->
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Created
+        <a href="#"></a>
+    <h4 class="field-label">400</h4>
+    bad input parameter
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="createQuiz"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /notification/createQuiz</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">createQuiz</span>)</div>
+    <div class="method-notes">Adds quiz notification.</div>
+
+
+
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Created
+        <a href="#"></a>
+    <h4 class="field-label">400</h4>
+    bad input parameter
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="forYouNotification"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /notification/for-you</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">forYouNotification</span>)</div>
+    <div class="method-notes">Returns 5 notifications based on the timestamp on the DB.</div>
+
+
+
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Last 5 notifications
+        <a href="#"></a>
+    <h4 class="field-label">400</h4>
+    bad input parameter
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <h1><a name="Post">Post</a></h1>
+  <div class="method"><a name="createImg"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /post/createImg</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">createImg</span>)</div>
+    <div class="method-notes">Adds an image post to the database.</div>
+
+
+
+
+
+    <h3 class="field-label">Query parameters</h3>
+    <div class="field-items">
+      <div class="param">caption (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Caption </div>      <div class="param">coverURL (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Cover URL </div>      <div class="param">conceptId (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Concept ID </div>      <div class="param">quizId (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Quiz ID </div>    </div>  <!-- field-items -->
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Post created
+        <a href="#"></a>
+    <h4 class="field-label">400</h4>
+    bad input parameter
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="createText"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /post/createText</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">createText</span>)</div>
+    <div class="method-notes">Adds a text post to the database.</div>
+
+
+
+
+
+    <h3 class="field-label">Query parameters</h3>
+    <div class="field-items">
+      <div class="param">caption (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Caption </div>      <div class="param">concept (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Concept ID </div>      <div class="param">mnemonic_text (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Mnemonic text </div>      <div class="param">quizId (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Quiz ID </div>    </div>  <!-- field-items -->
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Post created
+        <a href="#"></a>
+    <h4 class="field-label">400</h4>
+    bad input parameter
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="createVideo"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /post/createVideo</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">createVideo</span>)</div>
+    <div class="method-notes">Adds a video post to the database.</div>
+
+
+
+
+
+    <h3 class="field-label">Query parameters</h3>
+    <div class="field-items">
+      <div class="param">caption (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Caption </div>      <div class="param">videoURL (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Video URL </div>      <div class="param">coverURL (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Cover URL </div>      <div class="param">videoWidth (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Video Width </div>      <div class="param">videoHeight (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Video Height </div>      <div class="param">conceptId (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Concept ID </div>      <div class="param">quizId (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Quiz ID </div>      <div class="param">contentType (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Content Type </div>      <div class="param">mnemonicText (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Mnemonic Text </div>    </div>  <!-- field-items -->
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Post created
+        <a href="#"></a>
+    <h4 class="field-label">400</h4>
+    bad input parameter
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="following"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /post/following</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">following</span>)</div>
+    <div class="method-notes">Returns the feed from the followed users.</div>
+
+
+
+
+
+    <h3 class="field-label">Query parameters</h3>
+    <div class="field-items">
+      <div class="param">cursor (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Actual location in the feed </div>    </div>  <!-- field-items -->
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Feed
+        <a href="#"></a>
+    <h4 class="field-label">400</h4>
+    bad input parameter
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="forYou"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /post/for-you</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">forYou</span>)</div>
+    <div class="method-notes">Returns the feed content.</div>
+
+
+
+
+
+    <h3 class="field-label">Query parameters</h3>
+    <div class="field-items">
+      <div class="param">cursor (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Actual location in the feed </div>    </div>  <!-- field-items -->
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Feed
+        <a href="#"></a>
+    <h4 class="field-label">400</h4>
+    bad input parameter
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="getConcept"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /post/getConcept</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">getConcept</span>)</div>
+    <div class="method-notes">Get concept from quiz.</div>
+
+
+
+
+
+    <h3 class="field-label">Query parameters</h3>
+    <div class="field-items">
+      <div class="param">quizId (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; QuizId </div>    </div>  <!-- field-items -->
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Concept id
+        <a href="#"></a>
+    <h4 class="field-label">400</h4>
+    bad input parameter
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="getHint"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /post/getHint</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">getHint</span>)</div>
+    <div class="method-notes">Get quiz hint.</div>
+
+
+
+
+
+    <h3 class="field-label">Query parameters</h3>
+    <div class="field-items">
+      <div class="param">quizId (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Quiz ID </div>    </div>  <!-- field-items -->
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Returns hint
+        <a href="#"></a>
+    <h4 class="field-label">400</h4>
+    bad input parameter
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="presignedUrl"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /post/presignedUrl</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">presignedUrl</span>)</div>
+    <div class="method-notes">Returns a presigned URL to upload to S3.</div>
+
+
+
+
+
+    <h3 class="field-label">Query parameters</h3>
+    <div class="field-items">
+      <div class="param">fileName (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Name of the file </div>      <div class="param">fileType (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Type of the file </div>    </div>  <!-- field-items -->
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Returns URL and key
+        <a href="#"></a>
+    <h4 class="field-label">400</h4>
+    bad input parameter
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="uploadToS3"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /post/UploadToS3</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">uploadToS3</span>)</div>
+    <div class="method-notes">Upload file to S3.</div>
+
+
+
+
+
+    <h3 class="field-label">Query parameters</h3>
+    <div class="field-items">
+      <div class="param">file (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; File path </div>    </div>  <!-- field-items -->
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    File added
+        <a href="#"></a>
+    <h4 class="field-label">400</h4>
+    bad input parameter
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <h1><a name="Progress">Progress</a></h1>
+  <div class="method"><a name="getEfactor"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /progress/get-efactor</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">getEfactor</span>)</div>
+    <div class="method-notes">Returns ease factor of a post.</div>
+
+
+
+
+
+    <h3 class="field-label">Query parameters</h3>
+    <div class="field-items">
+      <div class="param">postId (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Post ID </div>    </div>  <!-- field-items -->
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Ease factor
+        <a href="#"></a>
+    <h4 class="field-label">400</h4>
+    bad input parameter
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="getManyQuizzes"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /progress/get-many-quizzes</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">getManyQuizzes</span>)</div>
+    <div class="method-notes">Returns quizzes based on progress and conent.</div>
+
+
+
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Returns quizzes
+        <a href="#"></a>
+    <h4 class="field-label">400</h4>
+    bad input parameter
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="getOneQuizes"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /progress/get-one-quiz</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">getOneQuizes</span>)</div>
+    <div class="method-notes">Returns quiz based on progress and conent.</div>
+
+
+
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Returns quiz
+        <a href="#"></a>
+    <h4 class="field-label">400</h4>
+    bad input parameter
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="postGotIt"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /progress/post-got-it</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">postGotIt</span>)</div>
+    <div class="method-notes">Creates a new quiz with interval, ease factor a repetition.</div>
+
+
+
+
+
+    <h3 class="field-label">Query parameters</h3>
+    <div class="field-items">
+      <div class="param">postId (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Post ID </div>    </div>  <!-- field-items -->
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Created
+        <a href="#"></a>
+    <h4 class="field-label">400</h4>
+    bad input parameter
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="postOneQuizResult"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /progress/post-one-quiz-result</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">postOneQuizResult</span>)</div>
+    <div class="method-notes">Updates ease factor, interval and repetition.</div>
+
+
+
+
+
+    <h3 class="field-label">Query parameters</h3>
+    <div class="field-items">
+      <div class="param">quizId (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Quiz ID </div>      <div class="param">grade (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Grade </div>    </div>  <!-- field-items -->
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Updated
+        <a href="#"></a>
+    <h4 class="field-label">400</h4>
+    bad input parameter
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <h1><a name="RecommendAcronym">RecommendAcronym</a></h1>
+  <div class="method"><a name="acronym"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /recommendAcro/acronym</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">acronym</span>)</div>
+    <div class="method-notes">Returns acronym created with GPT-3.</div>
+
+
+
+
+
+    <h3 class="field-label">Query parameters</h3>
+    <div class="field-items">
+      <div class="param">description (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Acronym description </div>    </div>  <!-- field-items -->
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Generated acronym
+        <a href="#"></a>
+    <h4 class="field-label">400</h4>
+    bad input parameter
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <h1><a name="RecommendImage">RecommendImage</a></h1>
+  <div class="method"><a name="stabledif"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /recommendImg/stabledif</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">stabledif</span>)</div>
+    <div class="method-notes">Returns image created with stable diffusion.</div>
+
+
+
+
+
+    <h3 class="field-label">Query parameters</h3>
+    <div class="field-items">
+      <div class="param">description (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Image description </div>    </div>  <!-- field-items -->
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Image file name
+        <a href="#"></a>
+    <h4 class="field-label">400</h4>
+    bad input parameter
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <h1><a name="RecommendStory">RecommendStory</a></h1>
+  <div class="method"><a name="prompt"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /recommendStory/prompt</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">prompt</span>)</div>
+    <div class="method-notes">Returns a prompt for image generation created with GPT-3.</div>
+
+
+
+
+
+    <h3 class="field-label">Query parameters</h3>
+    <div class="field-items">
+      <div class="param">description (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Prompt description </div>    </div>  <!-- field-items -->
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Generated prompt
+        <a href="#"></a>
+    <h4 class="field-label">400</h4>
+    bad input parameter
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="story"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /recommendStory/story</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">story</span>)</div>
+    <div class="method-notes">Returns story created with GPT-3.</div>
+
+
+
+
+
+    <h3 class="field-label">Query parameters</h3>
+    <div class="field-items">
+      <div class="param">description (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Story description </div>    </div>  <!-- field-items -->
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Generated story
+        <a href="#"></a>
+    <h4 class="field-label">400</h4>
+    bad input parameter
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <h1><a name="User">User</a></h1>
+  <div class="method"><a name="addConcept"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /user/addConcept</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">addConcept</span>)</div>
+    <div class="method-notes">Adds a concept to the list of concepts the user wants to learn.</div>
+
+
+
+
+
+    <h3 class="field-label">Query parameters</h3>
+    <div class="field-items">
+      <div class="param">conceptId (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Concept ID </div>    </div>  <!-- field-items -->
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Feed created
+        <a href="#"></a>
+    <h4 class="field-label">400</h4>
+    bad input parameter
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="score"></a>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /user/score</code></pre></div>
+    <div class="method-summary"> (<span class="nickname">score</span>)</div>
+    <div class="method-notes">Adds points to the user score</div>
+
+
+
+
+
+    <h3 class="field-label">Query parameters</h3>
+    <div class="field-items">
+      <div class="param">Score (required)</div>
+      
+            <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Points to add </div>    </div>  <!-- field-items -->
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Points added
+        <a href="#"></a>
+    <h4 class="field-label">400</h4>
+    bad input parameter
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+
+  <h2><a name="__Models">Models</a></h2>
+  [ Jump to <a href="#__Methods">Methods</a> ]
+
+  <h3>Table of Contents</h3>
+  <ol>
+  </ol>
+
+  </body>
+</html>
