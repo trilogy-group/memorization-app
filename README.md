@@ -38,9 +38,13 @@ Demo website: [https://memoryapp.tu2k22.devfactory.com/](https://memoryapp.tu2k2
 ```bash
 nvm install --lts
 ```
+- AWS Account + Credentials
+- Google Cloud Platform Account + Credentials
+
 #### 2. Install mysql
 - Create a mysql db user with all privileges
 - Then execute `CREATE DATABASE memoryapp`
+
 #### 3. Populate DB
 - run the following script to get Concepts from the Curriculum Graph
 ```bash
@@ -57,6 +61,8 @@ bash scripts/loadConcepts.py
 - Get [.env file from s3](https://s3.console.aws.amazon.com/s3/upload/tu2k22-memoryapp)
 - Change `DATABASE_URL` in .env to `DATABASE_URL=mysql://yourmysqldbadminname:password@127.0.0.1:3306/memoryapp`
 `memoryapp` is the database name.
+
+- In GCP, go to "API & Services" -> OAuth 2.0, add Authorized Javascript origins and Authorized redirect URIs in accordance to your production domain address
 
 #### 5. Running the app
 
@@ -84,3 +90,21 @@ cdk deploy --all --require-approval never
 ```
 
 The publish action in the github workflows publishes a new version of the code each time a commit is pushed to master and updates the ECS service
+
+#### 7. Build the docker 
+
+The ECR repository is configured in `aws/stack/ecs_stack.py` named as "memoryapp". The ecs service will always point to the latest image of the mentioned repository.
+
+To build and push the docker
+```
+cp scripts/build_image.sh .
+sudo bash build_image.sh
+```
+
+#### 8. Traps and Pitfalls
+
+1. ECS points to the docker image with the tag "latest" in ECR, every change in that certain image will be automatically reflected in the deployment. However, it takes 10~20 minutes to take on the effect.
+2. During our development, we only used free credits from Dreamstudio and OpenAI. We do not have business plans for the service as for now.
+3. Our development used private GCP accont. We do not have access to GCP company account.
+4. We provided a database dump file along with the instructions. It has 5~10 posts that demonstrate our ideas.
+
